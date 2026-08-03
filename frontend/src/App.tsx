@@ -7,6 +7,7 @@ import { studionet } from "genlayer-js/chains";
 import { explorerAddress, explorerTx, getContractAddress, RPC_URL } from "./config";
 import { useReadClient, useWriteClient } from "./useGenLayer";
 import { useWallet } from "./useWallet";
+import { parseImportData, mapToPatients, mapToDrugs, toCSV, downloadFile, readFileAsText, PatientImport, DrugImport } from "./importExport";
 
 /* ─── Types ─── */
 type Page =
@@ -364,6 +365,111 @@ function MultiDrugSelector({ value, onChange, label, placeholder, drugs }: { val
         ))}
       </select>
       <input value="" onChange={(e) => { if (e.target.value.trim()) { addDrug(e.target.value.trim()); e.target.value = ""; } }} placeholder={placeholder || "Type drug name and press Enter"} style={{ marginTop: 4 }} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); const t = e.currentTarget.value.trim(); if (t) { addDrug(t); e.currentTarget.value = ""; } } }} />
+    </div>
+  );
+}
+
+function ImportExportPanel({ type, onImport, onExportData }: { 
+  type: "patients" | "drugs"; 
+  onImport: (items: any[]) => void;
+  onExportData: () => any[];
+}) {
+  const [importStatus, setImportStatus] = useState<string | null>(null);
+  const [preview, setPreview] = useState<any[]>([]);
+  const fileRef = { current: null as HTMLInputElement | null };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await readFileAsText(file);
+      const raw = parseImportData(text, file.name);
+      const mapped = type === "patients" ? mapToPatients(raw) : mapToDrugs(raw);
+      setPreview(mapped);
+      setImportStatus(`Found ${mapped.length} ${type} in ${file.name}`);
+    } catch (err: any) {
+      setImportStatus(`Error: ${err.message}`);
+      setPreview([]);
+    }
+    e.target.value = '';
+  };
+
+  const doImport = () => {
+    if (preview.length === 0) return;
+    onImport(preview);
+    setImportStatus(`Imported ${preview.length} ${type}!`);
+    setPreview([]);
+  };
+
+  const doExport = (format: 'csv' | 'json') => {
+    const data = onExportData();
+    if (data.length === 0) { setImportStatus('No data to export'); return; }
+    if (format === 'json') {
+      downloadFile(JSON.stringify(data, null, 2), `medguard_${type}.json`, 'application/json');
+    } else {
+      const cols = type === "patients" 
+        ? ['patient_id', 'full_name', 'allergies', 'conditions', 'blood_type', 'age_years', 'weight_kg']
+        : ['drug_name', 'category', 'common_dosages', 'side_effects', 'contraindications'];
+      downloadFile(toCSV(data, cols), `medguard_${type}.csv`, 'text/csv');
+    }
+    setImportStatus(`Exported ${data.length} ${type} as ${format.toUpperCase()}`);
+  };
+
+  return (
+    <div style={{ padding: 16, background: "var(--surface-high)", borderRadius: 12, border: "1px solid var(--border)", marginBottom: 16 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+        <span className="material-symbols-outlined" style={{ fontSize: 18, color: "var(--blue)" }}>upload_file</span>
+        <span style={{ fontFamily: "var(--mono)", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-muted)" }}>
+          Import / Export {type}
+        </span>
+      </div>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+        <label className="btn btn-sm" style={{ cursor: "pointer" }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>file_upload</span> Import CSV/JSON
+          <input type="file" accept=".csv,.json,.txt,.xlsx" onChange={handleFileSelect} style={{ display: "none" }} />
+        </label>
+        <button className="btn btn-sm" onClick={() => doExport('csv')}>
+          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>download</span> Export CSV
+        </button>
+        <button className="btn btn-sm" onClick={() => doExport('json')}>
+          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>data_object</span> Export JSON
+        </button>
+        {preview.length > 0 && (
+          <button className="btn btn-green btn-sm" onClick={doImport}>
+            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>check</span> Import {preview.length} items
+          </button>
+        )}
+      </div>
+      {importStatus && (
+        <div style={{ marginTop: 8, fontSize: 12, color: importStatus.includes("Error") ? "var(--red)" : "var(--green)", fontFamily: "var(--mono)" }}>
+          {importStatus}
+        </div>
+      )}
+      {preview.length > 0 && (
+        <div style={{ marginTop: 12, maxHeight: 200, overflow: "auto" }}>
+          <table style={{ width: "100%", fontSize: 11 }}>
+            <thead>
+              <tr>
+                {Object.keys(preview[0]).map(k => (
+                  <th key={k} style={{ padding: "4px 8px", textAlign: "left", fontFamily: "var(--mono)", fontSize: 9, textTransform: "uppercase", color: "var(--text-muted)" }}>{k}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {preview.slice(0, 5).map((row, i) => (
+                <tr key={i}>
+                  {Object.values(row).map((v: any, j) => (
+                    <td key={j} style={{ padding: "4px 8px", borderBottom: "1px solid var(--border)", fontSize: 11 }}>{Array.isArray(v) ? v.join(", ") : String(v)}</td>
+                  ))}
+                </tr>
+              ))}
+              {preview.length > 5 && (
+                <tr><td colSpan={Object.keys(preview[0]).length} style={{ padding: "4px 8px", color: "var(--text-muted)", fontSize: 10 }}>...and {preview.length - 5} more</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
@@ -946,6 +1052,19 @@ export function App() {
         </div>
         {!ca && <div className="alert alert-error">Contract not deployed. Check configuration.</div>}
 
+        <ImportExportPanel 
+          type="patients" 
+          onImport={(items) => {
+            // Add to shared list and auto-register each
+            items.forEach((p: PatientImport) => {
+              if (!sharedPatients.find((x: any) => x.patient_id === p.patient_id)) {
+                setSharedPatients((prev: any[]) => [...prev, { ...p, allergies: typeof p.allergies === 'string' ? p.allergies.split(',').map(s => s.trim()).filter(Boolean) : p.allergies || [], conditions: typeof p.conditions === 'string' ? p.conditions.split(',').map(s => s.trim()).filter(Boolean) : p.conditions || [], prescription_count: 0 }]);
+              }
+            });
+          }}
+          onExportData={() => sharedPatients}
+        />
+
         {/* Patient List */}
         <div style={{ marginBottom: 20 }}>
           <div className="section-title" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -1203,6 +1322,18 @@ export function App() {
           <p className="page-hdr-sub">Search the on-chain pharmaceutical database and manage drug records.</p>
         </div>
         {!ca && <div className="alert alert-error">Contract not deployed. Check configuration.</div>}
+
+        <ImportExportPanel 
+          type="drugs" 
+          onImport={(items) => {
+            items.forEach((d: DrugImport) => {
+              if (!sharedDrugs.find((x: any) => x.drug_name === d.drug_name)) {
+                setSharedDrugs((prev: any[]) => [...prev, { ...d, common_dosages: typeof d.common_dosages === 'string' ? d.common_dosages.split(',').map(s => s.trim()) : d.common_dosages || [], side_effects: typeof d.side_effects === 'string' ? d.side_effects.split(',').map(s => s.trim()) : d.side_effects || [], contraindications: typeof d.contraindications === 'string' ? d.contraindications.split(',').map(s => s.trim()) : d.contraindications || [] }]);
+              }
+            });
+          }}
+          onExportData={() => sharedDrugs}
+        />
 
         <div className="form-card" style={{ marginBottom: 20 }}>
           <div className="form-card-header">
