@@ -194,25 +194,29 @@ export function App() {
   }
 
   async function doDrugInteraction() {
-    if (!ca || !drugA.trim() || !drugB.trim()) return;
+    if (!ca) { setTx({ k: "fail", label: "Drug Interaction Check", err: "Contract not deployed. Deploy the intelligent contract first." }); return; }
+    if (!drugA.trim() || !drugB.trim()) return;
     const cl = await ensureReady(); if (!cl) return;
     await withTx("Drug Interaction Check", () => cl.writeContract({ address: ca, functionName: "check_drug_interaction", args: [drugA.trim(), drugB.trim(), drugContext.trim(), ""], value: 0n }));
     setDrugA(""); setDrugB(""); setDrugContext("");
   }
   async function doDosageCheck() {
-    if (!ca || !dosageDrug.trim() || !dosageMg) return;
+    if (!ca) { setTx({ k: "fail", label: "Dosage Verification", err: "Contract not deployed. Deploy the intelligent contract first." }); return; }
+    if (!dosageDrug.trim() || !dosageMg) return;
     const cl = await ensureReady(); if (!cl) return;
     await withTx("Dosage Verification", () => cl.writeContract({ address: ca, functionName: "verify_dosage", args: [dosageDrug.trim(), parseFloat(dosageMg), parseFloat(dosageWeight) || 0, parseInt(dosageAge) || 0, ""], value: 0n }));
     setDosageDrug(""); setDosageMg(""); setDosageWeight(""); setDosageAge("");
   }
   async function doAllergyCheck() {
-    if (!ca || !allergyMeds.trim() || !allergyList.trim()) return;
+    if (!ca) { setTx({ k: "fail", label: "Allergy Cross-Check", err: "Contract not deployed. Deploy the intelligent contract first." }); return; }
+    if (!allergyMeds.trim() || !allergyList.trim()) return;
     const cl = await ensureReady(); if (!cl) return;
     await withTx("Allergy Cross-Check", () => cl.writeContract({ address: ca, functionName: "check_allergy_risk", args: [allergyMeds.trim(), allergyList.trim(), "", ""], value: 0n }));
     setAllergyMeds(""); setAllergyList("");
   }
   async function doTreatmentValidation() {
-    if (!ca || !treatCondition.trim() || !treatPlan.trim()) return;
+    if (!ca) { setTx({ k: "fail", label: "Treatment Validation", err: "Contract not deployed. Deploy the intelligent contract first." }); return; }
+    if (!treatCondition.trim() || !treatPlan.trim()) return;
     const cl = await ensureReady(); if (!cl) return;
     await withTx("Treatment Validation", () => cl.writeContract({ address: ca, functionName: "validate_treatment", args: [treatCondition.trim(), treatPlan.trim(), "", ""], value: 0n }));
     setTreatCondition(""); setTreatPlan("");
@@ -262,10 +266,14 @@ export function App() {
         <div className="topnav-right">
           <div className="network-pill">
             <span className="net-dot" />
-            <span>{w.status === "connected" ? `StudioNet · ${short(w.address)}` : "StudioNet"}</span>
+            <span>{w.status === "connected" || w.status === "wrong-chain" ? `StudioNet · ${short(w.address)}` : "StudioNet"}</span>
           </div>
-          <button className="btn btn-cyan btn-sm" onClick={() => w.status === "connected" ? disconnect() : connect()}>
-            {w.status === "connected" ? short(w.address) : "Connect Wallet"}
+          <button className="btn btn-cyan btn-sm" onClick={async () => {
+              if (w.status === "connected") disconnect();
+              else if (w.status === "wrong-chain") { try { await switchToStudioNet(); } catch {} }
+              else { try { await connect(); } catch {} }
+            }}>
+            {w.status === "connected" ? short(w.address) : w.status === "wrong-chain" ? "Wrong Chain" : "Connect Wallet"}
           </button>
         </div>
       </nav>
@@ -276,6 +284,9 @@ export function App() {
           <div>
             <div className="sidebar-name">MedGuard</div>
             <div className="sidebar-id">StudioNet · {ca ? short(ca) : "Not deployed"}</div>
+            {(w.status === "connected" || w.status === "wrong-chain") && (
+              <div className="sidebar-id" style={{ color: 'var(--cyan)', marginTop: 2 }}>Wallet: {short(w.address)}</div>
+            )}
           </div>
         </div>
         <nav className="sidebar-nav">
@@ -310,6 +321,12 @@ export function App() {
 
       <main className="main" style={{ position: 'relative' }}>
         <DNACurve side="left" /><DNACurve side="right" />
+        {!ca && (
+          <div className="alert alert-info" style={{ marginBottom: 20 }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>info</span>
+            <span>Contract not deployed yet. Connect wallet and deploy the intelligent contract to enable on-chain clinical checks.</span>
+          </div>
+        )}
         {loadErr && <div className="alert alert-error"><span className="material-symbols-outlined" style={{ fontSize: 18 }}>error</span> {loadErr}</div>}
 
         {/* ═══ DASHBOARD ═══ */}
@@ -350,9 +367,9 @@ export function App() {
 
             <div className="section-title">Clinical Tools</div>
             <div className="feature-grid">
-              <div className="feature-card" onClick={() => setPage("interaction")}>
+              <div className="feature-card" onClick={() => setPage("interaction")} style={!ca ? { opacity: 0.6 } : undefined}>
                 <div className="feature-icon cyan"><IconDrugInteraction /></div>
-                <h3>Drug Interaction</h3>
+                <h3>Drug Interaction {!ca && <span style={{fontSize:11, color:'var(--text-muted)', fontWeight:400}}>(deploy required)</span>}</h3>
                 <p>Screen two drugs for adverse interactions before co-administration. 5 severity levels from minor to contraindicated.</p>
                 <span className="material-symbols-outlined arrow">arrow_forward</span>
               </div>
