@@ -184,6 +184,127 @@ function tryParse(raw: string): any {
 }
 
 /* ─── Main App ─── */
+function ResultDetailCard({ data, onClose }: { data: any; onClose: () => void }) {
+  const result = data?.result || {};
+  const query = data?.query || {};
+  const checkType = data?.type || "unknown";
+
+  const severity = result.severity || result.safety || result.risk_level || result.verdict || "—";
+  const confidence = result.confidence || "—";
+  const riskScore = result.risk_score ?? "—";
+  const description = result.description || "No description available.";
+  const mechanism = result.mechanism || "";
+  const recommendation = result.recommendation || "";
+  const alternatives = result.alternatives || "";
+  const guidelineSource = result.guideline_source || "";
+
+  function severityColor(s: string) {
+    const upper = s.toUpperCase();
+    if (["NONE", "NO_RISK", "SAFE", "APPROPRIATE"].includes(upper)) return "var(--green)";
+    if (["MINOR", "MILD_RISK", "SUBTHERAPEUTIC", "PARTIALLY_APPROPRIATE"].includes(upper)) return "var(--gold)";
+    if (["MODERATE", "MODERATE_RISK", "ABOVE_THERAPEUTIC"].includes(upper)) return "#ff9800";
+    if (["MAJOR", "SEVERE_RISK"].includes(upper)) return "var(--red)";
+    if (["CONTRAINDICATED", "ANAPHYLAXIS_RISK", "DANGEROUS", "INAPPROPRIATE"].includes(upper)) return "#ff1744";
+    return "var(--text-muted)";
+  }
+  function severityBadge(s: string) {
+    const upper = s.toUpperCase();
+    if (["NONE", "NO_RISK", "SAFE", "APPROPRIATE"].includes(upper)) return "badge-safe";
+    if (["MINOR", "MILD_RISK", "SUBTHERAPEUTIC", "PARTIALLY_APPROPRIATE"].includes(upper)) return "badge-warn";
+    return "badge-danger";
+  }
+  function confBadge(c: string) {
+    if (c === "high") return "badge-safe";
+    if (c === "medium") return "badge-warn";
+    return "badge-pending";
+  }
+  function typeLabel(t: string) {
+    const map: Record<string, string> = {
+      drug_interaction: "Drug Interaction", dosage_check: "Dosage Check",
+      allergy_check: "Allergy Check", treatment_validation: "Treatment",
+      clinical_trial_match: "Clinical Trial", insurance_claim: "Insurance Claim"
+    };
+    return map[t] ?? t;
+  }
+
+  return (
+    <div className="result-card" style={{ marginTop: 16, border: `1px solid ${severityColor(severity)}` }}>
+      <div className="result-header" style={{ justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <span className="result-badge badge-info">{typeLabel(checkType)}</span>
+          <span className={`result-badge ${severityBadge(severity)}`} style={{ borderColor: severityColor(severity), color: severityColor(severity) }}>
+            {severity}
+          </span>
+          <span className={`result-badge ${confBadge(confidence)}`}>
+            {confidence} confidence
+          </span>
+          {riskScore !== "—" && (
+            <span className="result-badge badge-pending">
+              Risk: {riskScore}/100
+            </span>
+          )}
+        </div>
+        <button className="btn btn-sm" onClick={onClose}>Close</button>
+      </div>
+
+      {/* Query Info */}
+      {Object.keys(query).length > 0 && (
+        <div style={{ margin: "12px 0", padding: "10px 14px", background: "var(--surface-high)", borderRadius: 8, fontSize: 12 }}>
+          <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--text-muted)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Input Parameters</div>
+          {Object.entries(query).map(([k, v]) => (
+            <div key={k} style={{ marginBottom: 4 }}>
+              <span style={{ color: "var(--teal)", fontFamily: "var(--mono)", fontSize: 11 }}>{k}:</span>{" "}
+              <span style={{ color: "var(--text-dim)", fontSize: 13 }}>{Array.isArray(v) ? v.join(", ") : String(v)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Description */}
+      <div style={{ margin: "12px 0", padding: "12px 16px", background: "var(--surface)", borderRadius: 8, borderLeft: `3px solid ${severityColor(severity)}` }}>
+        <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--text-muted)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Clinical Assessment</div>
+        <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.7 }}>{description}</div>
+      </div>
+
+      {/* Mechanism */}
+      {mechanism && (
+        <div style={{ margin: "8px 0", padding: "10px 14px", background: "var(--surface-high)", borderRadius: 8 }}>
+          <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--blue)", marginBottom: 4, textTransform: "uppercase" }}>Mechanism</div>
+          <div style={{ fontSize: 13, color: "var(--text-dim)" }}>{mechanism}</div>
+        </div>
+      )}
+
+      {/* Recommendation */}
+      {recommendation && (
+        <div style={{ margin: "8px 0", padding: "10px 14px", background: "var(--green-glow)", borderRadius: 8, border: "1px solid rgba(0,168,107,0.2)" }}>
+          <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--green)", marginBottom: 4, textTransform: "uppercase" }}>Recommendation</div>
+          <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6 }}>{recommendation}</div>
+        </div>
+      )}
+
+      {/* Alternatives */}
+      {alternatives && (
+        <div style={{ margin: "8px 0", padding: "10px 14px", background: "var(--gold-glow)", borderRadius: 8 }}>
+          <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--gold)", marginBottom: 4, textTransform: "uppercase" }}>Alternatives</div>
+          <div style={{ fontSize: 13, color: "var(--text-dim)" }}>{alternatives}</div>
+        </div>
+      )}
+
+      {/* Guideline Source */}
+      {guidelineSource && (
+        <div style={{ margin: "8px 0", fontSize: 11, color: "var(--text-muted)" }}>
+          <span style={{ fontFamily: "var(--mono)", color: "var(--blue)" }}>Source:</span> {guidelineSource}
+        </div>
+      )}
+
+      {/* ID */}
+      <div style={{ marginTop: 12, fontSize: 10, color: "var(--text-muted)", fontFamily: "var(--mono)" }}>
+        Check ID: {data?.id} · Caller: {data?.caller?.slice(0, 10)}...
+      </div>
+    </div>
+  );
+}
+
 export function App() {
   const wallet = useWallet();
   const ca = getContractAddress();
@@ -195,7 +316,7 @@ export function App() {
   const [page, setPage] = useState<Page>("dashboard");
   const [stats, setStats] = useState<any>(null);
   const [history, setHistory] = useState<CheckRecord[]>([]);
-  const [historyDetail, setHistoryDetail] = useState<string | null>(null);
+  const [historyDetail, setHistoryDetail] = useState<any>(null);
 
   /* Load stats */
   const loadStats = useCallback(async () => {
@@ -1227,8 +1348,9 @@ export function App() {
                         try {
                           const fn = h.type.includes("Patient") ? "get_patient" :
                                      h.type.includes("Prescription") ? "get_prescription" : "get_check";
-                          const d = await read(fn, [h.result]);
-                          setHistoryDetail(typeof d === "string" ? d : JSON.stringify(d, null, 2));
+                          let d = await read(fn, [h.result]);
+                          if (typeof d === "string") { try { d = JSON.parse(d); } catch { d = { result: { description: d } }; } }
+                          setHistoryDetail(d);
                         } catch (e: any) {
                           setHistoryDetail(`Error: ${e.message}`);
                         }
@@ -1241,17 +1363,7 @@ export function App() {
           </div>
         )}
 
-        {historyDetail && (
-          <div className="result-card" style={{ marginTop: 16 }}>
-            <div className="result-header">
-              <span className="result-badge badge-info">Detail</span>
-              <button className="btn btn-sm" onClick={() => setHistoryDetail(null)}>Close</button>
-            </div>
-            <div className="result-detail" style={{ marginTop: 8, whiteSpace: "pre-wrap", maxHeight: 400, overflow: "auto" }}>
-              {historyDetail}
-            </div>
-          </div>
-        )}
+        {historyDetail && <ResultDetailCard data={historyDetail} onClose={() => setHistoryDetail(null)} />}
       </div>
     );
   }
