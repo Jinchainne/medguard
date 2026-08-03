@@ -1101,27 +1101,12 @@ export function App() {
           <p className="page-hdr-sub">Register and manage patient records securely on the blockchain.</p>
         </div>
         {!ca && <div className="alert alert-error">Contract not deployed. Check configuration.</div>}
-
-        {/* Patient List */}
-        <div style={{ marginBottom: 20 }}>
-          <div className="section-title" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span>Registered Patients ({sharedPatients.length})</span>
-            <button className="btn btn-sm" onClick={loadAllPatients} disabled={listLoading}>
-              {listLoading ? "Loading…" : "Refresh List"}
-            </button>
+        {sharedPatients.length > 0 && (
+          <div className="alert alert-info" style={{ marginBottom: 16 }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>info</span>
+            {sharedPatients.length} patients loaded from Dashboard import. Data syncs across all pages.
           </div>
-          {sharedPatients.length > 0 ? (
-            <div style={{ display: "grid", gap: 12 }}>
-              {sharedPatients.map((p: any, i: number) => (
-                <div key={i} style={{ cursor: "pointer" }} onClick={() => { setLookupId(p.patient_id); setPatientData(p); }}>
-                  <PatientCard data={p} />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="alert alert-info">No patients loaded. Register a new patient or click "Refresh List" to load from chain.</div>
-          )}
-        </div>
+        )}
 
         {/* Register Form */}
         <div className="form-card" style={{ marginBottom: 20 }}>
