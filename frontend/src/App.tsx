@@ -671,6 +671,42 @@ export function App() {
           ))}
         </div>
 
+        <div className="section-title">Data Import / Export</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 28 }}>
+          <ImportExportPanel 
+            type="patients" 
+            onImport={(items) => {
+              items.forEach((p: PatientImport) => {
+                if (!sharedPatients.find((x: any) => x.patient_id === p.patient_id)) {
+                  setSharedPatients((prev: any[]) => [...prev, { 
+                    ...p, 
+                    allergies: typeof p.allergies === 'string' ? p.allergies.split(',').map(s => s.trim()).filter(Boolean) : p.allergies || [], 
+                    conditions: typeof p.conditions === 'string' ? p.conditions.split(',').map(s => s.trim()).filter(Boolean) : p.conditions || [], 
+                    prescription_count: 0 
+                  }]);
+                }
+              });
+            }}
+            onExportData={() => sharedPatients}
+          />
+          <ImportExportPanel 
+            type="drugs" 
+            onImport={(items) => {
+              items.forEach((d: DrugImport) => {
+                if (!sharedDrugs.find((x: any) => x.drug_name === d.drug_name)) {
+                  setSharedDrugs((prev: any[]) => [...prev, { 
+                    ...d, 
+                    common_dosages: typeof d.common_dosages === 'string' ? d.common_dosages.split(',').map(s => s.trim()) : d.common_dosages || [], 
+                    side_effects: typeof d.side_effects === 'string' ? d.side_effects.split(',').map(s => s.trim()) : d.side_effects || [], 
+                    contraindications: typeof d.contraindications === 'string' ? d.contraindications.split(',').map(s => s.trim()) : d.contraindications || [] 
+                  }]);
+                }
+              });
+            }}
+            onExportData={() => sharedDrugs}
+          />
+        </div>
+
         <div className="section-title">Clinical Tools</div>
         <div className="feature-grid">
           {featureCards.map((c) => (
@@ -1066,19 +1102,6 @@ export function App() {
         </div>
         {!ca && <div className="alert alert-error">Contract not deployed. Check configuration.</div>}
 
-        <ImportExportPanel 
-          type="patients" 
-          onImport={(items) => {
-            // Add to shared list and auto-register each
-            items.forEach((p: PatientImport) => {
-              if (!sharedPatients.find((x: any) => x.patient_id === p.patient_id)) {
-                setSharedPatients((prev: any[]) => [...prev, { ...p, allergies: typeof p.allergies === 'string' ? p.allergies.split(',').map(s => s.trim()).filter(Boolean) : p.allergies || [], conditions: typeof p.conditions === 'string' ? p.conditions.split(',').map(s => s.trim()).filter(Boolean) : p.conditions || [], prescription_count: 0 }]);
-              }
-            });
-          }}
-          onExportData={() => sharedPatients}
-        />
-
         {/* Patient List */}
         <div style={{ marginBottom: 20 }}>
           <div className="section-title" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -1336,18 +1359,6 @@ export function App() {
           <p className="page-hdr-sub">Search the on-chain pharmaceutical database and manage drug records.</p>
         </div>
         {!ca && <div className="alert alert-error">Contract not deployed. Check configuration.</div>}
-
-        <ImportExportPanel 
-          type="drugs" 
-          onImport={(items) => {
-            items.forEach((d: DrugImport) => {
-              if (!sharedDrugs.find((x: any) => x.drug_name === d.drug_name)) {
-                setSharedDrugs((prev: any[]) => [...prev, { ...d, common_dosages: typeof d.common_dosages === 'string' ? d.common_dosages.split(',').map(s => s.trim()) : d.common_dosages || [], side_effects: typeof d.side_effects === 'string' ? d.side_effects.split(',').map(s => s.trim()) : d.side_effects || [], contraindications: typeof d.contraindications === 'string' ? d.contraindications.split(',').map(s => s.trim()) : d.contraindications || [] }]);
-              }
-            });
-          }}
-          onExportData={() => sharedDrugs}
-        />
 
         <div className="form-card" style={{ marginBottom: 20 }}>
           <div className="form-card-header">
