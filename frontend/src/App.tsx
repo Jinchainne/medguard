@@ -1,663 +1,1379 @@
-import { useEffect, useState } from "react";
+/* ═══════════════════════════════════════════════════════════
+   MedGuard v2 — Clinical Decision Support Oracle on GenLayer
+   ═══════════════════════════════════════════════════════════ */
+import React, { useEffect, useState, useCallback } from "react";
 import { createClient } from "genlayer-js";
 import { studionet } from "genlayer-js/chains";
 import { explorerAddress, explorerTx, getContractAddress, RPC_URL } from "./config";
 import { useReadClient, useWriteClient } from "./useGenLayer";
 import { useWallet } from "./useWallet";
 
-function mkClient(addr: `0x${string}`) {
-  return createClient({ chain: studionet, account: addr, endpoint: RPC_URL, provider: window.ethereum as any });
+/* ─── Types ─── */
+type Page =
+  | "dashboard"
+  | "interaction"
+  | "dosage"
+  | "allergy"
+  | "treatment"
+  | "patients"
+  | "prescription"
+  | "drugs"
+  | "alerts"
+  | "trials"
+  | "insurance"
+  | "history";
+
+interface TxState {
+  status: "idle" | "pending" | "success" | "error";
+  hash?: string;
+  result?: string;
+  error?: string;
 }
 
-const GH = "https://github.com/Jinchainne/medguard";
-function short(a: string) { return a ? `${a.slice(0, 6)}…${a.slice(-4)}` : ""; }
-
-type CheckResult = {
+interface CheckRecord {
   id: string;
   type: string;
-  query: Record<string, unknown>;
-  result: Record<string, unknown>;
-  caller: string;
-};
-
-type Tx = { k: "idle" } | { k: "sign"; label: string } | { k: "wait"; label: string; hash: string } | { k: "ok"; label: string; hash: string } | { k: "fail"; label: string; err: string };
-
-const TIMEOUT_MS = 15000;
-function withTimeout<T>(p: Promise<T>, ms = TIMEOUT_MS): Promise<T> {
-  return Promise.race([p, new Promise<T>((_, rej) => setTimeout(() => rej(new Error("RPC timeout")), ms))]);
-}
-async function retryRead<T>(fn: () => Promise<T>, maxRetries = 3, delayMs = 3000): Promise<T> {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try { return await withTimeout(fn()); }
-    catch (err) {
-      const msg = (err as Error).message || "";
-      if ((msg.includes("rate limit") || msg.includes("timeout") || msg.includes("Failed to fetch")) && attempt < maxRetries) {
-        await new Promise(r => setTimeout(r, delayMs));
-        delayMs = Math.min(delayMs * 1.5, 15000);
-      } else { throw err; }
-    }
-  }
-  throw new Error("unreachable");
+  inputs: string;
+  result: string;
+  timestamp: string;
 }
 
-/* ── Inline SVG Medical Icons ── */
-function IconDrugInteraction() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
-      <path d="M10 6.5h4M6.5 10v4M14 17.5h-4M17.5 14v-4"/>
-      <path d="M10.5 10.5l3 3" strokeDasharray="2 2"/>
-    </svg>
-  );
-}
-function IconDosage() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2v4M8 6h8l1 4H7l1-4z"/><rect x="7" y="10" width="10" height="12" rx="2"/>
-      <path d="M10 14h4M12 14v4"/><circle cx="12" cy="18" r="0.5" fill="currentColor"/>
-    </svg>
-  );
-}
-function IconAllergy() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
-      <path d="M8 9l2 2-2 2M16 9l-2 2 2 2M10 15h4"/>
-      <circle cx="12" cy="12" r="9" strokeDasharray="3 3" opacity="0.3"/>
-    </svg>
-  );
-}
-function IconTreatment() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2L12 6M12 18L12 22M2 12L6 12M18 12L22 12"/>
-      <rect x="7" y="7" width="10" height="10" rx="5"/>
-      <path d="M10 12h4M12 10v4"/>
-    </svg>
-  );
-}
-function IconShield() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-      <path d="M9 12l2 2 4-4"/>
-    </svg>
-  );
-}
-function ECGLine() {
-  return (
-    <svg className="ecg-line" width="100%" height="40" viewBox="0 0 800 40" preserveAspectRatio="none" style={{ position: 'absolute', bottom: 0, left: 0, opacity: 0.15 }}>
-      <path d="M0,20 L200,20 L220,20 L230,5 L240,35 L250,10 L260,30 L270,20 L400,20 L420,20 L430,5 L440,35 L450,10 L460,30 L470,20 L600,20 L620,20 L630,5 L640,35 L650,10 L660,30 L670,20 L800,20"
-        fill="none" stroke="#00dbe9" strokeWidth="1.5">
-        <animate attributeName="stroke-dasharray" values="0,1600;1600,0" dur="4s" repeatCount="indefinite"/>
-        <animate attributeName="stroke-dashoffset" values="1600;0" dur="4s" repeatCount="indefinite"/>
-      </path>
-    </svg>
-  );
-}
-function DNACurve({ side }: { side: "left" | "right" }) {
-  return (
-    <svg width="60" height="200" viewBox="0 0 60 200" style={{ position: 'absolute', [side]: -20, top: '20%', opacity: 0.04 }}>
-      {[0, 1, 2, 3, 4, 5, 6, 7].map(i => (
-        <g key={i}>
-          <ellipse cx="15" cy={i * 25 + 10} rx="12" ry="4" fill="none" stroke="#00dbe9" strokeWidth="1" transform={`rotate(${i % 2 ? 30 : -30}, 15, ${i * 25 + 10})`}/>
-          <ellipse cx="45" cy={i * 25 + 10} rx="12" ry="4" fill="none" stroke="#00dbe9" strokeWidth="1" transform={`rotate(${i % 2 ? -30 : 30}, 45, ${i * 25 + 10})`}/>
-          <line x1="20" y1={i * 25 + 10} x2="40" y2={i * 25 + 10} stroke="#00dbe9" strokeWidth="0.5" opacity="0.5"/>
-        </g>
-      ))}
-    </svg>
-  );
-}
+/* ─── Inline SVG Medical Icons ─── */
+const IconDrugInteraction = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="8" width="7" height="12" rx="3.5" transform="rotate(-30 6.5 14)" />
+    <rect x="14" y="4" width="7" height="12" rx="3.5" transform="rotate(30 17.5 10)" />
+    <line x1="9" y1="10" x2="15" y2="14" strokeDasharray="2 2" />
+  </svg>
+);
 
-export function App() {
-  const ca = getContractAddress();
-  const { state: w, connect, disconnect, switchToStudioNet } = useWallet();
-  const rd = useReadClient();
-  const wAddr = w.status === "connected" ? w.address : null;
-  const wr = useWriteClient(wAddr);
+const IconDosage = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M10 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V2" />
+    <path d="M18 2v8a2 2 0 0 1-2 2h-2" />
+    <path d="M6 2h12" />
+    <path d="M12 14v8" />
+    <path d="M8 18h8" />
+  </svg>
+);
 
-  const [page, setPage] = useState<"dashboard" | "interaction" | "dosage" | "allergy" | "treatment" | "history">("dashboard");
-  const [tx, setTx] = useState<Tx>({ k: "idle" });
-  const [tick, setTick] = useState(0);
-  const [loadErr, setLoadErr] = useState<string | null>(null);
-  const [stats, setStats] = useState<{ total_checks: number; trusted_sources_count: number } | null>(null);
-  const [history, setHistory] = useState<CheckResult[]>([]);
-  const [lastResult, setLastResult] = useState<CheckResult | null>(null);
+const IconAllergy = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+);
 
-  // Form states
-  const [drugA, setDrugA] = useState("");
-  const [drugB, setDrugB] = useState("");
-  const [drugContext, setDrugContext] = useState("");
-  const [dosageDrug, setDosageDrug] = useState("");
-  const [dosageMg, setDosageMg] = useState("");
-  const [dosageWeight, setDosageWeight] = useState("");
-  const [dosageAge, setDosageAge] = useState("");
-  const [allergyMeds, setAllergyMeds] = useState("");
-  const [allergyList, setAllergyList] = useState("");
-  const [treatCondition, setTreatCondition] = useState("");
-  const [treatPlan, setTreatPlan] = useState("");
+const IconTreatment = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3" />
+    <path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4" />
+    <circle cx="20" cy="10" r="2" />
+  </svg>
+);
 
-  useEffect(() => {
-    if (!ca) return;
-    let c = false;
-    (async () => {
-      setLoadErr(null);
-      try {
-        const s = await retryRead(() => rd.readContract({ address: ca, functionName: "get_stats", args: [] })) as { total_checks: number; trusted_sources_count: number };
-        if (!c) setStats(s);
-      } catch (err) { if (!c) setLoadErr((err as Error).message); }
-    })();
-    return () => { c = true; };
-  }, [ca, rd, tick]);
+const IconPatient = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+  </svg>
+);
 
-  useEffect(() => {
-    if (!ca || !stats || stats.total_checks === 0) return;
-    let c = false;
-    (async () => {
-      try {
-        const results: CheckResult[] = [];
-        const maxId = stats.total_checks;
-        const start = Math.max(1, maxId - 9);
-        for (let i = maxId; i >= start; i--) {
-          try {
-            const raw = await retryRead(() => rd.readContract({ address: ca, functionName: "get_check", args: [String(i)] })) as string;
-            const parsed = JSON.parse(raw);
-            if (!c) results.push(parsed);
-          } catch { /* skip */ }
-        }
-        if (!c) { setHistory(results); if (results.length > 0) setLastResult(results[0]); }
-      } catch { /* silent */ }
-    })();
-    return () => { c = true; };
-  }, [ca, rd, stats, tick]);
+const IconPrescription = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+    <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+    <path d="M9 14l2 2 4-4" />
+  </svg>
+);
 
-  async function withTx(label: string, fn: () => Promise<string>) {
-    setTx({ k: "sign", label });
-    let hash: string | undefined;
-    try {
-      hash = await runRetry(fn, () => setTx({ k: "wait", label, hash: "" }));
-      setTx({ k: "wait", label, hash });
-      await rd.waitForTransactionReceipt({ hash: hash as any, status: "ACCEPTED" as any, retries: 240, interval: 4000 });
-      setTx({ k: "ok", label, hash });
-      setTick(n => n + 1);
-    } catch (err) { setTx({ k: "fail", label, err: humanErr((err as Error).message) }); }
-  }
+const IconDrug = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5" />
+    <path d="M10.5 1.5v3h3v-3" />
+    <line x1="9" y1="10" x2="15" y2="10" />
+    <line x1="12" y1="7" x2="12" y2="13" />
+  </svg>
+);
 
-  async function ensureReady() {
-    if (w.status === "no-wallet") { setTx({ k: "fail", label: "Connect", err: "Install MetaMask or OKX Wallet." }); return null; }
-    if (w.status === "disconnected") { try { await connect(); } catch { return null; } }
-    if (w.status === "wrong-chain") { try { await switchToStudioNet(); } catch { return null; } }
-    const eth = window.ethereum; if (!eth) return null;
-    const accs = await eth.request({ method: "eth_accounts" }) as string[];
-    if (!accs?.length) return null;
-    return wr ?? mkClient(accs[0] as `0x${string}`);
-  }
+const IconAlert = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
+    <path d="M13.73 21a2 2 0 01-3.46 0" />
+    <line x1="12" y1="8" x2="12" y2="11" />
+    <line x1="12" y1="14" x2="12.01" y2="14" />
+  </svg>
+);
 
-  async function doDrugInteraction() {
-    if (!ca) { setTx({ k: "fail", label: "Drug Interaction Check", err: "Contract not deployed. Deploy the intelligent contract first." }); return; }
-    if (!drugA.trim() || !drugB.trim()) return;
-    const cl = await ensureReady(); if (!cl) return;
-    await withTx("Drug Interaction Check", () => cl.writeContract({ address: ca, functionName: "check_drug_interaction", args: [drugA.trim(), drugB.trim(), drugContext.trim(), ""], value: 0n }));
-    setDrugA(""); setDrugB(""); setDrugContext("");
-  }
-  async function doDosageCheck() {
-    if (!ca) { setTx({ k: "fail", label: "Dosage Verification", err: "Contract not deployed. Deploy the intelligent contract first." }); return; }
-    if (!dosageDrug.trim() || !dosageMg) return;
-    const cl = await ensureReady(); if (!cl) return;
-    await withTx("Dosage Verification", () => cl.writeContract({ address: ca, functionName: "verify_dosage", args: [dosageDrug.trim(), parseFloat(dosageMg), parseFloat(dosageWeight) || 0, parseInt(dosageAge) || 0, ""], value: 0n }));
-    setDosageDrug(""); setDosageMg(""); setDosageWeight(""); setDosageAge("");
-  }
-  async function doAllergyCheck() {
-    if (!ca) { setTx({ k: "fail", label: "Allergy Cross-Check", err: "Contract not deployed. Deploy the intelligent contract first." }); return; }
-    if (!allergyMeds.trim() || !allergyList.trim()) return;
-    const cl = await ensureReady(); if (!cl) return;
-    await withTx("Allergy Cross-Check", () => cl.writeContract({ address: ca, functionName: "check_allergy_risk", args: [allergyMeds.trim(), allergyList.trim(), "", ""], value: 0n }));
-    setAllergyMeds(""); setAllergyList("");
-  }
-  async function doTreatmentValidation() {
-    if (!ca) { setTx({ k: "fail", label: "Treatment Validation", err: "Contract not deployed. Deploy the intelligent contract first." }); return; }
-    if (!treatCondition.trim() || !treatPlan.trim()) return;
-    const cl = await ensureReady(); if (!cl) return;
-    await withTx("Treatment Validation", () => cl.writeContract({ address: ca, functionName: "validate_treatment", args: [treatCondition.trim(), treatPlan.trim(), "", ""], value: 0n }));
-    setTreatCondition(""); setTreatPlan("");
-  }
+const IconTrial = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 3h6v6l4 8H5l4-8V3z" />
+    <line x1="9" y1="3" x2="15" y2="3" />
+    <path d="M8.5 14h7" />
+  </svg>
+);
 
-  const busy = tx.k === "sign" || tx.k === "wait";
+const IconInsurance = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z" />
+    <path d="M12 8v4" />
+    <path d="M10 10h4" />
+  </svg>
+);
 
-  function severityColor(s: string) {
-    const upper = s.toUpperCase();
-    if (["NONE", "NO_RISK", "SAFE", "APPROPRIATE"].includes(upper)) return "var(--success)";
-    if (["MINOR", "MILD_RISK", "SUBTHERAPEUTIC", "PARTIALLY_APPROPRIATE"].includes(upper)) return "var(--warn)";
-    if (["MODERATE", "MODERATE_RISK", "ABOVE_THERAPEUTIC"].includes(upper)) return "#ff9800";
-    if (["MAJOR", "SEVERE_RISK"].includes(upper)) return "var(--error)";
-    if (["CONTRAINDICATED", "ANAPHYLAXIS_RISK", "DANGEROUS", "INAPPROPRIATE"].includes(upper)) return "#ff1744";
-    return "var(--text-muted)";
-  }
-  function severityBadge(s: string) {
-    const upper = s.toUpperCase();
-    if (["NONE", "NO_RISK", "SAFE", "APPROPRIATE"].includes(upper)) return "badge-safe";
-    if (["MINOR", "MILD_RISK", "SUBTHERAPEUTIC"].includes(upper)) return "badge-warn";
-    return "badge-danger";
-  }
-  function checkTypeLabel(t: string) {
-    const map: Record<string, string> = { drug_interaction: "Drug Interaction", dosage_check: "Dosage Check", allergy_check: "Allergy Check", treatment_validation: "Treatment Validation" };
-    return map[t] ?? t;
-  }
-  function resultValue(r: Record<string, unknown>) {
-    return String(r?.severity || r?.safety || r?.risk_level || r?.verdict || "—");
-  }
+const IconShield = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z" />
+    <path d="M9 12l2 2 4-4" />
+  </svg>
+);
 
-  return (
-    <>
-      <nav className="topnav">
-        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-          <div className="topnav-brand">
-            <img src="/logo.svg" alt="MedGuard" />
-            <span>Med<span style={{ color: "var(--cyan)" }}>Guard</span></span>
-          </div>
-          <div className="topnav-links">
-            {(["dashboard", "interaction", "dosage", "allergy", "treatment", "history"] as const).map(p => (
-              <a key={p} className={`topnav-link ${page === p ? "active" : ""}`} onClick={() => setPage(p)}>
-                {p === "dashboard" ? "Dashboard" : p === "interaction" ? "Interactions" : p === "dosage" ? "Dosage" : p === "allergy" ? "Allergy" : p === "treatment" ? "Treatment" : "History"}
-              </a>
-            ))}
-          </div>
-        </div>
-        <div className="topnav-right">
-          <div className="network-pill">
-            <span className="net-dot" />
-            <span>{w.status === "connected" || w.status === "wrong-chain" ? `StudioNet · ${short(w.address)}` : "StudioNet"}</span>
-          </div>
-          <button className="btn btn-cyan btn-sm" onClick={async () => {
-              if (w.status === "connected") disconnect();
-              else if (w.status === "wrong-chain") { try { await switchToStudioNet(); } catch {} }
-              else { try { await connect(); } catch {} }
-            }}>
-            {w.status === "connected" ? short(w.address) : w.status === "wrong-chain" ? "Wrong Chain" : "Connect Wallet"}
-          </button>
-        </div>
-      </nav>
+const ECGLine = () => (
+  <svg className="ecg-line" width="600" height="60" viewBox="0 0 600 60" fill="none">
+    <polyline
+      points="0,30 80,30 100,30 110,10 120,50 130,10 140,50 150,30 170,30 250,30 270,30 280,10 290,50 300,10 310,50 320,30 340,30 420,30 440,30 450,10 460,50 470,10 480,50 490,30 510,30 600,30"
+      stroke="var(--teal)"
+      strokeWidth="1.5"
+      fill="none"
+      opacity="0.6"
+    >
+      <animate attributeName="stroke-dashoffset" from="1200" to="0" dur="3s" repeatCount="indefinite" />
+    </polyline>
+  </svg>
+);
 
-      <aside className="sidebar">
-        <div className="sidebar-profile">
-          <div className="sidebar-avatar"><img src="/logo.svg" alt="" /></div>
-          <div>
-            <div className="sidebar-name">MedGuard</div>
-            <div className="sidebar-id">StudioNet · {ca ? short(ca) : "Not deployed"}</div>
-            {(w.status === "connected" || w.status === "wrong-chain") && (
-              <div className="sidebar-id" style={{ color: 'var(--cyan)', marginTop: 2 }}>Wallet: {short(w.address)}</div>
-            )}
-          </div>
-        </div>
-        <nav className="sidebar-nav">
-          <a className={`sidebar-link ${page === "dashboard" ? "active" : ""}`} onClick={() => setPage("dashboard")}>
-            <span className="icon material-symbols-outlined">dashboard</span> Dashboard
-          </a>
-          <a className={`sidebar-link ${page === "interaction" ? "active" : ""}`} onClick={() => setPage("interaction")}>
-            <span className="icon"><IconDrugInteraction /></span> Drug Interaction
-          </a>
-          <a className={`sidebar-link ${page === "dosage" ? "active" : ""}`} onClick={() => setPage("dosage")}>
-            <span className="icon"><IconDosage /></span> Dosage Check
-          </a>
-          <a className={`sidebar-link ${page === "allergy" ? "active" : ""}`} onClick={() => setPage("allergy")}>
-            <span className="icon"><IconAllergy /></span> Allergy Check
-          </a>
-          <a className={`sidebar-link ${page === "treatment" ? "active" : ""}`} onClick={() => setPage("treatment")}>
-            <span className="icon"><IconTreatment /></span> Treatment
-          </a>
-          <a className={`sidebar-link ${page === "history" ? "active" : ""}`} onClick={() => setPage("history")}>
-            <span className="icon material-symbols-outlined">history</span> History
-          </a>
-        </nav>
-        <div className="sidebar-bottom">
-          <a className="sidebar-link" href={ca ? explorerAddress(ca) : "#"} target="_blank" rel="noreferrer">
-            <span className="icon material-symbols-outlined" style={{ fontSize: 18 }}>open_in_new</span> Explorer
-          </a>
-          <a className="sidebar-link" href={GH} target="_blank" rel="noreferrer">
-            <span className="icon material-symbols-outlined" style={{ fontSize: 18 }}>code</span> GitHub
-          </a>
-        </div>
-      </aside>
+const DNACurve = () => (
+  <svg width="40" height="120" viewBox="0 0 40 120" fill="none" stroke="var(--teal)" strokeWidth="1" opacity="0.15">
+    <path d="M5,0 Q35,15 5,30 Q-25,45 5,60 Q35,75 5,90 Q-25,105 5,120" />
+    <path d="M35,0 Q5,15 35,30 Q65,45 35,60 Q5,75 35,90 Q65,105 35,120" />
+    <line x1="12" y1="15" x2="28" y2="15" />
+    <line x1="12" y1="45" x2="28" y2="45" />
+    <line x1="12" y1="75" x2="28" y2="75" />
+    <line x1="12" y1="105" x2="28" y2="105" />
+  </svg>
+);
 
-      <main className="main" style={{ position: 'relative' }}>
-        <DNACurve side="left" /><DNACurve side="right" />
-        {!ca && (
-          <div className="alert alert-info" style={{ marginBottom: 20 }}>
-            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>info</span>
-            <span>Contract not deployed yet. Connect wallet and deploy the intelligent contract to enable on-chain clinical checks.</span>
-          </div>
-        )}
-        {loadErr && <div className="alert alert-error"><span className="material-symbols-outlined" style={{ fontSize: 18 }}>error</span> {loadErr}</div>}
-
-        {/* ═══ DASHBOARD ═══ */}
-        {page === "dashboard" && (
-          <div className="fade-in">
-            <div className="hero" style={{ position: 'relative' }}>
-              <ECGLine />
-              <div style={{ position: 'relative', zIndex: 1 }}>
-                <div className="hero-label">Clinical Decision Support Oracle</div>
-                <h1 className="hero-title">On-Chain Healthcare<br/>Safety Verification</h1>
-                <p className="hero-sub">
-                  Drug interactions, dosage verification, allergy screening, and treatment protocol validation — powered by AI consensus on GenLayer.
-                </p>
-                <div className="hero-badge">
-                  <span className="dot" /> Live on StudioNet · Chain ID 61999
-                </div>
-              </div>
-            </div>
-
-            <div className="stat-row">
-              <div className="stat-box">
-                <p className="stat-box-label"><IconShield /> Total Checks</p>
-                <p className="stat-box-value cyan">{stats?.total_checks ?? 0}</p>
-              </div>
-              <div className="stat-box">
-                <p className="stat-box-label">Trusted Sources</p>
-                <p className="stat-box-value gold">{stats?.trusted_sources_count ?? 0}</p>
-              </div>
-              <div className="stat-box">
-                <p className="stat-box-label">Contract</p>
-                <p className="stat-box-value text">{ca ? short(ca) : "Not deployed"}</p>
-              </div>
-              <div className="stat-box">
-                <p className="stat-box-label">Network</p>
-                <p className="stat-box-value text">StudioNet 61999</p>
-              </div>
-            </div>
-
-            <div className="section-title">Clinical Tools</div>
-            <div className="feature-grid">
-              <div className="feature-card" onClick={() => setPage("interaction")} style={!ca ? { opacity: 0.6 } : undefined}>
-                <div className="feature-icon cyan"><IconDrugInteraction /></div>
-                <h3>Drug Interaction {!ca && <span style={{fontSize:11, color:'var(--text-muted)', fontWeight:400}}>(deploy required)</span>}</h3>
-                <p>Screen two drugs for adverse interactions before co-administration. 5 severity levels from minor to contraindicated.</p>
-                <span className="material-symbols-outlined arrow">arrow_forward</span>
-              </div>
-              <div className="feature-card" onClick={() => setPage("dosage")}>
-                <div className="feature-icon gold"><IconDosage /></div>
-                <h3>Dosage Verification</h3>
-                <p>Validate prescribed doses against therapeutic guidelines with patient-specific adjustments for weight and age.</p>
-                <span className="material-symbols-outlined arrow">arrow_forward</span>
-              </div>
-              <div className="feature-card" onClick={() => setPage("allergy")}>
-                <div className="feature-icon orange"><IconAllergy /></div>
-                <h3>Allergy Cross-Check</h3>
-                <p>Screen medication lists against known patient allergies for cross-reactivity and anaphylaxis risk.</p>
-                <span className="material-symbols-outlined arrow">arrow_forward</span>
-              </div>
-              <div className="feature-card" onClick={() => setPage("treatment")}>
-                <div className="feature-icon green"><IconTreatment /></div>
-                <h3>Treatment Validation</h3>
-                <p>Validate proposed treatment plans against clinical guidelines and evidence-based medicine.</p>
-                <span className="material-symbols-outlined arrow">arrow_forward</span>
-              </div>
-            </div>
-
-            {history.length > 0 && (
-              <>
-                <div className="section-title">Recent Clinical Checks</div>
-                {history.slice(0, 5).map(h => (
-                  <div className="result-card" key={h.id} onClick={() => { setLastResult(h); setPage("history"); }}>
-                    <div className="result-header">
-                      <span className={`result-badge ${severityBadge(resultValue(h.result))}`} style={{ borderColor: severityColor(resultValue(h.result)), color: severityColor(resultValue(h.result)) }}>
-                        {resultValue(h.result)}
-                      </span>
-                      <span className="result-meta">#{h.id} · {checkTypeLabel(h.type)}</span>
-                    </div>
-                    <div className="result-body">{h.result?.description ? String(h.result.description).slice(0, 160) : "No description available"}</div>
-                  </div>
-                ))}
-              </>
-            )}
-          </div>
-        )}
-
-        {/* ═══ DRUG INTERACTION ═══ */}
-        {page === "interaction" && (
-          <div className="fade-in">
-            <div className="page-hdr">
-              <div className="page-hdr-label"><IconDrugInteraction /> Clinical Pharmacology</div>
-              <h1 className="page-hdr-title">Drug Interaction Check</h1>
-              <p className="page-hdr-sub">Screen two drugs for adverse interactions using on-chain clinical sources and AI consensus.</p>
-            </div>
-            <div className="form-card">
-              <div className="form-card-header">
-                <div className="icon cyan" style={{ background: 'rgba(0,219,233,0.1)', color: 'var(--cyan)' }}><IconDrugInteraction /></div>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: 15 }}>Interaction Parameters</div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Enter two drugs to check for interactions</div>
-                </div>
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                <div className="form-group">
-                  <label className="form-label">Drug A</label>
-                  <input value={drugA} onChange={e => setDrugA(e.target.value)} placeholder="e.g. Warfarin" disabled={busy} />
-                  <span className="form-hint">First medication</span>
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Drug B</label>
-                  <input value={drugB} onChange={e => setDrugB(e.target.value)} placeholder="e.g. Aspirin" disabled={busy} />
-                  <span className="form-hint">Second medication</span>
-                </div>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Patient Context <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(optional)</span></label>
-                <textarea value={drugContext} onChange={e => setDrugContext(e.target.value)} placeholder="Age, weight, existing conditions, other medications..." disabled={busy} />
-              </div>
-              <button className="btn btn-cyan btn-full" onClick={doDrugInteraction} disabled={busy || !drugA.trim() || !drugB.trim()}>
-                {busy ? <><span className="spinner" style={{ width: 14, height: 14 }} /> Processing…</> : "Check Interaction"}
-              </button>
-              <TxPanel tx={tx} />
-            </div>
-          </div>
-        )}
-
-        {/* ═══ DOSAGE ═══ */}
-        {page === "dosage" && (
-          <div className="fade-in">
-            <div className="page-hdr">
-              <div className="page-hdr-label"><IconDosage /> Pharmacy Verification</div>
-              <h1 className="page-hdr-title">Dosage Verification</h1>
-              <p className="page-hdr-sub">Validate prescribed doses against therapeutic guidelines with patient-specific adjustments.</p>
-            </div>
-            <div className="form-card">
-              <div className="form-card-header">
-                <div className="icon" style={{ background: 'rgba(255,213,79,0.1)', color: 'var(--gold)' }}><IconDosage /></div>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: 15 }}>Dosage Parameters</div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Enter medication and patient details</div>
-                </div>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Medication Name</label>
-                <input value={dosageDrug} onChange={e => setDosageDrug(e.target.value)} placeholder="e.g. Metformin" disabled={busy} />
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
-                <div className="form-group">
-                  <label className="form-label">Dose (mg)</label>
-                  <input type="number" value={dosageMg} onChange={e => setDosageMg(e.target.value)} placeholder="500" disabled={busy} />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Weight (kg)</label>
-                  <input type="number" value={dosageWeight} onChange={e => setDosageWeight(e.target.value)} placeholder="70" disabled={busy} />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Age (years)</label>
-                  <input type="number" value={dosageAge} onChange={e => setDosageAge(e.target.value)} placeholder="45" disabled={busy} />
-                </div>
-              </div>
-              <button className="btn btn-cyan btn-full" onClick={doDosageCheck} disabled={busy || !dosageDrug.trim() || !dosageMg}>
-                {busy ? "Processing…" : "Verify Dosage"}
-              </button>
-              <TxPanel tx={tx} />
-            </div>
-          </div>
-        )}
-
-        {/* ═══ ALLERGY ═══ */}
-        {page === "allergy" && (
-          <div className="fade-in">
-            <div className="page-hdr">
-              <div className="page-hdr-label"><IconAllergy /> Patient Safety</div>
-              <h1 className="page-hdr-title">Allergy Cross-Check</h1>
-              <p className="page-hdr-sub">Screen medications against known patient allergies for cross-reactivity risks.</p>
-            </div>
-            <div className="form-card">
-              <div className="form-card-header">
-                <div className="icon" style={{ background: 'rgba(255,152,0,0.1)', color: '#ff9800' }}><IconAllergy /></div>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: 15 }}>Allergy Parameters</div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Enter medications and known allergies</div>
-                </div>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Medications <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(comma-separated)</span></label>
-                <textarea value={allergyMeds} onChange={e => setAllergyMeds(e.target.value)} placeholder="Amoxicillin, Ibuprofen, Metformin" disabled={busy} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Known Allergies <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(comma-separated)</span></label>
-                <textarea value={allergyList} onChange={e => setAllergyList(e.target.value)} placeholder="Penicillin, Sulfa drugs, NSAIDs" disabled={busy} />
-              </div>
-              <button className="btn btn-cyan btn-full" onClick={doAllergyCheck} disabled={busy || !allergyMeds.trim() || !allergyList.trim()}>
-                {busy ? "Processing…" : "Check Allergy Risk"}
-              </button>
-              <TxPanel tx={tx} />
-            </div>
-          </div>
-        )}
-
-        {/* ═══ TREATMENT ═══ */}
-        {page === "treatment" && (
-          <div className="fade-in">
-            <div className="page-hdr">
-              <div className="page-hdr-label"><IconTreatment /> Protocol Validation</div>
-              <h1 className="page-hdr-title">Treatment Validation</h1>
-              <p className="page-hdr-sub">Validate proposed treatments against clinical guidelines and evidence-based medicine.</p>
-            </div>
-            <div className="form-card">
-              <div className="form-card-header">
-                <div className="icon" style={{ background: 'rgba(105,240,174,0.1)', color: 'var(--success)' }}><IconTreatment /></div>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: 15 }}>Treatment Parameters</div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Enter condition and proposed treatment</div>
-                </div>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Medical Condition</label>
-                <input value={treatCondition} onChange={e => setTreatCondition(e.target.value)} placeholder="e.g. Type 2 Diabetes Mellitus" disabled={busy} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Proposed Treatment</label>
-                <textarea value={treatPlan} onChange={e => setTreatPlan(e.target.value)} placeholder="e.g. Metformin 500mg twice daily, lifestyle modifications" disabled={busy} />
-              </div>
-              <button className="btn btn-cyan btn-full" onClick={doTreatmentValidation} disabled={busy || !treatCondition.trim() || !treatPlan.trim()}>
-                {busy ? "Processing…" : "Validate Treatment"}
-              </button>
-              <TxPanel tx={tx} />
-            </div>
-          </div>
-        )}
-
-        {/* ═══ HISTORY ═══ */}
-        {page === "history" && (
-          <div className="fade-in">
-            <div className="page-hdr">
-              <div className="page-hdr-label"><span className="material-symbols-outlined" style={{ fontSize: 16 }}>history</span> Audit Trail</div>
-              <h1 className="page-hdr-title">Check History</h1>
-            </div>
-
-            {lastResult && (
-              <div className="result-card" style={{ marginBottom: 24, borderColor: severityColor(resultValue(lastResult.result)) }}>
-                <div className="result-header">
-                  <span className={`result-badge ${severityBadge(resultValue(lastResult.result))}`} style={{ borderColor: severityColor(resultValue(lastResult.result)), color: severityColor(resultValue(lastResult.result)) }}>
-                    {resultValue(lastResult.result)}
-                  </span>
-                  <span className="result-meta">#{lastResult.id} · {checkTypeLabel(lastResult.type)} · Confidence: {String(lastResult.result?.confidence || "—")}</span>
-                </div>
-                <div className="result-body">{lastResult.result?.description ? String(lastResult.result.description) : "No description"}</div>
-                {String(lastResult.result?.recommendation || "") && (
-                  <div className="result-detail" style={{ marginTop: 12 }}>
-                    <strong style={{ color: 'var(--cyan)' }}>Recommendation:</strong> {String(lastResult.result.recommendation)}
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>ID</th><th>Type</th><th>Result</th><th>Confidence</th><th>Caller</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {history.map(h => {
-                    const val = resultValue(h.result);
-                    return (
-                      <tr key={h.id} onClick={() => setLastResult(h)} style={{ cursor: 'pointer' }}>
-                        <td className="mono">#{h.id}</td>
-                        <td><span className="badge badge-pending">{checkTypeLabel(h.type)}</span></td>
-                        <td><span style={{ color: severityColor(val), fontWeight: 700, fontFamily: "var(--mono)", fontSize: 12 }}>{val}</span></td>
-                        <td className="mono">{String(h.result?.confidence || "—")}</td>
-                        <td className="mono" style={{ color: "var(--cyan)" }}>{short(h.caller)}</td>
-                      </tr>
-                    );
-                  })}
-                  {history.length === 0 && (
-                    <tr><td colSpan={5} style={{ textAlign: "center", padding: 40, color: "var(--text-muted)" }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: 40, display: 'block', margin: '0 auto 8px', opacity: 0.3 }}>medical_information</span>
-                      No clinical checks performed yet
-                    </td></tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-      </main>
-
-      <footer className="footer">
-        <span>© 2026 MedGuard · Clinical Decision Support · Built on GenLayer</span>
-        <div className="footer-links">
-          <a href={GH} target="_blank" rel="noreferrer">GitHub</a>
-          <a href="https://explorer-studio.genlayer.com" target="_blank" rel="noreferrer">Explorer</a>
-          <a href="https://genlayer.com" target="_blank" rel="noreferrer">GenLayer</a>
-        </div>
-      </footer>
-    </>
-  );
-}
-
-async function runRetry(fn: () => Promise<string>, onRetry: () => void) {
-  for (let i = 1; i <= 3; i++) {
-    try { return await fn(); } catch (err) {
-      const m = ((err as Error).message ?? "").toLowerCase();
-      if (m.includes("user rejected") || m.includes("user denied") || i === 3) throw err;
-      if (m.includes("reverted") || m.includes("out of gas")) { onRetry(); await new Promise(r => setTimeout(r, 4000)); continue; }
-      throw err;
-    }
-  }
-  throw new Error("unreachable");
-}
-function humanErr(m: string) {
-  const l = m.toLowerCase();
-  if (l.includes("user rejected") || l.includes("user denied")) return "You cancelled the signature.";
-  if (l.includes("insufficient funds")) return "Not enough GEN to cover gas.";
-  if (l.includes("reverted")) return "Transaction reverted. Try again.";
-  if (l.includes("timeout")) return "RPC timeout. Try again.";
-  return m;
-}
-function TxPanel({ tx }: { tx: Tx }) {
-  if (tx.k === "idle") return null;
-  const label = tx.k === "sign" ? "Awaiting signature" : tx.k === "wait" ? "Pending" : tx.k === "ok" ? "Accepted" : "Failed";
+/* ─── TxPanel Component ─── */
+function TxPanel({ tx }: { tx: TxState }) {
+  if (tx.status === "idle") return null;
   return (
     <div className="tx-panel">
       <div className="tx-status">
-        {(tx.k === "sign" || tx.k === "wait") && <span className="spinner" />}
-        <span>{tx.label} · {label}</span>
+        {tx.status === "pending" && <><span className="spinner" /> Processing transaction…</>}
+        {tx.status === "success" && <>✓ Transaction confirmed</>}
+        {tx.status === "error" && <>✗ Transaction failed</>}
       </div>
-      {"hash" in tx && tx.hash && <a className="tx-hash" href={explorerTx(tx.hash)} target="_blank" rel="noreferrer">{tx.hash}</a>}
-      {tx.k === "fail" && <div className="tx-error">{tx.err}</div>}
+      {tx.hash && (
+        <a className="tx-hash" href={explorerTx(tx.hash)} target="_blank" rel="noopener noreferrer">
+          {tx.hash}
+        </a>
+      )}
+      {tx.error && <div className="tx-error">{tx.error}</div>}
+      {tx.result && tx.status === "success" && (
+        <div className="result-detail" style={{ marginTop: 8 }}>{tx.result}</div>
+      )}
     </div>
+  );
+}
+
+/* ─── Utility: try-parse JSON, return raw string on failure ─── */
+function tryParse(raw: string): any {
+  try { return JSON.parse(raw); } catch { return raw; }
+}
+
+/* ─── Main App ─── */
+export function App() {
+  const wallet = useWallet();
+  const ca = getContractAddress();
+  const readClient = useReadClient();
+  const writeClient = useWriteClient(
+    wallet.state.status === "connected" ? wallet.state.address : null
+  );
+
+  const [page, setPage] = useState<Page>("dashboard");
+  const [stats, setStats] = useState<any>(null);
+  const [history, setHistory] = useState<CheckRecord[]>([]);
+  const [historyDetail, setHistoryDetail] = useState<string | null>(null);
+
+  /* Load stats */
+  const loadStats = useCallback(async () => {
+    if (!ca) return;
+    try {
+      const raw = await readClient.readContract({
+        address: ca,
+        functionName: "get_stats",
+        args: [],
+      });
+      setStats(typeof raw === "string" ? tryParse(raw) : raw);
+    } catch (e) {
+      console.error("loadStats", e);
+    }
+  }, [ca, readClient]);
+
+  useEffect(() => { loadStats(); }, [loadStats]);
+
+  /* Ensure wallet + write client ready */
+  function ensureReady(): boolean {
+    if (!ca) return false;
+    if (wallet.state.status !== "connected") {
+      wallet.connect();
+      return false;
+    }
+    if (!writeClient) return false;
+    return true;
+  }
+
+  /* With-transaction helper */
+  function withTx(fn: () => Promise<any>, onResult?: (r: any) => void) {
+    return async () => {
+      if (!ensureReady()) return;
+      setTx({ status: "pending" });
+      try {
+        const hash = await fn();
+        const hashStr = typeof hash === "string" ? hash : String(hash);
+        setTx({ status: "success", hash: hashStr });
+        loadStats();
+        if (onResult) onResult(hashStr);
+      } catch (e: any) {
+        setTx({ status: "error", error: e?.message ?? String(e) });
+      }
+    };
+  }
+
+  const [tx, setTx] = useState<TxState>({ status: "idle" });
+
+  /* Generic write helper */
+  async function write(functionName: string, args: any[]): Promise<string> {
+    const hash = await writeClient!.writeContract({
+      address: ca!,
+      functionName,
+      args,
+      value: 0n,
+    });
+    return typeof hash === "string" ? hash : String(hash);
+  }
+
+  /* Generic read helper */
+  async function read(functionName: string, args: any[] = []): Promise<any> {
+    const raw = await readClient.readContract({
+      address: ca!,
+      functionName,
+      args,
+    });
+    return typeof raw === "string" ? tryParse(raw) : raw;
+  }
+
+  /* Append to history */
+  function addHistory(type: string, inputs: string, result: string) {
+    setHistory((h) => [
+      { id: `${Date.now()}`, type, inputs, result, timestamp: new Date().toISOString() },
+      ...h,
+    ]);
+  }
+
+  /* ─── Sidebar Navigation Config ─── */
+  const navSections: { label: string; items: { page: Page; icon: React.ReactNode; name: string }[] }[] = [
+    {
+      label: "Clinical",
+      items: [
+        { page: "dashboard", icon: <IconShield />, name: "Dashboard" },
+        { page: "interaction", icon: <IconDrugInteraction />, name: "Drug Interaction" },
+        { page: "dosage", icon: <IconDosage />, name: "Dosage Check" },
+        { page: "allergy", icon: <IconAllergy />, name: "Allergy Check" },
+        { page: "treatment", icon: <IconTreatment />, name: "Treatment" },
+      ],
+    },
+    {
+      label: "Management",
+      items: [
+        { page: "patients", icon: <IconPatient />, name: "Patients" },
+        { page: "prescription", icon: <IconPrescription />, name: "Prescription" },
+        { page: "drugs", icon: <IconDrug />, name: "Drug Database" },
+        { page: "alerts", icon: <IconAlert />, name: "Alerts" },
+      ],
+    },
+    {
+      label: "Advanced",
+      items: [
+        { page: "trials", icon: <IconTrial />, name: "Clinical Trials" },
+        { page: "insurance", icon: <IconInsurance />, name: "Insurance" },
+        { page: "history", icon: <IconShield />, name: "History" },
+      ],
+    },
+  ];
+
+  /* ─── Dashboard Page ─── */
+  function DashboardPage() {
+    const statItems = stats ? [
+      { label: "Total Checks", value: stats.total_checks ?? 0, color: "blue" },
+      { label: "Patients", value: stats.total_patients ?? 0, color: "green" },
+      { label: "Prescriptions", value: stats.total_prescriptions ?? 0, color: "teal" },
+      { label: "Drug DB Size", value: stats.drug_database_size ?? 0, color: "gold" },
+      { label: "Drug Checks", value: stats.total_drug_checks ?? 0, color: "blue" },
+      { label: "Dosage Checks", value: stats.total_dosage_checks ?? 0, color: "green" },
+      { label: "Allergy Checks", value: stats.total_allergy_checks ?? 0, color: "teal" },
+      { label: "Treatment Checks", value: stats.total_treatment_checks ?? 0, color: "gold" },
+      { label: "Alerts", value: stats.total_alerts ?? 0, color: "red" },
+      { label: "Trusted Sources", value: stats.trusted_sources_count ?? 0, color: "text" },
+      { label: "Insurance Claims", value: stats.total_claims ?? 0, color: "blue" },
+    ] : [];
+
+    const featureCards: { page: Page; icon: React.ReactNode; color: string; title: string; desc: string }[] = [
+      { page: "interaction", icon: <IconDrugInteraction />, color: "blue", title: "Drug Interaction", desc: "Check two drugs for harmful interactions with AI-powered analysis" },
+      { page: "dosage", icon: <IconDosage />, color: "green", title: "Dosage Verification", desc: "Verify medication dosages against patient weight and age" },
+      { page: "allergy", icon: <IconAllergy />, color: "red", title: "Allergy Risk", desc: "Cross-reference medications with known patient allergies" },
+      { page: "treatment", icon: <IconTreatment />, color: "teal", title: "Treatment Validation", desc: "Validate proposed treatments against medical conditions" },
+      { page: "patients", icon: <IconPatient />, color: "gold", title: "Patient Registry", desc: "Register and manage patient records on-chain" },
+      { page: "prescription", icon: <IconPrescription />, color: "blue", title: "Prescription Verify", desc: "Verify prescriptions against patient history and safety" },
+      { page: "drugs", icon: <IconDrug />, color: "green", title: "Drug Database", desc: "Search and manage the on-chain pharmaceutical database" },
+      { page: "alerts", icon: <IconAlert />, color: "red", title: "Medical Alerts", desc: "View critical patient alerts and safety notifications" },
+      { page: "trials", icon: <IconTrial />, color: "teal", title: "Clinical Trials", desc: "Match patients to relevant clinical trial opportunities" },
+      { page: "insurance", icon: <IconInsurance />, color: "gold", title: "Insurance Claims", desc: "Verify insurance claims against treatment costs" },
+    ];
+
+    return (
+      <div className="fade-in">
+        <div className="hero">
+          <ECGLine />
+          <div className="hero-label">Clinical Decision Support Oracle</div>
+          <h1 className="hero-title">MedGuard v2</h1>
+          <p className="hero-sub">
+            AI-powered clinical decision support on GenLayer blockchain. Verify drug interactions,
+            validate dosages, check allergies, and manage patient safety — all on-chain with
+            trusted medical references.
+          </p>
+          <span className="hero-badge">
+            <span className="dot" /> GenLayer StudioNet · Chain {61999}
+          </span>
+        </div>
+
+        <div className="stat-row">
+          {statItems.map((s, i) => (
+            <div className="stat-box" key={i}>
+              <div className="stat-box-label">{s.label}</div>
+              <div className={`stat-box-value ${s.color}`}>{s.value}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="section-title">Clinical Tools</div>
+        <div className="feature-grid">
+          {featureCards.map((c) => (
+            <div
+              key={c.page}
+              className={`feature-card ${c.color}`}
+              onClick={() => setPage(c.page)}
+            >
+              <div className={`feature-icon ${c.color}`}>{c.icon}</div>
+              <h3>{c.title}</h3>
+              <p>{c.desc}</p>
+              <span className="arrow">→</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  /* ─── Drug Interaction Page ─── */
+  function InteractionPage() {
+    const [drugA, setDrugA] = useState("");
+    const [drugB, setDrugB] = useState("");
+    const [context, setContext] = useState("");
+    const [result, setResult] = useState<string | null>(null);
+
+    const submit = withTx(
+      () => write("check_drug_interaction", [drugA, drugB, context, ""]),
+      (r) => {
+        setResult(r);
+        addHistory("Drug Interaction", `${drugA} + ${drugB}`, r);
+      }
+    );
+
+    return (
+      <div className="fade-in">
+        <div className="page-hdr">
+          <div className="page-hdr-label"><span className="icon"><IconDrugInteraction /></span> Clinical</div>
+          <h1 className="page-hdr-title">Drug Interaction Check</h1>
+          <p className="page-hdr-sub">Check two medications for harmful interactions using AI-powered analysis with trusted medical references.</p>
+        </div>
+        {!ca && <div className="alert alert-error">Contract not deployed. Check configuration.</div>}
+        <div className="form-card">
+          <div className="form-card-header">
+            <div className="icon" style={{ background: "var(--blue-glow)", color: "var(--blue)" }}><IconDrugInteraction /></div>
+            <div>
+              <strong>Interaction Analysis</strong>
+              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Enter two drugs to check for interactions</div>
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Drug A</label>
+            <input value={drugA} onChange={(e) => setDrugA(e.target.value)} placeholder="e.g. Warfarin" />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Drug B</label>
+            <input value={drugB} onChange={(e) => setDrugB(e.target.value)} placeholder="e.g. Aspirin" />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Patient Context <span className="form-hint">(optional)</span></label>
+            <textarea value={context} onChange={(e) => setContext(e.target.value)} placeholder="Age, weight, conditions..." />
+          </div>
+          <button className="btn btn-primary btn-full" onClick={submit} disabled={tx.status === "pending" || !drugA || !drugB}>
+            {tx.status === "pending" ? "Checking…" : "Check Interaction"}
+          </button>
+          <TxPanel tx={tx} />
+        </div>
+        {result && (
+          <div className="result-card" style={{ marginTop: 16 }}>
+            <div className="result-header">
+              <span className="result-badge badge-info">Result</span>
+              <span className="result-meta">Check ID: {result}</span>
+            </div>
+            <div className="result-body">
+              <button className="btn btn-sm" onClick={async () => {
+                try { const d = await read("get_check", [result]); setResult(typeof d === "string" ? d : JSON.stringify(d, null, 2)); } catch (e: any) { setResult(e.message); }
+              }}>Load Full Result</button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  /* ─── Dosage Check Page ─── */
+  function DosagePage() {
+    const [drug, setDrug] = useState("");
+    const [dosage, setDosage] = useState("");
+    const [weight, setWeight] = useState("");
+    const [age, setAge] = useState("");
+    const [result, setResult] = useState<string | null>(null);
+
+    const submit = withTx(
+      () => write("verify_dosage", [drug, parseFloat(dosage), parseFloat(weight), parseInt(age), ""]),
+      (r) => {
+        setResult(r);
+        addHistory("Dosage Check", `${drug} ${dosage}mg, ${weight}kg, ${age}y`, r);
+      }
+    );
+
+    return (
+      <div className="fade-in">
+        <div className="page-hdr">
+          <div className="page-hdr-label"><span className="icon"><IconDosage /></span> Clinical</div>
+          <h1 className="page-hdr-title">Dosage Verification</h1>
+          <p className="page-hdr-sub">Verify medication dosages are safe and appropriate for the patient's weight and age.</p>
+        </div>
+        {!ca && <div className="alert alert-error">Contract not deployed. Check configuration.</div>}
+        <div className="form-card">
+          <div className="form-card-header">
+            <div className="icon" style={{ background: "var(--green-glow)", color: "var(--green)" }}><IconDosage /></div>
+            <div>
+              <strong>Dosage Verification</strong>
+              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Enter dosage details for safety check</div>
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Drug Name</label>
+            <input value={drug} onChange={(e) => setDrug(e.target.value)} placeholder="e.g. Amoxicillin" />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Dosage (mg)</label>
+            <input type="number" value={dosage} onChange={(e) => setDosage(e.target.value)} placeholder="e.g. 500" />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Patient Weight (kg)</label>
+            <input type="number" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="e.g. 70" />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Patient Age (years)</label>
+            <input type="number" value={age} onChange={(e) => setAge(e.target.value)} placeholder="e.g. 35" />
+          </div>
+          <button className="btn btn-primary btn-full" onClick={submit} disabled={tx.status === "pending" || !drug || !dosage || !weight || !age}>
+            {tx.status === "pending" ? "Verifying…" : "Verify Dosage"}
+          </button>
+          <TxPanel tx={tx} />
+        </div>
+        {result && (
+          <div className="result-card" style={{ marginTop: 16 }}>
+            <div className="result-header">
+              <span className="result-badge badge-info">Result</span>
+              <span className="result-meta">Check ID: {result}</span>
+            </div>
+            <div className="result-body">
+              <button className="btn btn-sm" onClick={async () => {
+                try { const d = await read("get_check", [result]); setResult(typeof d === "string" ? d : JSON.stringify(d, null, 2)); } catch (e: any) { setResult(e.message); }
+              }}>Load Full Result</button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  /* ─── Allergy Check Page ─── */
+  function AllergyPage() {
+    const [meds, setMeds] = useState("");
+    const [allergies, setAllergies] = useState("");
+    const [context, setContext] = useState("");
+    const [result, setResult] = useState<string | null>(null);
+
+    const submit = withTx(
+      () => write("check_allergy_risk", [meds, allergies, context, ""]),
+      (r) => {
+        setResult(r);
+        addHistory("Allergy Check", `Meds: ${meds}, Allergies: ${allergies}`, r);
+      }
+    );
+
+    return (
+      <div className="fade-in">
+        <div className="page-hdr">
+          <div className="page-hdr-label"><span className="icon"><IconAllergy /></span> Clinical</div>
+          <h1 className="page-hdr-title">Allergy Risk Check</h1>
+          <p className="page-hdr-sub">Cross-reference medications against known patient allergies to prevent adverse reactions.</p>
+        </div>
+        {!ca && <div className="alert alert-error">Contract not deployed. Check configuration.</div>}
+        <div className="form-card">
+          <div className="form-card-header">
+            <div className="icon" style={{ background: "var(--red-glow)", color: "var(--red)" }}><IconAllergy /></div>
+            <div>
+              <strong>Allergy Analysis</strong>
+              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Comma-separated lists for batch checking</div>
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Medications (comma-separated)</label>
+            <input value={meds} onChange={(e) => setMeds(e.target.value)} placeholder="e.g. Penicillin, Ibuprofen, Aspirin" />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Known Allergies (comma-separated)</label>
+            <input value={allergies} onChange={(e) => setAllergies(e.target.value)} placeholder="e.g. Penicillin, Sulfa" />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Patient Context <span className="form-hint">(optional)</span></label>
+            <textarea value={context} onChange={(e) => setContext(e.target.value)} placeholder="Additional patient context..." />
+          </div>
+          <button className="btn btn-primary btn-full" onClick={submit} disabled={tx.status === "pending" || !meds || !allergies}>
+            {tx.status === "pending" ? "Checking…" : "Check Allergy Risk"}
+          </button>
+          <TxPanel tx={tx} />
+        </div>
+        {result && (
+          <div className="result-card" style={{ marginTop: 16 }}>
+            <div className="result-header">
+              <span className="result-badge badge-info">Result</span>
+              <span className="result-meta">Check ID: {result}</span>
+            </div>
+            <div className="result-body">
+              <button className="btn btn-sm" onClick={async () => {
+                try { const d = await read("get_check", [result]); setResult(typeof d === "string" ? d : JSON.stringify(d, null, 2)); } catch (e: any) { setResult(e.message); }
+              }}>Load Full Result</button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  /* ─── Treatment Validation Page ─── */
+  function TreatmentPage() {
+    const [condition, setCondition] = useState("");
+    const [treatment, setTreatment] = useState("");
+    const [context, setContext] = useState("");
+    const [result, setResult] = useState<string | null>(null);
+
+    const submit = withTx(
+      () => write("validate_treatment", [condition, treatment, context, ""]),
+      (r) => {
+        setResult(r);
+        addHistory("Treatment Validation", `${condition} → ${treatment}`, r);
+      }
+    );
+
+    return (
+      <div className="fade-in">
+        <div className="page-hdr">
+          <div className="page-hdr-label"><span className="icon"><IconTreatment /></span> Clinical</div>
+          <h1 className="page-hdr-title">Treatment Validation</h1>
+          <p className="page-hdr-sub">Validate proposed treatments against medical conditions and best practices.</p>
+        </div>
+        {!ca && <div className="alert alert-error">Contract not deployed. Check configuration.</div>}
+        <div className="form-card">
+          <div className="form-card-header">
+            <div className="icon" style={{ background: "var(--teal-glow)", color: "var(--teal)" }}><IconTreatment /></div>
+            <div>
+              <strong>Treatment Analysis</strong>
+              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>AI-powered treatment validation</div>
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Medical Condition</label>
+            <input value={condition} onChange={(e) => setCondition(e.target.value)} placeholder="e.g. Type 2 Diabetes" />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Proposed Treatment</label>
+            <input value={treatment} onChange={(e) => setTreatment(e.target.value)} placeholder="e.g. Metformin 500mg twice daily" />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Patient Context <span className="form-hint">(optional)</span></label>
+            <textarea value={context} onChange={(e) => setContext(e.target.value)} placeholder="Age, comorbidities, current medications..." />
+          </div>
+          <button className="btn btn-primary btn-full" onClick={submit} disabled={tx.status === "pending" || !condition || !treatment}>
+            {tx.status === "pending" ? "Validating…" : "Validate Treatment"}
+          </button>
+          <TxPanel tx={tx} />
+        </div>
+        {result && (
+          <div className="result-card" style={{ marginTop: 16 }}>
+            <div className="result-header">
+              <span className="result-badge badge-info">Result</span>
+              <span className="result-meta">Check ID: {result}</span>
+            </div>
+            <div className="result-body">
+              <button className="btn btn-sm" onClick={async () => {
+                try { const d = await read("get_check", [result]); setResult(typeof d === "string" ? d : JSON.stringify(d, null, 2)); } catch (e: any) { setResult(e.message); }
+              }}>Load Full Result</button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  /* ─── Patients Page ─── */
+  function PatientsPage() {
+    const [patientId, setPatientId] = useState("");
+    const [fullName, setFullName] = useState("");
+    const [pAllergies, setPAllergies] = useState("");
+    const [conditions, setConditions] = useState("");
+    const [bloodType, setBloodType] = useState("");
+    const [pAge, setPAge] = useState("");
+    const [pWeight, setPWeight] = useState("");
+    const [lookupId, setLookupId] = useState("");
+    const [patientData, setPatientData] = useState<string | null>(null);
+
+    const regSubmit = withTx(
+      () => write("register_patient", [patientId, fullName, pAllergies, conditions, bloodType, parseInt(pAge), parseFloat(pWeight)]),
+      (r) => addHistory("Patient Register", `${patientId}: ${fullName}`, r)
+    );
+
+    const lookupPatient = async () => {
+      if (!lookupId || !ca) return;
+      try {
+        const d = await read("get_patient", [lookupId]);
+        setPatientData(typeof d === "string" ? d : JSON.stringify(d, null, 2));
+      } catch (e: any) {
+        setPatientData(`Error: ${e.message}`);
+      }
+    };
+
+    return (
+      <div className="fade-in">
+        <div className="page-hdr">
+          <div className="page-hdr-label"><span className="icon"><IconPatient /></span> Management</div>
+          <h1 className="page-hdr-title">Patient Registry</h1>
+          <p className="page-hdr-sub">Register and manage patient records securely on the blockchain.</p>
+        </div>
+        {!ca && <div className="alert alert-error">Contract not deployed. Check configuration.</div>}
+
+        <div className="form-card" style={{ marginBottom: 20 }}>
+          <div className="form-card-header">
+            <div className="icon" style={{ background: "var(--gold-glow)", color: "var(--gold)" }}><IconPatient /></div>
+            <div>
+              <strong>Register Patient</strong>
+              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Add a new patient record on-chain</div>
+            </div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div className="form-group">
+              <label className="form-label">Patient ID</label>
+              <input value={patientId} onChange={(e) => setPatientId(e.target.value)} placeholder="e.g. PAT-001" />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Full Name</label>
+              <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="e.g. John Doe" />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Allergies (comma-separated)</label>
+              <input value={pAllergies} onChange={(e) => setPAllergies(e.target.value)} placeholder="e.g. Penicillin, Latex" />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Conditions (comma-separated)</label>
+              <input value={conditions} onChange={(e) => setConditions(e.target.value)} placeholder="e.g. Diabetes, Hypertension" />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Blood Type</label>
+              <input value={bloodType} onChange={(e) => setBloodType(e.target.value)} placeholder="e.g. O+" />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Age (years)</label>
+              <input type="number" value={pAge} onChange={(e) => setPAge(e.target.value)} placeholder="e.g. 45" />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Weight (kg)</label>
+              <input type="number" value={pWeight} onChange={(e) => setPWeight(e.target.value)} placeholder="e.g. 72" />
+            </div>
+          </div>
+          <button className="btn btn-green btn-full" onClick={regSubmit} disabled={tx.status === "pending" || !patientId || !fullName}>
+            {tx.status === "pending" ? "Registering…" : "Register Patient"}
+          </button>
+          <TxPanel tx={tx} />
+        </div>
+
+        <div className="form-card">
+          <div className="form-card-header">
+            <div className="icon" style={{ background: "var(--teal-glow)", color: "var(--teal)" }}><IconPatient /></div>
+            <div>
+              <strong>Lookup Patient</strong>
+              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Retrieve patient record by ID</div>
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Patient ID</label>
+            <input value={lookupId} onChange={(e) => setLookupId(e.target.value)} placeholder="e.g. PAT-001" />
+          </div>
+          <button className="btn btn-primary" onClick={lookupPatient} disabled={!lookupId}>Lookup</button>
+          {patientData && <div className="result-detail" style={{ marginTop: 12 }}>{patientData}</div>}
+        </div>
+      </div>
+    );
+  }
+
+  /* ─── Prescription Page ─── */
+  function PrescriptionPage() {
+    const [pId, setPId] = useState("");
+    const [pMeds, setPMeds] = useState("");
+    const [pNotes, setPNotes] = useState("");
+    const [result, setResult] = useState<string | null>(null);
+    const [prescLookup, setPrescLookup] = useState("");
+    const [prescData, setPrescData] = useState<string | null>(null);
+
+    const submit = withTx(
+      () => write("verify_prescription", [pId, pMeds, pNotes, ""]),
+      (r) => {
+        setResult(r);
+        addHistory("Prescription Verify", `Patient: ${pId}, Meds: ${pMeds}`, r);
+      }
+    );
+
+    const lookupPresc = async () => {
+      if (!prescLookup || !ca) return;
+      try {
+        const d = await read("get_prescription", [prescLookup]);
+        setPrescData(typeof d === "string" ? d : JSON.stringify(d, null, 2));
+      } catch (e: any) {
+        setPrescData(`Error: ${e.message}`);
+      }
+    };
+
+    return (
+      <div className="fade-in">
+        <div className="page-hdr">
+          <div className="page-hdr-label"><span className="icon"><IconPrescription /></span> Management</div>
+          <h1 className="page-hdr-title">Prescription Verification</h1>
+          <p className="page-hdr-sub">Verify prescriptions against patient history, allergies, and safety guidelines.</p>
+        </div>
+        {!ca && <div className="alert alert-error">Contract not deployed. Check configuration.</div>}
+        <div className="form-card" style={{ marginBottom: 20 }}>
+          <div className="form-card-header">
+            <div className="icon" style={{ background: "var(--blue-glow)", color: "var(--blue)" }}><IconPrescription /></div>
+            <div>
+              <strong>Verify Prescription</strong>
+              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Check prescription safety for a registered patient</div>
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Patient ID</label>
+            <input value={pId} onChange={(e) => setPId(e.target.value)} placeholder="e.g. PAT-001" />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Medications (comma-separated)</label>
+            <input value={pMeds} onChange={(e) => setPMeds(e.target.value)} placeholder="e.g. Metformin, Lisinopril" />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Prescriber Notes <span className="form-hint">(optional)</span></label>
+            <textarea value={pNotes} onChange={(e) => setPNotes(e.target.value)} placeholder="Additional notes from prescriber..." />
+          </div>
+          <button className="btn btn-primary btn-full" onClick={submit} disabled={tx.status === "pending" || !pId || !pMeds}>
+            {tx.status === "pending" ? "Verifying…" : "Verify Prescription"}
+          </button>
+          <TxPanel tx={tx} />
+        </div>
+        {result && (
+          <div className="result-card" style={{ marginBottom: 20 }}>
+            <div className="result-header">
+              <span className="result-badge badge-info">Prescription ID</span>
+              <span className="result-meta">{result}</span>
+            </div>
+          </div>
+        )}
+        <div className="form-card">
+          <div className="form-card-header">
+            <div className="icon" style={{ background: "var(--teal-glow)", color: "var(--teal)" }}><IconPrescription /></div>
+            <div>
+              <strong>Lookup Prescription</strong>
+              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Retrieve prescription details by ID</div>
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Prescription ID</label>
+            <input value={prescLookup} onChange={(e) => setPrescLookup(e.target.value)} placeholder="e.g. PRSC-001" />
+          </div>
+          <button className="btn btn-primary" onClick={lookupPresc} disabled={!prescLookup}>Lookup</button>
+          {prescData && <div className="result-detail" style={{ marginTop: 12 }}>{prescData}</div>}
+        </div>
+      </div>
+    );
+  }
+
+  /* ─── Drug Database Page ─── */
+  function DrugsPage() {
+    const [dName, setDName] = useState("");
+    const [dCategory, setDCategory] = useState("");
+    const [dDosages, setDDosages] = useState("");
+    const [dSideEffects, setDSideEffects] = useState("");
+    const [dContra, setDContra] = useState("");
+    const [searchQ, setSearchQ] = useState("");
+    const [searchResults, setSearchResults] = useState<any>(null);
+    const [drugInfo, setDrugInfo] = useState("");
+    const [drugInfoResult, setDrugInfoResult] = useState<string | null>(null);
+
+    const addSubmit = withTx(
+      () => write("add_drug", [dName, dCategory, dDosages, dSideEffects, dContra]),
+      (r) => addHistory("Add Drug", dName, r)
+    );
+
+    const doSearch = async () => {
+      if (!searchQ || !ca) return;
+      try {
+        const d = await read("search_drugs", [searchQ]);
+        setSearchResults(d);
+      } catch (e: any) {
+        setSearchResults({ error: e.message });
+      }
+    };
+
+    const doLookup = async () => {
+      if (!drugInfo || !ca) return;
+      try {
+        const d = await read("get_drug_info", [drugInfo]);
+        setDrugInfoResult(typeof d === "string" ? d : JSON.stringify(d, null, 2));
+      } catch (e: any) {
+        setDrugInfoResult(`Error: ${e.message}`);
+      }
+    };
+
+    return (
+      <div className="fade-in">
+        <div className="page-hdr">
+          <div className="page-hdr-label"><span className="icon"><IconDrug /></span> Management</div>
+          <h1 className="page-hdr-title">Drug Database</h1>
+          <p className="page-hdr-sub">Search the on-chain pharmaceutical database and manage drug records.</p>
+        </div>
+        {!ca && <div className="alert alert-error">Contract not deployed. Check configuration.</div>}
+
+        <div className="form-card" style={{ marginBottom: 20 }}>
+          <div className="form-card-header">
+            <div className="icon" style={{ background: "var(--green-glow)", color: "var(--green)" }}><IconDrug /></div>
+            <div>
+              <strong>Add Drug</strong>
+              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Owner-only: Add a new drug to the database</div>
+            </div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div className="form-group">
+              <label className="form-label">Drug Name</label>
+              <input value={dName} onChange={(e) => setDName(e.target.value)} placeholder="e.g. Metformin" />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Category</label>
+              <input value={dCategory} onChange={(e) => setDCategory(e.target.value)} placeholder="e.g. Antidiabetic" />
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Common Dosages (comma-separated)</label>
+            <input value={dDosages} onChange={(e) => setDDosages(e.target.value)} placeholder="e.g. 500mg, 850mg, 1000mg" />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Side Effects (comma-separated)</label>
+            <input value={dSideEffects} onChange={(e) => setDSideEffects(e.target.value)} placeholder="e.g. Nausea, Diarrhea, Lactic acidosis" />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Contraindications (comma-separated)</label>
+            <input value={dContra} onChange={(e) => setDContra(e.target.value)} placeholder="e.g. Renal impairment, Hepatic disease" />
+          </div>
+          <button className="btn btn-green btn-full" onClick={addSubmit} disabled={tx.status === "pending" || !dName}>
+            {tx.status === "pending" ? "Adding…" : "Add Drug"}
+          </button>
+          <TxPanel tx={tx} />
+        </div>
+
+        <div className="form-card" style={{ marginBottom: 20 }}>
+          <div className="form-card-header">
+            <div className="icon" style={{ background: "var(--blue-glow)", color: "var(--blue)" }}><IconDrug /></div>
+            <div>
+              <strong>Search Drugs</strong>
+              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Search the on-chain drug database</div>
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Search Query</label>
+            <input value={searchQ} onChange={(e) => setSearchQ(e.target.value)} placeholder="e.g. Metformin" />
+          </div>
+          <button className="btn btn-primary" onClick={doSearch} disabled={!searchQ}>Search</button>
+          {searchResults && (
+            <div className="result-detail" style={{ marginTop: 12, whiteSpace: "pre-wrap" }}>
+              {typeof searchResults === "string" ? searchResults : JSON.stringify(searchResults, null, 2)}
+            </div>
+          )}
+        </div>
+
+        <div className="form-card">
+          <div className="form-card-header">
+            <div className="icon" style={{ background: "var(--teal-glow)", color: "var(--teal)" }}><IconDrug /></div>
+            <div>
+              <strong>Drug Info Lookup</strong>
+              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Get detailed info by exact drug name</div>
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Drug Name</label>
+            <input value={drugInfo} onChange={(e) => setDrugInfo(e.target.value)} placeholder="e.g. Aspirin" />
+          </div>
+          <button className="btn btn-primary" onClick={doLookup} disabled={!drugInfo}>Lookup</button>
+          {drugInfoResult && <div className="result-detail" style={{ marginTop: 12 }}>{drugInfoResult}</div>}
+        </div>
+      </div>
+    );
+  }
+
+  /* ─── Alerts Page ─── */
+  function AlertsPage() {
+    const [alertLookup, setAlertLookup] = useState("");
+    const [alertData, setAlertData] = useState<string | null>(null);
+    const [patientAlerts, setPatientAlerts] = useState<any>(null);
+    const [alertPatientId, setAlertPatientId] = useState("");
+
+    const lookupAlert = async () => {
+      if (!alertLookup || !ca) return;
+      try {
+        const d = await read("get_alert", [alertLookup]);
+        setAlertData(typeof d === "string" ? d : JSON.stringify(d, null, 2));
+      } catch (e: any) {
+        setAlertData(`Error: ${e.message}`);
+      }
+    };
+
+    const lookupPatientAlerts = async () => {
+      if (!alertPatientId || !ca) return;
+      try {
+        const d = await read("get_alerts_for_patient", [alertPatientId]);
+        setPatientAlerts(d);
+      } catch (e: any) {
+        setPatientAlerts({ error: e.message });
+      }
+    };
+
+    return (
+      <div className="fade-in">
+        <div className="page-hdr">
+          <div className="page-hdr-label"><span className="icon"><IconAlert /></span> Management</div>
+          <h1 className="page-hdr-title">Medical Alerts</h1>
+          <p className="page-hdr-sub">View critical patient alerts and safety notifications generated by the oracle.</p>
+        </div>
+        {!ca && <div className="alert alert-error">Contract not deployed. Check configuration.</div>}
+
+        <div className="form-card" style={{ marginBottom: 20 }}>
+          <div className="form-card-header">
+            <div className="icon" style={{ background: "var(--red-glow)", color: "var(--red)" }}><IconAlert /></div>
+            <div>
+              <strong>Alert Lookup</strong>
+              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Retrieve a specific alert by ID</div>
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Alert ID</label>
+            <input value={alertLookup} onChange={(e) => setAlertLookup(e.target.value)} placeholder="e.g. ALT-001" />
+          </div>
+          <button className="btn btn-primary" onClick={lookupAlert} disabled={!alertLookup}>Lookup Alert</button>
+          {alertData && <div className="result-detail" style={{ marginTop: 12 }}>{alertData}</div>}
+        </div>
+
+        <div className="form-card">
+          <div className="form-card-header">
+            <div className="icon" style={{ background: "var(--gold-glow)", color: "var(--gold)" }}><IconAlert /></div>
+            <div>
+              <strong>Patient Alerts</strong>
+              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Get all alerts for a specific patient</div>
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Patient ID</label>
+            <input value={alertPatientId} onChange={(e) => setAlertPatientId(e.target.value)} placeholder="e.g. PAT-001" />
+          </div>
+          <button className="btn btn-primary" onClick={lookupPatientAlerts} disabled={!alertPatientId}>Get Alerts</button>
+          {patientAlerts && (
+            <div style={{ marginTop: 12 }}>
+              {Array.isArray(patientAlerts) ? (
+                patientAlerts.length === 0 ? (
+                  <div className="alert alert-info">No alerts found for this patient.</div>
+                ) : (
+                  patientAlerts.map((a: any, i: number) => (
+                    <div className="result-card" key={i}>
+                      <div className="result-header">
+                        <span className={`result-badge ${a.severity === "critical" ? "badge-danger" : a.severity === "warning" ? "badge-warn" : "badge-info"}`}>
+                          {a.severity ?? "info"}
+                        </span>
+                        <span className="result-meta">{a.alert_id ?? a.id ?? `Alert ${i + 1}`}</span>
+                      </div>
+                      <div className="result-body">{a.message ?? a.description ?? JSON.stringify(a)}</div>
+                    </div>
+                  ))
+                )
+              ) : (
+                <div className="result-detail" style={{ whiteSpace: "pre-wrap" }}>
+                  {typeof patientAlerts === "string" ? patientAlerts : JSON.stringify(patientAlerts, null, 2)}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  /* ─── Clinical Trials Page ─── */
+  function TrialsPage() {
+    const [tCondition, setTCondition] = useState("");
+    const [tContext, setTContext] = useState("");
+    const [result, setResult] = useState<string | null>(null);
+
+    const submit = withTx(
+      () => write("match_clinical_trial", [tCondition, tContext, ""]),
+      (r) => {
+        setResult(r);
+        addHistory("Clinical Trial Match", tCondition, r);
+      }
+    );
+
+    return (
+      <div className="fade-in">
+        <div className="page-hdr">
+          <div className="page-hdr-label"><span className="icon"><IconTrial /></span> Advanced</div>
+          <h1 className="page-hdr-title">Clinical Trial Matching</h1>
+          <p className="page-hdr-sub">Match patients to relevant clinical trial opportunities based on their condition and profile.</p>
+        </div>
+        {!ca && <div className="alert alert-error">Contract not deployed. Check configuration.</div>}
+        <div className="form-card">
+          <div className="form-card-header">
+            <div className="icon" style={{ background: "var(--teal-glow)", color: "var(--teal)" }}><IconTrial /></div>
+            <div>
+              <strong>Trial Matching</strong>
+              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Find clinical trials for a condition</div>
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Medical Condition</label>
+            <input value={tCondition} onChange={(e) => setTCondition(e.target.value)} placeholder="e.g. Rheumatoid Arthritis" />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Patient Context</label>
+            <textarea value={tContext} onChange={(e) => setTContext(e.target.value)} placeholder="Age, weight, current medications, history..." />
+          </div>
+          <button className="btn btn-primary btn-full" onClick={submit} disabled={tx.status === "pending" || !tCondition}>
+            {tx.status === "pending" ? "Matching…" : "Find Clinical Trials"}
+          </button>
+          <TxPanel tx={tx} />
+        </div>
+        {result && (
+          <div className="result-card" style={{ marginTop: 16 }}>
+            <div className="result-header">
+              <span className="result-badge badge-info">Result</span>
+              <span className="result-meta">Check ID: {result}</span>
+            </div>
+            <div className="result-body">
+              <button className="btn btn-sm" onClick={async () => {
+                try { const d = await read("get_check", [result]); setResult(typeof d === "string" ? d : JSON.stringify(d, null, 2)); } catch (e: any) { setResult(e.message); }
+              }}>Load Full Result</button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  /* ─── Insurance Page ─── */
+  function InsurancePage() {
+    const [iTreatment, setITreatment] = useState("");
+    const [iCost, setICost] = useState("");
+    const [iProvider, setIProvider] = useState("");
+    const [iContext, setIContext] = useState("");
+    const [result, setResult] = useState<string | null>(null);
+
+    const submit = withTx(
+      () => write("verify_insurance_claim", [iTreatment, parseFloat(iCost), iProvider, iContext, ""]),
+      (r) => {
+        setResult(r);
+        addHistory("Insurance Claim", `${iTreatment} — $${iCost} via ${iProvider}`, r);
+      }
+    );
+
+    return (
+      <div className="fade-in">
+        <div className="page-hdr">
+          <div className="page-hdr-label"><span className="icon"><IconInsurance /></span> Advanced</div>
+          <h1 className="page-hdr-title">Insurance Claim Verification</h1>
+          <p className="page-hdr-sub">Verify insurance claims against treatment costs and patient context.</p>
+        </div>
+        {!ca && <div className="alert alert-error">Contract not deployed. Check configuration.</div>}
+        <div className="form-card">
+          <div className="form-card-header">
+            <div className="icon" style={{ background: "var(--gold-glow)", color: "var(--gold)" }}><IconInsurance /></div>
+            <div>
+              <strong>Claim Verification</strong>
+              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Verify an insurance claim for fairness</div>
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Treatment</label>
+            <input value={iTreatment} onChange={(e) => setITreatment(e.target.value)} placeholder="e.g. Knee Replacement Surgery" />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Claimed Cost ($)</label>
+            <input type="number" value={iCost} onChange={(e) => setICost(e.target.value)} placeholder="e.g. 45000" />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Insurance Provider</label>
+            <input value={iProvider} onChange={(e) => setIProvider(e.target.value)} placeholder="e.g. BlueCross BlueShield" />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Patient Context <span className="form-hint">(optional)</span></label>
+            <textarea value={iContext} onChange={(e) => setIContext(e.target.value)} placeholder="Patient details, location, plan type..." />
+          </div>
+          <button className="btn btn-primary btn-full" onClick={submit} disabled={tx.status === "pending" || !iTreatment || !iCost || !iProvider}>
+            {tx.status === "pending" ? "Verifying…" : "Verify Claim"}
+          </button>
+          <TxPanel tx={tx} />
+        </div>
+        {result && (
+          <div className="result-card" style={{ marginTop: 16 }}>
+            <div className="result-header">
+              <span className="result-badge badge-info">Result</span>
+              <span className="result-meta">Check ID: {result}</span>
+            </div>
+            <div className="result-body">
+              <button className="btn btn-sm" onClick={async () => {
+                try { const d = await read("get_check", [result]); setResult(typeof d === "string" ? d : JSON.stringify(d, null, 2)); } catch (e: any) { setResult(e.message); }
+              }}>Load Full Result</button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  /* ─── History Page ─── */
+  function HistoryPage() {
+    return (
+      <div className="fade-in">
+        <div className="page-hdr">
+          <div className="page-hdr-label"><span className="icon"><IconShield /></span> Advanced</div>
+          <h1 className="page-hdr-title">Check History</h1>
+          <p className="page-hdr-sub">View all clinical checks performed during this session with full detail access.</p>
+        </div>
+
+        {history.length === 0 ? (
+          <div className="alert alert-info">
+            No checks performed yet. Use the clinical tools to start verifying medications and treatments.
+          </div>
+        ) : (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Inputs</th>
+                  <th>Result ID</th>
+                  <th>Time</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {history.map((h) => (
+                  <tr key={h.id}>
+                    <td>
+                      <span className={`badge ${
+                        h.type.includes("Interaction") ? "badge-info" :
+                        h.type.includes("Dosage") ? "badge-safe" :
+                        h.type.includes("Allergy") ? "badge-danger" :
+                        h.type.includes("Treatment") ? "badge-warn" :
+                        "badge-pending"
+                      }`}>{h.type}</span>
+                    </td>
+                    <td className="mono">{h.inputs}</td>
+                    <td className="mono">{h.result}</td>
+                    <td className="mono">{new Date(h.timestamp).toLocaleTimeString()}</td>
+                    <td>
+                      <button className="btn btn-sm" onClick={async () => {
+                        try {
+                          const fn = h.type.includes("Patient") ? "get_patient" :
+                                     h.type.includes("Prescription") ? "get_prescription" : "get_check";
+                          const d = await read(fn, [h.result]);
+                          setHistoryDetail(typeof d === "string" ? d : JSON.stringify(d, null, 2));
+                        } catch (e: any) {
+                          setHistoryDetail(`Error: ${e.message}`);
+                        }
+                      }}>View</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {historyDetail && (
+          <div className="result-card" style={{ marginTop: 16 }}>
+            <div className="result-header">
+              <span className="result-badge badge-info">Detail</span>
+              <button className="btn btn-sm" onClick={() => setHistoryDetail(null)}>Close</button>
+            </div>
+            <div className="result-detail" style={{ marginTop: 8, whiteSpace: "pre-wrap", maxHeight: 400, overflow: "auto" }}>
+              {historyDetail}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  /* ─── Page Router ─── */
+  function renderPage() {
+    switch (page) {
+      case "dashboard": return <DashboardPage />;
+      case "interaction": return <InteractionPage />;
+      case "dosage": return <DosagePage />;
+      case "allergy": return <AllergyPage />;
+      case "treatment": return <TreatmentPage />;
+      case "patients": return <PatientsPage />;
+      case "prescription": return <PrescriptionPage />;
+      case "drugs": return <DrugsPage />;
+      case "alerts": return <AlertsPage />;
+      case "trials": return <TrialsPage />;
+      case "insurance": return <InsurancePage />;
+      case "history": return <HistoryPage />;
+    }
+  }
+
+  /* ─── Wallet button ─── */
+  function WalletButton() {
+    const { state, connect, disconnect, switchToStudioNet } = wallet;
+    if (state.status === "no-wallet") {
+      return <span className="network-pill" style={{ color: "var(--red)", cursor: "default" }}>No Wallet</span>;
+    }
+    if (state.status === "disconnected") {
+      return <button className="btn btn-primary btn-sm" onClick={connect}>Connect Wallet</button>;
+    }
+    if (state.status === "wrong-chain") {
+      return <button className="btn btn-sm" style={{ borderColor: "var(--gold)", color: "var(--gold)" }} onClick={switchToStudioNet}>Switch to StudioNet</button>;
+    }
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span className="network-pill">
+          <span className="net-dot" /> StudioNet
+        </span>
+        <button className="btn btn-sm" onClick={disconnect}>
+          {state.address.slice(0, 6)}…{state.address.slice(-4)}
+        </button>
+      </div>
+    );
+  }
+
+  /* ─── Render ─── */
+  return (
+    <>
+      {/* Top Nav */}
+      <nav className="topnav">
+        <div className="topnav-brand">
+          <img src="/logo.svg" alt="MedGuard" />
+          MedGuard
+        </div>
+        <div className="topnav-links">
+          {(["dashboard", "interaction", "dosage", "allergy", "treatment", "patients", "prescription", "drugs", "alerts", "trials", "insurance", "history"] as Page[]).map((p) => (
+            <a
+              key={p}
+              className={`topnav-link ${page === p ? "active" : ""}`}
+              onClick={() => { setPage(p); setTx({ status: "idle" }); }}
+            >
+              {p.charAt(0).toUpperCase() + p.slice(1)}
+            </a>
+          ))}
+        </div>
+        <div className="topnav-right">
+          <WalletButton />
+        </div>
+      </nav>
+
+      {/* Sidebar */}
+      <aside className="sidebar">
+        <div className="sidebar-profile">
+          <div className="sidebar-avatar">
+            <img src="/favicon.svg" alt="M" />
+          </div>
+          <div>
+            <div className="sidebar-name">MedGuard v2</div>
+            <div className="sidebar-id">Clinical Decision Oracle</div>
+          </div>
+        </div>
+        <nav className="sidebar-nav">
+          {navSections.map((sec) => (
+            <div key={sec.label}>
+              <div className="sidebar-section">{sec.label}</div>
+              {sec.items.map((item) => (
+                <a
+                  key={item.page}
+                  className={`sidebar-link ${page === item.page ? "active" : ""}`}
+                  onClick={() => { setPage(item.page); setTx({ status: "idle" }); }}
+                >
+                  <span className="icon">{item.icon}</span>
+                  {item.name}
+                </a>
+              ))}
+            </div>
+          ))}
+        </nav>
+        <div className="sidebar-bottom">
+          {ca && (
+            <a
+              className="sidebar-link"
+              href={explorerAddress(ca)}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ fontSize: 10 }}
+            >
+              <span className="icon"><IconShield /></span>
+              {ca.slice(0, 8)}…{ca.slice(-6)}
+            </a>
+          )}
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="main">
+        {renderPage()}
+      </main>
+
+      {/* Footer */}
+      <footer className="footer">
+        <span>MedGuard v2 · Clinical Decision Support Oracle</span>
+        <div className="footer-links">
+          <a href="https://explorer-studio.genlayer.com" target="_blank" rel="noopener noreferrer">Explorer</a>
+          <a href="https://studio.genlayer.com" target="_blank" rel="noopener noreferrer">GenLayer</a>
+          {ca && <a href={explorerAddress(ca)} target="_blank" rel="noopener noreferrer">Contract</a>}
+        </div>
+      </footer>
+    </>
   );
 }
