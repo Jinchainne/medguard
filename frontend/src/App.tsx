@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════
-   MedGuard v2 — Clinical Decision Support Oracle on GenLayer
+   MedGuard — Clinical Decision Support Oracle on GenLayer
    ═══════════════════════════════════════════════════════════ */
 import React, { useEffect, useState, useCallback } from "react";
 import { createClient } from "genlayer-js";
@@ -345,7 +345,7 @@ export function App() {
         <div className="hero">
           <ECGLine />
           <div className="hero-label">Clinical Decision Support Oracle</div>
-          <h1 className="hero-title">MedGuard v2</h1>
+          <h1 className="hero-title">MedGuard</h1>
           <p className="hero-sub">
             AI-powered clinical decision support on GenLayer blockchain. Verify drug interactions,
             validate dosages, check allergies, and manage patient safety — all on-chain with
@@ -1304,7 +1304,7 @@ export function App() {
       {/* Top Nav */}
       <nav className="topnav">
         <div className="topnav-brand">
-          <img src="/logo.svg" alt="MedGuard" />
+          <img src="/favicon.svg" alt="MedGuard" />
           MedGuard
         </div>
         <div className="topnav-links">
@@ -1330,8 +1330,8 @@ export function App() {
             <img src="/favicon.svg" alt="M" />
           </div>
           <div>
-            <div className="sidebar-name">MedGuard v2</div>
-            <div className="sidebar-id">Clinical Decision Oracle</div>
+            <div className="sidebar-name">MedGuard</div>
+            <div className="sidebar-id">Clinical Decision Support</div>
           </div>
         </div>
         <nav className="sidebar-nav">
@@ -1374,7 +1374,7 @@ export function App() {
 
       {/* Footer */}
       <footer className="footer">
-        <span>MedGuard v2 · Clinical Decision Support Oracle</span>
+        <span>MedGuard · Clinical Decision Support</span>
         <div className="footer-links">
           <a href="https://explorer-studio.genlayer.com" target="_blank" rel="noopener noreferrer">Explorer</a>
           <a href="https://studio.genlayer.com" target="_blank" rel="noopener noreferrer">GenLayer</a>

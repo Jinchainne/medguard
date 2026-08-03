@@ -1,4 +1,4 @@
-# MedGuard v2
+# MedGuard
 
 Comprehensive Clinical Decision Support Oracle for GenLayer. Full-stack healthcare platform with on-chain drug interaction screening, dosage verification, allergy cross-checks, treatment validation, patient records, prescription verification, drug database, emergency alerts, clinical trial matching, and insurance claim verification.
 
@@ -20,7 +20,7 @@ Comprehensive Clinical Decision Support Oracle for GenLayer. Full-stack healthca
 
 ## What It Does
 
-MedGuard v2 is a comprehensive intelligent contract platform for healthcare professionals. It provides **10 core functions**, all executed on-chain with AI consensus:
+MedGuard is a comprehensive intelligent contract platform for healthcare professionals. It provides **10 core functions**, all executed on-chain with AI consensus:
 
 ### 1. Drug Interaction Screening
 Check if two drugs can be safely co-administered. Returns severity level, risk score (0–100), pharmacological mechanism, and clinical recommendation.
@@ -203,7 +203,7 @@ The `get_stats()` view returns comprehensive system analytics:
 ```
 medguard/
 ├── contracts/
-│   └── medguard.py              # Intelligent Contract (v2 — 13 write + 12 view functions)
+│   └── medguard.py              # Intelligent Contract ( 13 write + 12 view functions)
 ├── tests/
 │   └── test_medguard.py         # 64 invariant tests
 ├── frontend/
