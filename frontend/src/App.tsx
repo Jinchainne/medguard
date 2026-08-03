@@ -1056,13 +1056,16 @@ export function App() {
       if (!lookupId || !ca) return;
       try {
         const d = await read("get_patient", [lookupId]);
-        setPatientData(d);
-        // Add to list if not already there
-        if (d && !sharedPatients.find((p: any) => p.patient_id === d.patient_id)) {
-          setSharedPatients((prev: any[]) => [...prev, d]);
+        if (d && typeof d === 'object' && d.patient_id) {
+          setPatientData(d);
+          if (!sharedPatients.find((p: any) => p.patient_id === d.patient_id)) {
+            setSharedPatients((prev: any[]) => [...prev, d]);
+          }
+        } else {
+          setPatientData({ error: "Patient not found or invalid response" });
         }
       } catch (e: any) {
-        setPatientData({ error: e.message });
+        setPatientData({ error: `Lookup failed: ${e.message}` });
       }
     };
 
@@ -1210,7 +1213,11 @@ export function App() {
       if (!prescLookup || !ca) return;
       try {
         const d = await read("get_prescription", [prescLookup]);
-        setPrescData(typeof d === "string" ? d : JSON.stringify(d, null, 2));
+        if (d && typeof d === 'object') {
+          setPrescData(JSON.stringify(d, null, 2));
+        } else {
+          setPrescData(String(d || "Not found"));
+        }
       } catch (e: any) {
         setPrescData(`Error: ${e.message}`);
       }
@@ -1320,7 +1327,11 @@ export function App() {
       if (!drugInfo || !ca) return;
       try {
         const d = await read("get_drug_info", [drugInfo]);
-        setDrugInfoResult(typeof d === "string" ? d : JSON.stringify(d, null, 2));
+        if (d && typeof d === 'object') {
+          setDrugInfoResult(JSON.stringify(d, null, 2));
+        } else {
+          setDrugInfoResult(String(d || "Drug not found"));
+        }
       } catch (e: any) {
         setDrugInfoResult(`Error: ${e.message}`);
       }
@@ -1421,7 +1432,11 @@ export function App() {
       if (!alertLookup || !ca) return;
       try {
         const d = await read("get_alert", [alertLookup]);
-        setAlertData(typeof d === "string" ? d : JSON.stringify(d, null, 2));
+        if (d && typeof d === 'object') {
+          setAlertData(JSON.stringify(d, null, 2));
+        } else {
+          setAlertData(String(d || "Alert not found"));
+        }
       } catch (e: any) {
         setAlertData(`Error: ${e.message}`);
       }
@@ -1678,9 +1693,13 @@ export function App() {
                         try {
                           const fn = h.type.includes("Patient") ? "get_patient" :
                                      h.type.includes("Prescription") ? "get_prescription" : "get_check";
+                          try {
                           let d = await read(fn, [h.result]);
                           if (typeof d === "string") { try { d = JSON.parse(d); } catch { d = { result: { description: d } }; } }
                           setHistoryDetail(d);
+                        } catch (err: any) {
+                          setHistoryDetail({ result: { description: `Error: ${err.message}` }, type: h.type, query: {} });
+                        }
                         } catch (e: any) {
                           setHistoryDetail(`Error: ${e.message}`);
                         }
