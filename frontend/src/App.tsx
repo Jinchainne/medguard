@@ -234,8 +234,15 @@ export function App() {
         const hash = await fn();
         const hashStr = typeof hash === "string" ? hash : String(hash);
         setTx({ status: "success", hash: hashStr });
+        // Get the latest check ID from contract after tx
+        try {
+          const s = await read("get_stats") as any;
+          const latestId = String(s?.total_checks ?? "");
+          if (onResult) onResult(latestId || hashStr);
+        } catch {
+          if (onResult) onResult(hashStr);
+        }
         loadStats();
-        if (onResult) onResult(hashStr);
       } catch (e: any) {
         setTx({ status: "error", error: e?.message ?? String(e) });
       }
