@@ -1,0 +1,58 @@
+[
+  {
+    "drug_name": "Metformin",
+    "category": "Antidiabetic",
+    "common_dosages": "500mg, 850mg, 1000mg",
+    "side_effects": "Nausea, Diarrhea, Lactic acidosis",
+    "contraindications": "Renal impairment, Hepatic disease, Alcohol abuse"
+  },
+  {
+    "drug_name": "Amoxicillin",
+    "category": "Antibiotic - Penicillin",
+    "common_dosages": "250mg, 500mg, 875mg",
+    "side_effects": "Diarrhea, Rash, Allergic reaction",
+    "contraindications": "Penicillin allergy, Mononucleosis"
+  },
+  {
+    "drug_name": "Lisinopril",
+    "category": "ACE Inhibitor",
+    "common_dosages": "5mg, 10mg, 20mg, 40mg",
+    "side_effects": "Cough, Dizziness, Hyperkalemia",
+    "contraindications": "Pregnancy, Angioedema history, Bilateral renal artery stenosis"
+  },
+  {
+    "drug_name": "Warfarin",
+    "category": "Anticoagulant",
+    "common_dosages": "1mg, 2mg, 2.5mg, 5mg, 7.5mg, 10mg",
+    "side_effects": "Bleeding, Bruising, Necrosis",
+    "contraindications": "Active bleeding, Pregnancy, Severe liver disease"
+  },
+  {
+    "drug_name": "Omeprazole",
+    "category": "Proton Pump Inhibitor",
+    "common_dosages": "10mg, 20mg, 40mg",
+    "side_effects": "Headache, Nausea, Clostridium difficile infection",
+    "contraindications": "Hypersensitivity to PPIs, Concomitant rilpivirine"
+  },
+  {
+    "drug_name": "Atorvastatin",
+    "category": "Statin",
+    "common_dosages": "10mg, 20mg, 40mg, 80mg",
+    "side_effects": "Muscle pain, Liver enzyme elevation, Headache",
+    "contraindications": "Active liver disease, Pregnancy, Breastfeeding"
+  },
+  {
+    "drug_name": "Aspirin",
+    "category": "NSAID / Antiplatelet",
+    "common_dosages": "81mg, 325mg, 500mg",
+    "side_effects": "GI bleeding, Tinnitus, Reye syndrome (children)",
+    "contraindications": "Bleeding disorders, Children with viral illness, Severe renal impairment"
+  },
+  {
+    "drug_name": "Ciprofloxacin",
+    "category": "Fluoroquinolone Antibiotic",
+    "common_dosages": "250mg, 500mg, 750mg",
+    "side_effects": "Tendon rupture, QT prolongation, CNS effects",
+    "contraindications": "Myasthenia gravis, Tendon disorders, Children < 18"
+  }
+]

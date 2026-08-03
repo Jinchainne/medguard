@@ -1,0 +1,47 @@
+[
+  {
+    "patient_id": "PAT-001",
+    "full_name": "Nguyen Van An",
+    "allergies": "Penicillin, Latex",
+    "conditions": "Diabetes Type 2, Hypertension",
+    "blood_type": "O+",
+    "age_years": 45,
+    "weight_kg": 72
+  },
+  {
+    "patient_id": "PAT-002",
+    "full_name": "Tran Thi Bich",
+    "allergies": "Sulfa drugs",
+    "conditions": "Asthma",
+    "blood_type": "A+",
+    "age_years": 32,
+    "weight_kg": 58
+  },
+  {
+    "patient_id": "PAT-003",
+    "full_name": "Le Minh Cuong",
+    "allergies": "NSAIDs, Aspirin",
+    "conditions": "Heart disease, High cholesterol",
+    "blood_type": "B+",
+    "age_years": 67,
+    "weight_kg": 85
+  },
+  {
+    "patient_id": "PAT-004",
+    "full_name": "Pham Thi Dao",
+    "allergies": "Iodine",
+    "conditions": "Thyroid disorder",
+    "blood_type": "AB+",
+    "age_years": 28,
+    "weight_kg": 52
+  },
+  {
+    "patient_id": "PAT-005",
+    "full_name": "Hoang Van Em",
+    "allergies": "Codeine, Morphine",
+    "conditions": "Chronic kidney disease, Anemia",
+    "blood_type": "O-",
+    "age_years": 55,
+    "weight_kg": 68
+  }
+]

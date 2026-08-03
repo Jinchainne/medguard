@@ -1,0 +1,6 @@
+patient_id,full_name,allergies,conditions,blood_type,age_years,weight_kg
+PAT-001,Nguyen Van An,"Penicillin, Latex","Diabetes Type 2, Hypertension",O+,45,72
+PAT-002,Tran Thi Bich,Sulfa drugs,Asthma,A+,32,58
+PAT-003,Le Minh Cuong,"NSAIDs, Aspirin","Heart disease, High cholesterol",B+,67,85
+PAT-004,Pham Thi Dao,Iodine,Thyroid disorder,AB+,28,52
+PAT-005,Hoang Van Em,"Codeine, Morphine","Chronic kidney disease, Anemia",O-,55,68

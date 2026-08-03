@@ -1,0 +1,9 @@
+drug_name,category,common_dosages,side_effects,contraindications
+Metformin,Antidiabetic,"500mg, 850mg, 1000mg","Nausea, Diarrhea, Lactic acidosis","Renal impairment, Hepatic disease, Alcohol abuse"
+Amoxicillin,Antibiotic - Penicillin,"250mg, 500mg, 875mg","Diarrhea, Rash, Allergic reaction","Penicillin allergy, Mononucleosis"
+Lisinopril,ACE Inhibitor,"5mg, 10mg, 20mg, 40mg","Cough, Dizziness, Hyperkalemia","Pregnancy, Angioedema history, Bilateral renal artery stenosis"
+Warfarin,Anticoagulant,"1mg, 2mg, 2.5mg, 5mg, 7.5mg, 10mg","Bleeding, Bruising, Necrosis","Active bleeding, Pregnancy, Severe liver disease"
+Omeprazole,Proton Pump Inhibitor,"10mg, 20mg, 40mg","Headache, Nausea, Clostridium difficile infection","Hypersensitivity to PPIs, Concomitant rilpivirine"
+Atorvastatin,Statin,"10mg, 20mg, 40mg, 80mg","Muscle pain, Liver enzyme elevation, Headache","Active liver disease, Pregnancy, Breastfeeding"
+Aspirin,NSAID / Antiplatelet,"81mg, 325mg, 500mg","GI bleeding, Tinnitus, Reye syndrome (children)","Bleeding disorders, Children with viral illness, Severe renal impairment"
+Ciprofloxacin,Fluoroquinolone Antibiotic,"250mg, 500mg, 750mg","Tendon rupture, QT prolongation, CNS effects","Myasthenia gravis, Tendon disorders, Children < 18"

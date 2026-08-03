@@ -426,8 +426,14 @@ function ImportExportPanel({ type, onImport, onExportData }: {
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
         <label className="btn btn-sm" style={{ cursor: "pointer" }}>
           <span className="material-symbols-outlined" style={{ fontSize: 16 }}>file_upload</span> Import CSV/JSON
-          <input type="file" accept=".csv,.json,.txt,.xlsx" onChange={handleFileSelect} style={{ display: "none" }} />
+          <input type="file" accept=".csv,.json,.txt" onChange={handleFileSelect} style={{ display: "none" }} />
         </label>
+        <a className="btn btn-sm" href={`/sample_${type}.json`} download style={{ textDecoration: "none" }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>download</span> Sample JSON
+        </a>
+        <a className="btn btn-sm" href={`/sample_${type}.csv`} download style={{ textDecoration: "none" }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>download</span> Sample CSV
+        </a>
         <button className="btn btn-sm" onClick={() => doExport('csv')}>
           <span className="material-symbols-outlined" style={{ fontSize: 16 }}>download</span> Export CSV
         </button>
@@ -486,8 +492,16 @@ export function App() {
   const [stats, setStats] = useState<any>(null);
   const [history, setHistory] = useState<CheckRecord[]>([]);
   const [historyDetail, setHistoryDetail] = useState<any>(null);
-  const [sharedPatients, setSharedPatients] = useState<any[]>([]);
-  const [sharedDrugs, setSharedDrugs] = useState<any[]>([]);
+  const [sharedPatients, setSharedPatients] = useState<any[]>(() => {
+    try { return JSON.parse(localStorage.getItem("medguard_patients") || "[]"); } catch { return []; }
+  });
+  const [sharedDrugs, setSharedDrugs] = useState<any[]>(() => {
+    try { return JSON.parse(localStorage.getItem("medguard_drugs") || "[]"); } catch { return []; }
+  });
+
+  // Persist to localStorage on change
+  useEffect(() => { localStorage.setItem("medguard_patients", JSON.stringify(sharedPatients)); }, [sharedPatients]);
+  useEffect(() => { localStorage.setItem("medguard_drugs", JSON.stringify(sharedDrugs)); }, [sharedDrugs]);
 
   /* Load stats */
   const loadStats = useCallback(async () => {
