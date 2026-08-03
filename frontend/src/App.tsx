@@ -317,6 +317,7 @@ export function App() {
   const [stats, setStats] = useState<any>(null);
   const [history, setHistory] = useState<CheckRecord[]>([]);
   const [historyDetail, setHistoryDetail] = useState<any>(null);
+  const [sharedPatients, setSharedPatients] = useState<any[]>([]);
 
   /* Load stats */
   const loadStats = useCallback(async () => {
@@ -771,30 +772,107 @@ export function App() {
   }
 
   /* ─── Patients Page ─── */
+  function PatientCard({ data }: { data: any }) {
+    return (
+      <div style={{ padding: 16, background: "var(--surface)", borderRadius: 12, border: "1px solid var(--border)" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "var(--text)" }}>{data.full_name}</div>
+            <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--teal)" }}>{data.patient_id}</div>
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <span className="badge badge-info">{data.blood_type || "—"}</span>
+            <span className="badge badge-safe">{data.age_years}y</span>
+            <span className="badge badge-warn">{data.weight_kg}kg</span>
+          </div>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div style={{ padding: "10px 12px", background: "var(--surface-high)", borderRadius: 8 }}>
+            <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--red)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>Allergies</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+              {(data.allergies || []).length > 0 ? data.allergies.map((a: string, i: number) => (
+                <span key={i} className="badge badge-danger">{a}</span>
+              )) : <span style={{ fontSize: 12, color: "var(--text-muted)" }}>None recorded</span>}
+            </div>
+          </div>
+          <div style={{ padding: "10px 12px", background: "var(--surface-high)", borderRadius: 8 }}>
+            <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>Conditions</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+              {(data.conditions || []).length > 0 ? data.conditions.map((c: string, i: number) => (
+                <span key={i} className="badge badge-warn">{c}</span>
+              )) : <span style={{ fontSize: 12, color: "var(--text-muted)" }}>None recorded</span>}
+            </div>
+          </div>
+        </div>
+        <div style={{ marginTop: 10, display: "flex", gap: 16, fontSize: 11, color: "var(--text-muted)", fontFamily: "var(--mono)" }}>
+          <span>Rx Count: {data.prescription_count ?? 0}</span>
+          <span>Registered: {data.registered_by?.slice(0, 10)}...</span>
+        </div>
+      </div>
+    );
+  }
+
   function PatientsPage() {
-    const [patientId, setPatientId] = useState("");
-    const [fullName, setFullName] = useState("");
-    const [pAllergies, setPAllergies] = useState("");
-    const [conditions, setConditions] = useState("");
-    const [bloodType, setBloodType] = useState("");
-    const [pAge, setPAge] = useState("");
-    const [pWeight, setPWeight] = useState("");
-    const [lookupId, setLookupId] = useState("");
-    const [patientData, setPatientData] = useState<string | null>(null);
+      const [patientId, setPatientId] = useState("");
+      const [fullName, setFullName] = useState("");
+      const [pAllergies, setPAllergies] = useState("");
+      const [conditions, setConditions] = useState("");
+      const [bloodType, setBloodType] = useState("");
+      const [pAge, setPAge] = useState("");
+      const [pWeight, setPWeight] = useState("");
+      const [lookupId, setLookupId] = useState("");
+      const [patientData, setPatientData] = useState<any>(null);
+    const [listLoading, setListLoading] = useState(false);
 
     const regSubmit = withTx(
       () => write("register_patient", [patientId, fullName, pAllergies, conditions, bloodType, parseInt(pAge), parseFloat(pWeight)]),
-      (r) => addHistory("Patient Register", `${patientId}: ${fullName}`, r)
+      (r) => {
+        addHistory("Patient Register", `${patientId}: ${fullName}`, r);
+        // Auto-add to list
+        setSharedPatients(prev => [...prev, { patient_id: patientId, full_name: fullName, allergies: pAllergies.split(",").map(s => s.trim()).filter(Boolean), conditions: conditions.split(",").map(s => s.trim()).filter(Boolean), blood_type: bloodType, age_years: parseInt(pAge) || 0, weight_kg: parseFloat(pWeight) || 0, prescription_count: 0 }]);
+        setPatientId(""); setFullName(""); setPAllergies(""); setConditions(""); setBloodType(""); setPAge(""); setPWeight("");
+      }
     );
 
     const lookupPatient = async () => {
       if (!lookupId || !ca) return;
       try {
         const d = await read("get_patient", [lookupId]);
-        setPatientData(typeof d === "string" ? d : JSON.stringify(d, null, 2));
+        setPatientData(d);
+        // Add to list if not already there
+        if (d && !sharedPatients.find((p: any) => p.patient_id === d.patient_id)) {
+          setSharedPatients((prev: any[]) => [...prev, d]);
+        }
       } catch (e: any) {
-        setPatientData(`Error: ${e.message}`);
+        setPatientData({ error: e.message });
       }
+    };
+
+    const loadAllPatients = async () => {
+      if (!ca) return;
+      setListLoading(true);
+      try {
+        const s = await read("get_stats") as any;
+        const totalChecks = s?.total_checks ?? 0;
+        const patients: any[] = [];
+        // Scan recent checks for patient registrations
+        for (let i = totalChecks; i >= Math.max(1, totalChecks - 50); i--) {
+          try {
+            const check = await read("get_check", [String(i)]);
+            if (check?.type === "patient_register" || check?.query?.patient_id) {
+              const pid = check.query?.patient_id;
+              if (pid && !patients.find(p => p.patient_id === pid)) {
+                try {
+                  const pat = await read("get_patient", [pid]);
+                  if (pat) patients.push(pat);
+                } catch {}
+              }
+            }
+          } catch {}
+        }
+        setSharedPatients(patients);
+      } catch {}
+      setListLoading(false);
     };
 
     return (
@@ -806,11 +884,33 @@ export function App() {
         </div>
         {!ca && <div className="alert alert-error">Contract not deployed. Check configuration.</div>}
 
+        {/* Patient List */}
+        <div style={{ marginBottom: 20 }}>
+          <div className="section-title" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span>Registered Patients ({sharedPatients.length})</span>
+            <button className="btn btn-sm" onClick={loadAllPatients} disabled={listLoading}>
+              {listLoading ? "Loading…" : "Refresh List"}
+            </button>
+          </div>
+          {sharedPatients.length > 0 ? (
+            <div style={{ display: "grid", gap: 12 }}>
+              {sharedPatients.map((p: any, i: number) => (
+                <div key={i} style={{ cursor: "pointer" }} onClick={() => { setLookupId(p.patient_id); setPatientData(p); }}>
+                  <PatientCard data={p} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="alert alert-info">No patients loaded. Register a new patient or click "Refresh List" to load from chain.</div>
+          )}
+        </div>
+
+        {/* Register Form */}
         <div className="form-card" style={{ marginBottom: 20 }}>
           <div className="form-card-header">
-            <div className="icon" style={{ background: "var(--gold-glow)", color: "var(--gold)" }}><IconPatient /></div>
+            <div className="icon" style={{ background: "var(--green-glow)", color: "var(--green)" }}><IconPatient /></div>
             <div>
-              <strong>Register Patient</strong>
+              <strong>Register New Patient</strong>
               <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Add a new patient record on-chain</div>
             </div>
           </div>
@@ -850,6 +950,7 @@ export function App() {
           <TxPanel tx={tx} />
         </div>
 
+        {/* Lookup */}
         <div className="form-card">
           <div className="form-card-header">
             <div className="icon" style={{ background: "var(--teal-glow)", color: "var(--teal)" }}><IconPatient /></div>
@@ -858,12 +959,15 @@ export function App() {
               <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Retrieve patient record by ID</div>
             </div>
           </div>
-          <div className="form-group">
-            <label className="form-label">Patient ID</label>
-            <input value={lookupId} onChange={(e) => setLookupId(e.target.value)} placeholder="e.g. PAT-001" />
+          <div style={{ display: "flex", gap: 12, alignItems: "flex-end" }}>
+            <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
+              <label className="form-label">Patient ID</label>
+              <input value={lookupId} onChange={(e) => setLookupId(e.target.value)} placeholder="e.g. PAT-001" />
+            </div>
+            <button className="btn btn-primary" onClick={lookupPatient} disabled={!lookupId} style={{ marginBottom: 0 }}>Lookup</button>
           </div>
-          <button className="btn btn-primary" onClick={lookupPatient} disabled={!lookupId}>Lookup</button>
-          {patientData && <div className="result-detail" style={{ marginTop: 12 }}>{patientData}</div>}
+          {patientData && !patientData.error && <div style={{ marginTop: 16 }}><PatientCard data={patientData} /></div>}
+          {patientData?.error && <div className="alert alert-error" style={{ marginTop: 12 }}>{patientData.error}</div>}
         </div>
       </div>
     );
@@ -913,8 +1017,17 @@ export function App() {
             </div>
           </div>
           <div className="form-group">
-            <label className="form-label">Patient ID</label>
-            <input value={pId} onChange={(e) => setPId(e.target.value)} placeholder="e.g. PAT-001" />
+            <label className="form-label">Patient</label>
+            {sharedPatients.length > 0 ? (
+              <select value={pId} onChange={(e) => setPId(e.target.value)}>
+                <option value="">-- Select patient or type below --</option>
+                {sharedPatients.map((p: any) => (
+                  <option key={p.patient_id} value={p.patient_id}>{p.patient_id} — {p.full_name} ({p.allergies?.join(", ") || "no allergies"})</option>
+                ))}
+              </select>
+            ) : null}
+            <input value={pId} onChange={(e) => setPId(e.target.value)} placeholder="e.g. PAT-001" style={{ marginTop: sharedPatients.length > 0 ? 8 : 0 }} />
+            {sharedPatients.length === 0 && <span className="form-hint">Register patients first to select from list</span>}
           </div>
           <div className="form-group">
             <label className="form-label">Medications (comma-separated)</label>
