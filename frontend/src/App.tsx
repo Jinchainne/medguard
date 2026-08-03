@@ -950,21 +950,34 @@ export function App() {
           <TxPanel tx={tx} />
         </div>
 
-        {/* Lookup */}
+        {/* Patient Selector */}
         <div className="form-card">
           <div className="form-card-header">
             <div className="icon" style={{ background: "var(--teal-glow)", color: "var(--teal)" }}><IconPatient /></div>
             <div>
-              <strong>Lookup Patient</strong>
-              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Retrieve patient record by ID</div>
+              <strong>Select Patient</strong>
+              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Choose from registered patients or enter ID manually</div>
             </div>
           </div>
-          <div style={{ display: "flex", gap: 12, alignItems: "flex-end" }}>
-            <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
-              <label className="form-label">Patient ID</label>
-              <input value={lookupId} onChange={(e) => setLookupId(e.target.value)} placeholder="e.g. PAT-001" />
+          <div className="form-group">
+            <label className="form-label">Patient</label>
+            <select 
+              value={lookupId} 
+              onChange={(e) => { const v = e.target.value; setLookupId(v); if (v) { const p = sharedPatients.find((x: any) => x.patient_id === v); if (p) setPatientData(p); else lookupPatient(); } }}
+              style={{ marginBottom: 8 }}
+            >
+              <option value="">-- Select patient from list --</option>
+              {sharedPatients.map((p: any) => (
+                <option key={p.patient_id} value={p.patient_id}>
+                  {p.patient_id} — {p.full_name} ({p.allergies?.join(", ") || "no allergies"})
+                </option>
+              ))}
+            </select>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Or enter ID:</span>
+              <input value={lookupId} onChange={(e) => setLookupId(e.target.value)} placeholder="e.g. PAT-001" style={{ flex: 1 }} />
+              <button className="btn btn-primary btn-sm" onClick={lookupPatient} disabled={!lookupId}>Lookup</button>
             </div>
-            <button className="btn btn-primary" onClick={lookupPatient} disabled={!lookupId} style={{ marginBottom: 0 }}>Lookup</button>
           </div>
           {patientData && !patientData.error && <div style={{ marginTop: 16 }}><PatientCard data={patientData} /></div>}
           {patientData?.error && <div className="alert alert-error" style={{ marginTop: 12 }}>{patientData.error}</div>}
@@ -1018,16 +1031,21 @@ export function App() {
           </div>
           <div className="form-group">
             <label className="form-label">Patient</label>
-            {sharedPatients.length > 0 ? (
-              <select value={pId} onChange={(e) => setPId(e.target.value)}>
-                <option value="">-- Select patient or type below --</option>
-                {sharedPatients.map((p: any) => (
-                  <option key={p.patient_id} value={p.patient_id}>{p.patient_id} — {p.full_name} ({p.allergies?.join(", ") || "no allergies"})</option>
-                ))}
-              </select>
-            ) : null}
-            <input value={pId} onChange={(e) => setPId(e.target.value)} placeholder="e.g. PAT-001" style={{ marginTop: sharedPatients.length > 0 ? 8 : 0 }} />
-            {sharedPatients.length === 0 && <span className="form-hint">Register patients first to select from list</span>}
+            <select 
+              value={pId} 
+              onChange={(e) => setPId(e.target.value)}
+            >
+              <option value="">-- Select patient --</option>
+              {sharedPatients.map((p: any) => (
+                <option key={p.patient_id} value={p.patient_id}>
+                  {p.patient_id} — {p.full_name} (Allergies: {p.allergies?.join(", ") || "none"})
+                </option>
+              ))}
+            </select>
+            <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8 }}>
+              <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Or enter ID:</span>
+              <input value={pId} onChange={(e) => setPId(e.target.value)} placeholder="e.g. PAT-001" style={{ flex: 1 }} />
+            </div>
           </div>
           <div className="form-group">
             <label className="form-label">Medications (comma-separated)</label>
