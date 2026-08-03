@@ -1308,23 +1308,13 @@ export function App() {
       }
     );
 
-    const doSearch = async () => {
-      if (!searchQ || !ca) return;
-      try {
-        const d = await read("search_drugs", [searchQ]);
-        setSearchResults(d);
-        // Add found drugs to sharedDrugs
-        if (Array.isArray(d)) {
-          setSharedDrugs((prev: any[]) => {
-            const existing = new Set(prev.map((x: any) => x.drug_name));
-            const newDrugs = d.filter((x: any) => !existing.has(x.drug_name));
-            return [...prev, ...newDrugs];
-          });
-        }
-      } catch (e: any) {
-        setSearchResults({ error: e.message });
+    const doSearch = withTx(
+      () => write("search_drugs", [searchQ]),
+      (r) => {
+        addHistory("Drug Search", searchQ, r);
+        setSearchResults({ message: "Search submitted. Check history for results." });
       }
-    };
+    );
 
     const doLookup = async () => {
       if (!drugInfo || !ca) return;
