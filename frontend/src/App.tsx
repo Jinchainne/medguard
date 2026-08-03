@@ -305,6 +305,69 @@ function ResultDetailCard({ data, onClose }: { data: any; onClose: () => void })
   );
 }
 
+function PatientSelector({ value, onChange, label, patients }: { value: string; onChange: (v: string) => void; label?: string; patients: any[] }) {
+  return (
+    <div className="form-group">
+      <label className="form-label">{label || "Patient"}</label>
+      <select value={value} onChange={(e) => onChange(e.target.value)}>
+        <option value="">-- Select patient --</option>
+        {patients.map((p: any) => (
+          <option key={p.patient_id} value={p.patient_id}>
+            {p.patient_id} — {p.full_name} ({p.allergies?.join(", ") || "no allergies"})
+          </option>
+        ))}
+      </select>
+      <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 6 }}>
+        <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Or type:</span>
+        <input value={value} onChange={(e) => onChange(e.target.value)} placeholder="PAT-001" style={{ flex: 1, padding: "6px 10px", fontSize: 13 }} />
+      </div>
+    </div>
+  );
+}
+
+function DrugSelector({ value, onChange, label, placeholder, drugs }: { value: string; onChange: (v: string) => void; label?: string; placeholder?: string; drugs: any[] }) {
+  return (
+    <div className="form-group">
+      <label className="form-label">{label || "Medication"}</label>
+      <select value={value} onChange={(e) => onChange(e.target.value)}>
+        <option value="">-- Select from database --</option>
+        {drugs.map((d: any) => (
+          <option key={d.drug_name} value={d.drug_name}>
+            {d.drug_name} ({d.category || "uncategorized"})
+          </option>
+        ))}
+      </select>
+      <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 6 }}>
+        <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Or type:</span>
+        <input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder || "e.g. Metformin"} style={{ flex: 1, padding: "6px 10px", fontSize: 13 }} />
+      </div>
+    </div>
+  );
+}
+
+function MultiDrugSelector({ value, onChange, label, placeholder, drugs }: { value: string; onChange: (v: string) => void; label?: string; placeholder?: string; drugs: any[] }) {
+  const drugNames = value.split(",").map(s => s.trim()).filter(Boolean);
+  const addDrug = (d: string) => { if (d && !drugNames.includes(d)) onChange([...drugNames, d].join(", ")); };
+  const removeDrug = (d: string) => onChange(drugNames.filter(x => x !== d).join(", "));
+  return (
+    <div className="form-group">
+      <label className="form-label">{label || "Medications"}</label>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 6 }}>
+        {drugNames.map((d: string, i: number) => (
+          <span key={i} className="badge badge-info" style={{ cursor: "pointer" }} onClick={() => removeDrug(d)}>{d} ×</span>
+        ))}
+      </div>
+      <select value="" onChange={(e) => { addDrug(e.target.value); e.target.value = ""; }}>
+        <option value="">+ Add from database</option>
+        {drugs.filter((d: any) => !drugNames.includes(d.drug_name)).map((d: any) => (
+          <option key={d.drug_name} value={d.drug_name}>{d.drug_name}</option>
+        ))}
+      </select>
+      <input value="" onChange={(e) => { if (e.target.value.trim()) { addDrug(e.target.value.trim()); e.target.value = ""; } }} placeholder={placeholder || "Type drug name and press Enter"} style={{ marginTop: 4 }} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); const t = e.currentTarget.value.trim(); if (t) { addDrug(t); e.currentTarget.value = ""; } } }} />
+    </div>
+  );
+}
+
 export function App() {
   const wallet = useWallet();
   const ca = getContractAddress();
@@ -318,6 +381,7 @@ export function App() {
   const [history, setHistory] = useState<CheckRecord[]>([]);
   const [historyDetail, setHistoryDetail] = useState<any>(null);
   const [sharedPatients, setSharedPatients] = useState<any[]>([]);
+  const [sharedDrugs, setSharedDrugs] = useState<any[]>([]);
 
   /* Load stats */
   const loadStats = useCallback(async () => {
@@ -537,14 +601,8 @@ export function App() {
               <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Enter two drugs to check for interactions</div>
             </div>
           </div>
-          <div className="form-group">
-            <label className="form-label">Drug A</label>
-            <input value={drugA} onChange={(e) => setDrugA(e.target.value)} placeholder="e.g. Warfarin" />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Drug B</label>
-            <input value={drugB} onChange={(e) => setDrugB(e.target.value)} placeholder="e.g. Aspirin" />
-          </div>
+          <DrugSelector value={drugA} onChange={setDrugA} label="Drug A" placeholder="e.g. Warfarin" drugs={sharedDrugs} />
+                      <DrugSelector value={drugB} onChange={setDrugB} label="Drug B" placeholder="e.g. Aspirin" drugs={sharedDrugs} />
           <div className="form-group">
             <label className="form-label">Patient Context <span className="form-hint">(optional)</span></label>
             <textarea value={context} onChange={(e) => setContext(e.target.value)} placeholder="Age, weight, conditions..." />
@@ -647,6 +705,7 @@ export function App() {
     const [allergies, setAllergies] = useState("");
     const [context, setContext] = useState("");
     const [result, setResult] = useState<string | null>(null);
+    const [allergyPatient, setAllergyPatient] = useState("");
 
     const submit = withTx(
       () => write("check_allergy_risk", [meds, allergies, context, ""]),
@@ -672,13 +731,16 @@ export function App() {
               <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Comma-separated lists for batch checking</div>
             </div>
           </div>
-          <div className="form-group">
-            <label className="form-label">Medications (comma-separated)</label>
-            <input value={meds} onChange={(e) => setMeds(e.target.value)} placeholder="e.g. Penicillin, Ibuprofen, Aspirin" />
-          </div>
+          <PatientSelector patients={sharedPatients} value={allergyPatient} onChange={(v) => {
+            setAllergyPatient(v);
+            const p = sharedPatients.find((x: any) => x.patient_id === v);
+            if (p) { setAllergies(p.allergies?.join(", ") || ""); }
+          }} label="Quick Fill from Patient" />
+          <MultiDrugSelector value={meds} onChange={setMeds} label="Medications to Check" placeholder="Type drug name and press Enter" drugs={sharedDrugs} />
           <div className="form-group">
             <label className="form-label">Known Allergies (comma-separated)</label>
             <input value={allergies} onChange={(e) => setAllergies(e.target.value)} placeholder="e.g. Penicillin, Sulfa" />
+            <span className="form-hint">Auto-filled when patient selected above</span>
           </div>
           <div className="form-group">
             <label className="form-label">Patient Context <span className="form-hint">(optional)</span></label>
@@ -1047,10 +1109,7 @@ export function App() {
               <input value={pId} onChange={(e) => setPId(e.target.value)} placeholder="e.g. PAT-001" style={{ flex: 1 }} />
             </div>
           </div>
-          <div className="form-group">
-            <label className="form-label">Medications (comma-separated)</label>
-            <input value={pMeds} onChange={(e) => setPMeds(e.target.value)} placeholder="e.g. Metformin, Lisinopril" />
-          </div>
+          <MultiDrugSelector value={pMeds} onChange={setPMeds} label="Medications" placeholder="Type drug name and press Enter" drugs={sharedDrugs} />
           <div className="form-group">
             <label className="form-label">Prescriber Notes <span className="form-hint">(optional)</span></label>
             <textarea value={pNotes} onChange={(e) => setPNotes(e.target.value)} placeholder="Additional notes from prescriber..." />
@@ -1101,7 +1160,11 @@ export function App() {
 
     const addSubmit = withTx(
       () => write("add_drug", [dName, dCategory, dDosages, dSideEffects, dContra]),
-      (r) => addHistory("Add Drug", dName, r)
+      (r) => {
+        addHistory("Add Drug", dName, r);
+        setSharedDrugs((prev: any[]) => [...prev, { drug_name: dName, category: dCategory, common_dosages: dDosages.split(",").map((s: string) => s.trim()), side_effects: dSideEffects.split(",").map((s: string) => s.trim()), contraindications: dContra.split(",").map((s: string) => s.trim()) }]);
+        setDName(""); setDCategory(""); setDDosages(""); setDSideEffects(""); setDContra("");
+      }
     );
 
     const doSearch = async () => {
@@ -1109,6 +1172,14 @@ export function App() {
       try {
         const d = await read("search_drugs", [searchQ]);
         setSearchResults(d);
+        // Add found drugs to sharedDrugs
+        if (Array.isArray(d)) {
+          setSharedDrugs((prev: any[]) => {
+            const existing = new Set(prev.map((x: any) => x.drug_name));
+            const newDrugs = d.filter((x: any) => !existing.has(x.drug_name));
+            return [...prev, ...newDrugs];
+          });
+        }
       } catch (e: any) {
         setSearchResults({ error: e.message });
       }
@@ -1268,10 +1339,7 @@ export function App() {
               <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Get all alerts for a specific patient</div>
             </div>
           </div>
-          <div className="form-group">
-            <label className="form-label">Patient ID</label>
-            <input value={alertPatientId} onChange={(e) => setAlertPatientId(e.target.value)} placeholder="e.g. PAT-001" />
-          </div>
+          <PatientSelector value={alertPatientId} onChange={setAlertPatientId} label="Patient" patients={sharedPatients} />
           <button className="btn btn-primary" onClick={lookupPatientAlerts} disabled={!alertPatientId}>Get Alerts</button>
           {patientAlerts && (
             <div style={{ marginTop: 12 }}>
