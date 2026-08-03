@@ -1,6 +1,6 @@
 // MedGuard frontend config.
 
-export const DEPLOYED_ADDRESS: `0x${string}` | "" = "";
+export const DEPLOYED_ADDRESS: `0x${string}` | "" = "0x747292eE674133Ec346444A26BdE687edD2C2454";
 
 export function getContractAddress(): `0x${string}` | null {
   const envAddr = (import.meta.env.VITE_CONTRACT_ADDRESS ?? "").trim();
