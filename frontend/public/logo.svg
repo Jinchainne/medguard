@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a1628"/>
+      <stop offset="100%" stop-color="#111d33"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffd54f"/>
+      <stop offset="100%" stop-color="#ff9800"/>
+    </linearGradient>
+    <linearGradient id="cyan" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#00f0ff"/>
+      <stop offset="100%" stop-color="#00dbe9"/>
+    </linearGradient>
+  </defs>
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="250" fill="url(#bg)" stroke="#00dbe9" stroke-width="3"/>
+  <!-- Globe grid lines -->
+  <ellipse cx="256" cy="256" rx="180" ry="180" fill="none" stroke="#1a2a45" stroke-width="1.5"/>
+  <ellipse cx="256" cy="256" rx="130" ry="130" fill="none" stroke="#1a2a45" stroke-width="1"/>
+  <ellipse cx="256" cy="256" rx="80" ry="80" fill="none" stroke="#1a2a45" stroke-width="1"/>
+  <!-- Longitude lines -->
+  <ellipse cx="256" cy="256" rx="40" ry="180" fill="none" stroke="#1a2a45" stroke-width="1"/>
+  <ellipse cx="256" cy="256" rx="100" ry="180" fill="none" stroke="#1a2a45" stroke-width="1"/>
+  <ellipse cx="256" cy="256" rx="155" ry="180" fill="none" stroke="#1a2a45" stroke-width="1"/>
+  <line x1="256" y1="76" x2="256" y2="436" stroke="#1a2a45" stroke-width="1"/>
+  <line x1="76" y1="256" x2="436" y2="256" stroke="#1a2a45" stroke-width="1"/>
+  <!-- Laurel wreath left -->
+  <g fill="#00dbe9" opacity="0.6">
+    <path d="M120,380 Q90,340 95,290 Q85,300 80,280 Q90,260 100,250 Q88,255 82,240 Q95,220 108,215 Q95,215 90,200 Q105,180 118,178 Q105,172 102,158 Q118,138 132,140 Q120,130 120,118 Q138,100 152,105"/>
+    <path d="M115,375 Q88,338 92,288 Q82,298 77,278 Q87,258 97,248 Q85,253 79,238 Q92,218 105,213 Q92,213 87,198 Q102,178 115,176 Q102,170 99,156 Q115,136 129,138 Q117,128 117,116 Q135,98 149,103"/>
+  </g>
+  <!-- Laurel wreath right -->
+  <g fill="#00dbe9" opacity="0.6">
+    <path d="M392,380 Q422,340 417,290 Q427,300 432,280 Q422,260 412,250 Q424,255 430,240 Q417,220 404,215 Q417,215 422,200 Q407,180 394,178 Q407,172 410,158 Q394,138 380,140 Q392,130 392,118 Q374,100 360,105"/>
+    <path d="M397,375 Q424,338 420,288 Q430,298 435,278 Q425,258 415,248 Q427,253 433,238 Q420,218 407,213 Q420,213 425,198 Q410,178 397,176 Q410,170 413,156 Q397,136 383,138 Q395,128 395,116 Q377,98 363,103"/>
+  </g>
+  <!-- Rod of Asclepius -->
+  <rect x="249" y="140" width="14" height="220" rx="7" fill="url(#gold)"/>
+  <!-- Snake -->
+  <path d="M256,155 Q280,165 275,185 Q268,200 256,195 Q240,188 245,210 Q250,225 256,220 Q270,212 265,235 Q258,250 256,245 Q240,238 245,260 Q250,275 256,270 Q272,262 268,285 Q262,300 256,295 Q242,288 248,310 Q254,325 256,320 Q265,315 262,335 Q258,345 256,340" fill="none" stroke="url(#gold)" stroke-width="10" stroke-linecap="round"/>
+  <!-- Snake head -->
+  <circle cx="262" cy="338" r="8" fill="url(#gold)"/>
+  <circle cx="265" cy="336" r="2" fill="#0a1628"/>
+  <!-- Medical cross glow -->
+  <rect x="230" y="200" width="52" height="16" rx="3" fill="#00dbe9" opacity="0.15"/>
+  <rect x="248" y="182" width="16" height="52" rx="3" fill="#00dbe9" opacity="0.15"/>
+  <!-- Pulse line decoration -->
+  <path d="M100,256 L180,256 L200,230 L215,280 L230,240 L245,260 L256,256 L320,256 L412,256" fill="none" stroke="#00dbe9" stroke-width="2" opacity="0.4"/>
+</svg>
