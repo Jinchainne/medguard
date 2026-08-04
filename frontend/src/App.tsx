@@ -494,23 +494,103 @@ const workflowSteps = [
   { num: 10, icon: "🏦", title: "Insurance", page: "insurance" as Page, color: "#d97706" },
 ];
 
+/* ── Pixel MC Doctor — bounces/blinks in corner like retro game ── */
+function PixelMCDoc() {
+  return (
+    <div style={{
+      position: "fixed", bottom: 20, right: 20, zIndex: 1000,
+      animation: "mcBounce 0.8s ease-in-out infinite",
+      cursor: "pointer", filter: "drop-shadow(0 4px 16px rgba(0,212,170,0.3))",
+    }} title="Dr. MedGuard — Your Clinical AI Assistant!">
+      <svg width="64" height="88" viewBox="0 0 64 88" style={{ imageRendering: "pixelated" as any }}>
+        {/* Speech bubble */}
+        <rect x="0" y="-22" width="58" height="20" rx="4" fill="white" opacity="0.95" />
+        <polygon points="20,−2 28,−2 22,4" fill="white" opacity="0.95" />
+        <text x="29" y="-8" textAnchor="middle" fontSize="7" fill="#1e3a5f" fontWeight="700" fontFamily="monospace">Hi! I'm Dr.</text>
+
+        {/* Hair */}
+        <rect x="18" y="4" width="28" height="10" rx="4" fill="#2c3e50" />
+        <rect x="16" y="10" width="4" height="10" rx="2" fill="#2c3e50" />
+        <rect x="44" y="10" width="4" height="10" rx="2" fill="#2c3e50" />
+        {/* Head */}
+        <rect x="20" y="12" width="24" height="22" rx="5" fill="#fcd5b8" />
+        {/* Head mirror */}
+        <rect x="28" y="2" width="8" height="6" rx="2" fill="#bdc3c7" />
+        <rect x="30" y="3" width="4" height="3" rx="1" fill="#ecf0f1" />
+        {/* Eyes — blink animation */}
+        <rect x="26" y="20" width="5" height="4" rx="2" fill="#2c3e50">
+          <animate attributeName="height" values="4;1;4" dur="3s" repeatCount="indefinite" begin="0s" />
+          <animate attributeName="y" values="20;22;20" dur="3s" repeatCount="indefinite" begin="0s" />
+        </rect>
+        <rect x="34" y="20" width="5" height="4" rx="2" fill="#2c3e50">
+          <animate attributeName="height" values="4;1;4" dur="3s" repeatCount="indefinite" begin="0s" />
+          <animate attributeName="y" values="20;22;20" dur="3s" repeatCount="indefinite" begin="0s" />
+        </rect>
+        {/* Eye shine */}
+        <rect x="27" y="20" width="2" height="2" rx="1" fill="white">
+          <animate attributeName="opacity" values="1;0;1" dur="3s" repeatCount="indefinite" begin="0s" />
+        </rect>
+        <rect x="35" y="20" width="2" height="2" rx="1" fill="white">
+          <animate attributeName="opacity" values="1;0;1" dur="3s" repeatCount="indefinite" begin="0s" />
+        </rect>
+        {/* Big smile */}
+        <path d="M26 28 Q32 34 38 28" stroke="#e74c3c" strokeWidth="2" fill="none" strokeLinecap="round" />
+        {/* Blush */}
+        <circle cx="22" cy="28" r="3" fill="#ffb3b3" opacity="0.5" />
+        <circle cx="42" cy="28" r="3" fill="#ffb3b3" opacity="0.5" />
+        {/* Glasses */}
+        <rect x="23" y="17" width="8" height="7" rx="2" fill="none" stroke="#546e7a" strokeWidth="1.5" />
+        <rect x="33" y="17" width="8" height="7" rx="2" fill="none" stroke="#546e7a" strokeWidth="1.5" />
+        <line x1="31" y1="20" x2="33" y2="20" stroke="#546e7a" strokeWidth="1.5" />
+
+        {/* White coat */}
+        <rect x="16" y="36" width="32" height="28" rx="4" fill="white" stroke="#ddd" strokeWidth="1" />
+        {/* Coat V */}
+        <path d="M24 36 L32 44 L40 36" fill="#f0f4ff" stroke="#ccc" strokeWidth="0.5" />
+        {/* Stethoscope */}
+        <path d="M22 36 Q16 42 18 52" stroke="#3498db" strokeWidth="2" fill="none" />
+        <circle cx="18" cy="54" r="3" fill="#3498db" />
+        <circle cx="18" cy="54" r="1.5" fill="#2980b9" />
+        {/* Clipboard */}
+        <rect x="38" y="42" width="12" height="18" rx="2" fill="#2563eb" />
+        <rect x="40" y="44" width="8" height="2" rx="1" fill="white" opacity="0.7" />
+        <rect x="40" y="48" width="8" height="1.5" rx="0.5" fill="white" opacity="0.5" />
+        <rect x="40" y="52" width="5" height="1.5" rx="0.5" fill="white" opacity="0.4" />
+        {/* Arms */}
+        <rect x="8" y="38" width="8" height="18" rx="4" fill="white" stroke="#ddd" strokeWidth="0.5" />
+        <rect x="48" y="38" width="8" height="18" rx="4" fill="white" stroke="#ddd" strokeWidth="0.5" />
+        {/* Hands */}
+        <rect x="10" y="56" width="6" height="5" rx="2.5" fill="#fcd5b8" />
+        <rect x="48" y="56" width="6" height="5" rx="2.5" fill="#fcd5b8" />
+
+        {/* Legs */}
+        <rect x="20" y="64" width="8" height="14" rx="4" fill="#1e3a5f" />
+        <rect x="36" y="64" width="8" height="14" rx="4" fill="#1e3a5f" />
+        {/* Shoes */}
+        <rect x="17" y="76" width="12" height="6" rx="3" fill="#2c3e50" />
+        <rect x="35" y="76" width="12" height="6" rx="3" fill="#2c3e50" />
+
+        {/* ID Badge */}
+        <rect x="42" y="40" width="7" height="9" rx="1.5" fill="#e2e8f0" />
+        <rect x="43" y="41" width="5" height="3" rx="0.5" fill="#2563eb" opacity="0.5" />
+      </svg>
+    </div>
+  );
+}
+
+/* ── Workflow with glowing arrow transitions ── */
 function WorkflowDoctor({ activeStep, setActiveStep, playing, setPlaying }: { activeStep: number; setActiveStep: (n: number | ((p: number) => number)) => void; playing: boolean; setPlaying: (b: boolean) => void }) {
   const intervalRef = React.useRef<number | null>(null);
-  const stepRef = React.useRef(activeStep);
-  stepRef.current = activeStep;
 
   React.useEffect(() => {
     if (playing) {
-      // Immediate first step
       setActiveStep(prev => prev >= workflowSteps.length - 1 ? 0 : prev + 1);
       intervalRef.current = window.setInterval(() => {
         setActiveStep(prev => prev >= workflowSteps.length - 1 ? 0 : prev + 1);
-      }, 1800);
+      }, 1600);
     }
     return () => { if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; } };
   }, [playing]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const isWalking = playing;
 
   return (
     <div style={{ marginBottom: 24 }}>
@@ -520,153 +600,122 @@ function WorkflowDoctor({ activeStep, setActiveStep, playing, setPlaying }: { ac
           {playing ? "⏸ Pause" : "▶ Auto Play"}
         </button>
         <div style={{ flex: 1, height: 6, background: "var(--border)", borderRadius: 3, overflow: "hidden" }}>
-          <div style={{ height: "100%", width: `${activeStep >= 0 ? ((activeStep + 1) / workflowSteps.length) * 100 : 0}%`, background: "linear-gradient(90deg, var(--teal), var(--blue))", borderRadius: 3, transition: "width 0.6s ease" }} />
+          <div style={{ height: "100%", width: `${activeStep >= 0 ? ((activeStep + 1) / workflowSteps.length) * 100 : 0}%`, background: "linear-gradient(90deg, var(--teal), var(--blue))", borderRadius: 3, transition: "width 0.5s ease" }} />
         </div>
         <span style={{ fontSize: 13, fontFamily: "var(--mono)", color: "var(--teal)", fontWeight: 600, minWidth: 60, textAlign: "right" }}>
           {Math.max(0, activeStep + 1)} / {workflowSteps.length}
         </span>
       </div>
 
-      {/* Steps grid with doctor walking ON the cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10 }}>
-        {workflowSteps.map((s, i) => (
-          <div
-            key={i}
-            onClick={() => setActiveStep(i)}
-            style={{
-              position: "relative",
-              background: i === activeStep ? `${s.color}20` : "var(--surface-high)",
-              border: `2px solid ${i === activeStep ? s.color : i < activeStep ? "var(--teal)" : "var(--border)"}`,
-              borderRadius: 14, padding: "14px 12px 14px 12px", cursor: "pointer", transition: "all 0.5s ease",
-              opacity: i <= activeStep ? 1 : 0.4,
-              transform: i === activeStep ? "scale(1.04)" : "scale(1)",
-              boxShadow: i === activeStep ? `0 0 24px ${s.color}40, inset 0 0 20px ${s.color}10` : "none",
-              minHeight: 120,
-            }}
-          >
-            {/* Doctor stands ON this card when active */}
-            {i === activeStep && activeStep >= 0 && (
+      {/* Row 1: Steps 1-5 with arrows */}
+      <div style={{ display: "flex", alignItems: "center", gap: 0, marginBottom: 8 }}>
+        {workflowSteps.slice(0, 5).map((s, i) => (
+          <React.Fragment key={i}>
+            <div
+              onClick={() => setActiveStep(i)}
+              style={{
+                flex: 1, position: "relative", background: i === activeStep ? `${s.color}22` : "var(--surface-high)",
+                border: `2px solid ${i === activeStep ? s.color : i < activeStep ? "var(--teal)" : "var(--border)"}`,
+                borderRadius: 12, padding: "14px 10px", cursor: "pointer", transition: "all 0.5s ease",
+                opacity: i <= activeStep ? 1 : 0.4,
+                transform: i === activeStep ? "scale(1.05)" : "scale(1)",
+                boxShadow: i === activeStep ? `0 0 20px ${s.color}40, 0 0 40px ${s.color}15` : "none",
+                minHeight: 100,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                <span style={{ fontSize: 9, color: i === activeStep ? s.color : "var(--text-muted)", fontFamily: "var(--mono)", fontWeight: i === activeStep ? 700 : 400 }}>STEP {s.num}</span>
+                <span style={{
+                  width: 18, height: 18, borderRadius: "50%",
+                  background: i < activeStep ? "var(--teal)" : i === activeStep ? s.color : "var(--border)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 9, color: "white", fontWeight: 700, transition: "all 0.3s",
+                }}>
+                  {i < activeStep ? "✓" : i === activeStep ? "●" : ""}
+                </span>
+              </div>
+              <div style={{ fontSize: 24, marginBottom: 6, textAlign: "center" }}>{s.icon}</div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: i === activeStep ? "white" : "var(--text)", textAlign: "center", lineHeight: 1.3 }}>{s.title}</div>
+            </div>
+            {/* Glowing arrow between cards */}
+            {i < 4 && (
               <div style={{
-                position: "absolute",
-                top: -55,
-                left: "50%",
-                transform: "translateX(-50%)",
-                zIndex: 10,
-                animation: "doctorBounce 0.6s ease-in-out infinite",
-                filter: "drop-shadow(0 4px 12px rgba(0,212,170,0.4))",
+                width: 28, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
               }}>
-                <PixelDoctor walking={isWalking} />
+                <span style={{
+                  fontSize: 18, fontWeight: 900, transition: "all 0.5s ease",
+                  color: i < activeStep ? "var(--teal)" : "var(--border)",
+                  textShadow: i < activeStep ? "0 0 12px var(--teal), 0 0 24px var(--teal)" : "none",
+                  opacity: i < activeStep ? 1 : 0.3,
+                  animation: i === activeStep - 1 ? "arrowGlow 0.8s ease-in-out infinite" : "none",
+                }}>→</span>
               </div>
             )}
-
-            {/* Arrow from previous step */}
-            {i > 0 && i <= activeStep && (
-              <div style={{
-                position: "absolute", left: -14, top: "50%", transform: "translateY(-50%)",
-                fontSize: 12, color: "var(--teal)", fontWeight: 700,
-              }}>→</div>
-            )}
-
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-              <span style={{ fontSize: 9, color: i === activeStep ? s.color : "var(--text-muted)", fontFamily: "var(--mono)", fontWeight: i === activeStep ? 700 : 400, letterSpacing: "0.05em" }}>STEP {s.num}</span>
-              <span style={{
-                width: 20, height: 20, borderRadius: "50%",
-                background: i < activeStep ? "var(--teal)" : i === activeStep ? s.color : "var(--border)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 10, color: "white", transition: "all 0.3s", fontWeight: 700,
-                boxShadow: i === activeStep ? `0 0 10px ${s.color}66` : "none",
-              }}>
-                {i < activeStep ? "✓" : i === activeStep ? "●" : ""}
-              </span>
-            </div>
-            <div style={{ fontSize: 26, marginBottom: 8, textAlign: "center" }}>{s.icon}</div>
-            <div style={{ fontSize: 12, fontWeight: 600, color: i === activeStep ? "white" : "var(--text)", lineHeight: 1.3, textAlign: "center" }}>{s.title}</div>
-          </div>
+          </React.Fragment>
         ))}
+      </div>
+
+      {/* Turn arrow (row 1 → row 2) */}
+      <div style={{ display: "flex", justifyContent: "flex-end", paddingRight: 20, marginBottom: 4 }}>
+        <span style={{
+          fontSize: 18, fontWeight: 900, transition: "all 0.5s ease", transform: "rotate(90deg)",
+          color: activeStep >= 4 ? "var(--teal)" : "var(--border)",
+          textShadow: activeStep >= 4 ? "0 0 12px var(--teal)" : "none",
+          opacity: activeStep >= 4 ? 1 : 0.3,
+        }}>→</span>
+      </div>
+
+      {/* Row 2: Steps 6-10 with arrows */}
+      <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
+        {workflowSteps.slice(5, 10).map((s, i) => {
+          const idx = i + 5;
+          return (
+            <React.Fragment key={idx}>
+              <div
+                onClick={() => setActiveStep(idx)}
+                style={{
+                  flex: 1, position: "relative", background: idx === activeStep ? `${s.color}22` : "var(--surface-high)",
+                  border: `2px solid ${idx === activeStep ? s.color : idx < activeStep ? "var(--teal)" : "var(--border)"}`,
+                  borderRadius: 12, padding: "14px 10px", cursor: "pointer", transition: "all 0.5s ease",
+                  opacity: idx <= activeStep ? 1 : 0.4,
+                  transform: idx === activeStep ? "scale(1.05)" : "scale(1)",
+                  boxShadow: idx === activeStep ? `0 0 20px ${s.color}40, 0 0 40px ${s.color}15` : "none",
+                  minHeight: 100,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                  <span style={{ fontSize: 9, color: idx === activeStep ? s.color : "var(--text-muted)", fontFamily: "var(--mono)", fontWeight: idx === activeStep ? 700 : 400 }}>STEP {s.num}</span>
+                  <span style={{
+                    width: 18, height: 18, borderRadius: "50%",
+                    background: idx < activeStep ? "var(--teal)" : idx === activeStep ? s.color : "var(--border)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 9, color: "white", fontWeight: 700, transition: "all 0.3s",
+                  }}>
+                    {idx < activeStep ? "✓" : idx === activeStep ? "●" : ""}
+                  </span>
+                </div>
+                <div style={{ fontSize: 24, marginBottom: 6, textAlign: "center" }}>{s.icon}</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: idx === activeStep ? "white" : "var(--text)", textAlign: "center", lineHeight: 1.3 }}>{s.title}</div>
+              </div>
+              {/* Glowing arrow */}
+              {i < 4 && (
+                <div style={{ width: 28, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <span style={{
+                    fontSize: 18, fontWeight: 900, transition: "all 0.5s ease",
+                    color: idx < activeStep ? "var(--teal)" : "var(--border)",
+                    textShadow: idx < activeStep ? "0 0 12px var(--teal), 0 0 24px var(--teal)" : "none",
+                    opacity: idx < activeStep ? 1 : 0.3,
+                    animation: idx === activeStep - 1 ? "arrowGlow 0.8s ease-in-out infinite" : "none",
+                  }}>→</span>
+                </div>
+              )}
+            </React.Fragment>
+          );
+        })}
       </div>
     </div>
   );
 }
-
-/* Pixel Art Doctor — walks directly on workflow cards */
-function PixelDoctor({ walking }: { walking?: boolean }) {
-  return (
-    <svg width="48" height="64" viewBox="0 0 48 64" style={{ imageRendering: "pixelated" as any }}>
-      {/* Head */}
-      <rect x="16" y="2" width="16" height="14" rx="3" fill="#fcd5b8" />
-      {/* Hair */}
-      <rect x="14" y="0" width="20" height="6" rx="2" fill="#2c3e50" />
-      {/* Eyes — happy */}
-      <rect x="20" y="8" width="3" height="3" rx="1" fill="#2c3e50" />
-      <rect x="27" y="8" width="3" height="3" rx="1" fill="#2c3e50" />
-      <rect x="21" y="8" width="1" height="1" fill="white" />
-      <rect x="28" y="8" width="1" height="1" fill="white" />
-      {/* Big smile */}
-      <path d="M20 13 Q24 17 28 13" stroke="#e74c3c" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-      {/* Blush */}
-      <circle cx="18" cy="12" r="2" fill="#ffb3b3" opacity="0.5" />
-      <circle cx="32" cy="12" r="2" fill="#ffb3b3" opacity="0.5" />
-      {/* Glasses */}
-      <rect x="18" y="6" width="6" height="5" rx="1.5" fill="none" stroke="#546e7a" strokeWidth="1" />
-      <rect x="26" y="6" width="6" height="5" rx="1.5" fill="none" stroke="#546e7a" strokeWidth="1" />
-      <line x1="24" y1="8" x2="26" y2="8" stroke="#546e7a" strokeWidth="1" />
-      {/* Head mirror */}
-      <rect x="22" y="0" width="4" height="3" rx="1" fill="#bdc3c7" />
-
-      {/* White coat body */}
-      <rect x="14" y="16" width="20" height="20" rx="3" fill="white" stroke="#ddd" strokeWidth="0.5" />
-      {/* Stethoscope */}
-      <path d="M18 16 Q14 20 15 26" stroke="#3498db" strokeWidth="1.5" fill="none" />
-      <circle cx="15" cy="27" r="2" fill="#3498db" />
-      {/* Clipboard */}
-      <rect x="30" y="22" width="8" height="12" rx="2" fill="#2563eb" />
-      <rect x="31" y="24" width="6" height="1.5" rx="0.5" fill="white" opacity="0.7" />
-      <rect x="31" y="27" width="6" height="1" rx="0.5" fill="white" opacity="0.5" />
-      <rect x="31" y="30" width="4" height="1" rx="0.5" fill="white" opacity="0.4" />
-
-      {/* Arms */}
-      <rect x="8" y="18" width="6" height="14" rx="3" fill="white" stroke="#ddd" strokeWidth="0.5" />
-      <rect x="34" y="18" width="6" height="14" rx="3" fill="white" stroke="#ddd" strokeWidth="0.5" />
-      {/* Hands */}
-      <rect x="9" y="32" width="5" height="4" rx="2" fill="#fcd5b8" />
-      <rect x="34" y="32" width="5" height="4" rx="2" fill="#fcd5b8" />
-
-      {/* Legs — animated walking */}
-      {walking ? (
-        <>
-          <rect x="17" y="36" width="6" height="14" rx="3" fill="#1e3a5f">
-            <animateTransform attributeName="transform" type="rotate" values="-20 20 36;20 20 36;-20 20 36" dur="0.4s" repeatCount="indefinite" />
-          </rect>
-          <rect x="27" y="36" width="6" height="14" rx="3" fill="#1e3a5f">
-            <animateTransform attributeName="transform" type="rotate" values="20 30 36;-20 30 36;20 30 36" dur="0.4s" repeatCount="indefinite" />
-          </rect>
-          {/* Shoes */}
-          <rect x="14" y="48" width="9" height="5" rx="2" fill="#2c3e50">
-            <animateTransform attributeName="transform" type="rotate" values="-20 18 48;20 18 48;-20 18 48" dur="0.4s" repeatCount="indefinite" />
-          </rect>
-          <rect x="27" y="48" width="9" height="5" rx="2" fill="#2c3e50">
-            <animateTransform attributeName="transform" type="rotate" values="20 31 48;-20 31 48;20 31 48" dur="0.4s" repeatCount="indefinite" />
-          </rect>
-          {/* Speed lines */}
-          <line x1="4" y1="38" x2="0" y2="38" stroke="var(--teal)" strokeWidth="1" opacity="0.5">
-            <animate attributeName="opacity" values="0.5;0;0.5" dur="0.25s" repeatCount="indefinite" />
-          </line>
-          <line x1="4" y1="42" x2="0" y2="44" stroke="var(--teal)" strokeWidth="0.8" opacity="0.3">
-            <animate attributeName="opacity" values="0.3;0;0.3" dur="0.35s" repeatCount="indefinite" />
-          </line>
-        </>
-      ) : (
-        <>
-          <rect x="17" y="36" width="6" height="14" rx="3" fill="#1e3a5f" />
-          <rect x="27" y="36" width="6" height="14" rx="3" fill="#1e3a5f" />
-          <rect x="14" y="48" width="9" height="5" rx="2" fill="#2c3e50" />
-          <rect x="27" y="48" width="9" height="5" rx="2" fill="#2c3e50" />
-        </>
-      )}
-    </svg>
-  );
-}
-
 export function App() {
   const wallet = useWallet();
   const ca = getContractAddress();
@@ -2059,6 +2108,7 @@ export function App() {
           {ca && <a href={explorerAddress(ca)} target="_blank" rel="noopener noreferrer">Contract</a>}
         </div>
       </footer>
+      <PixelMCDoc />
     </>
   );
 }
