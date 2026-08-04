@@ -1,6 +1,6 @@
 # MedGuard
 
-Clinical Decision Support Oracle for GenLayer. Full-stack healthcare platform with on-chain drug interaction screening, dosage verification, allergy cross-checks, treatment validation, patient records, prescription verification, drug database, emergency alerts, clinical trial matching, and insurance claim verification.
+**Clinical Decision Support Oracle on GenLayer** — Full-stack healthcare platform with 10 on-chain AI-powered clinical tools, 50-patient registry, 100-drug pharmaceutical database, and animated clinical workflow visualization.
 
 ---
 
@@ -10,7 +10,7 @@ Clinical Decision Support Oracle for GenLayer. Full-stack healthcare platform wi
 |--------|-------|
 | **Contract Address** | [`0x2916Ec2952B83210B6c02f3D00E3CC2452Be4703`](https://explorer-studio.genlayer.com/address/0x2916Ec2952B83210B6c02f3D00E3CC2452Be4703) |
 | **Network** | GenLayer StudioNet |
-| **Chain ID** | 61999 |
+| **Chain ID** | 61999 (0xF22F) |
 | **Explorer** | [explorer-studio.genlayer.com](https://explorer-studio.genlayer.com) |
 | **Frontend** | [genlayer-medguard.vercel.app](https://genlayer-medguard.vercel.app) |
 | **RPC URL** | `https://studio.genlayer.com/api` |
@@ -22,83 +22,99 @@ Clinical Decision Support Oracle for GenLayer. Full-stack healthcare platform wi
 
 MedGuard is an intelligent contract platform for healthcare professionals. It provides **10 core clinical functions**, all executed on-chain with AI consensus:
 
-### 1. Drug Interaction Screening
-Check if two drugs can be safely co-administered. Returns severity level, risk score (0–100), pharmacological mechanism, and clinical recommendation.
+| # | Tool | Description | Type |
+|---|------|-------------|------|
+| 1 | **Drug Interaction** | Check two drugs for harmful interactions with AI-powered analysis | write |
+| 2 | **Dosage Verification** | Verify medication dosages against patient weight and age | write |
+| 3 | **Allergy Risk** | Cross-reference medications with known patient allergies | write |
+| 4 | **Treatment Validation** | Validate proposed treatments against medical conditions | write |
+| 5 | **Patient Registry** | Register and manage patient records on-chain | write |
+| 6 | **Prescription Verify** | Verify prescriptions against patient history and safety | write |
+| 7 | **Drug Database** | Search and manage the on-chain pharmaceutical database | write |
+| 8 | **Medical Alerts** | View critical patient alerts and safety notifications | view |
+| 9 | **Clinical Trials** | Match patients to relevant clinical trial opportunities | write |
+| 10 | **Insurance Claims** | Verify insurance claims against treatment costs | write |
 
-| Severity | Meaning |
-|----------|---------|
+---
+
+## Clinical Workflow
+
+```
+User Query → Contract (write tx) → Web Fetch (trusted sources) → AI Analysis → Consensus (leader + validator) → Result → Auto-Alert (if dangerous)
+```
+
+Each clinical tool follows the same on-chain consensus pattern:
+
+1. **Submit** — Healthcare worker provides clinical query (drug names, dosages, patient info)
+2. **Fetch** — Contract fetches from trusted medical sources via `gl.nondet.web.render()`
+3. **Analyze** — AI evaluates against pharmacological data and clinical guidelines
+4. **Consensus** — Leader and validator must agree on severity/safety levels exactly
+5. **Store** — Clinical assessment stored on-chain with unique record ID
+6. **Alert** — If dangerous result detected, automatic emergency alert created
+
+---
+
+## Severity & Safety Levels
+
+### Drug Interaction Severity
+| Level | Meaning |
+|-------|---------|
 | NONE | No known interaction |
 | MINOR | Minimal significance, monitor patient |
 | MODERATE | May require dose adjustment or monitoring |
 | MAJOR | Avoid combination if possible |
 | CONTRAINDICATED | Do not combine under any circumstances |
 
-### 2. Dosage Verification
-Validate prescribed doses against therapeutic guidelines. Supports patient weight and age for pediatric/geriatric adjustments.
-
-| Safety Level | Meaning |
-|--------------|---------|
+### Dosage Safety
+| Level | Meaning |
+|-------|---------|
 | SAFE | Within therapeutic range |
 | SUBTHERAPEUTIC | Below effective dose |
 | ABOVE_THERAPEUTIC | Exceeds recommended range |
 | DANGEROUS | Potentially toxic dose |
 
-### 3. Allergy Cross-Check
-Screen medication lists against patient allergies. Cross-references cross-reactivity (e.g., penicillin → amoxicillin) and flags high-risk medications.
-
-| Risk Level | Meaning |
-|------------|---------|
+### Allergy Risk
+| Level | Meaning |
+|-------|---------|
 | NO_RISK | No cross-reactivity found |
 | MILD_RISK | Low likelihood, monitor |
 | MODERATE_RISK | Consider alternatives |
 | SEVERE_RISK | Avoid medication |
 | ANAPHYLAXIS_RISK | Life-threatening — do not administer |
 
-### 4. Treatment Protocol Validation
-Verify proposed treatments against clinical guidelines with on-chain source evidence.
-
-### 5. Patient Records Management
-Register and manage patient records on-chain: allergies, conditions, blood type, age, weight. Records persist on-chain and sync across all pages.
-
-### 6. Prescription Verification
-Verify prescriptions against patient records. Automatically cross-references drug-drug interactions, allergy conflicts, and dosage appropriateness.
-
-### 7. Drug Database
-Owner-managed searchable drug catalog with category, dosages, side effects, and contraindications.
-
-### 8. Emergency Alert System
-Automatic alerts triggered when dangerous interactions, dosages, or allergy risks are detected.
-
-### 9. Clinical Trial Matching
-AI-powered matching of patient conditions against clinical trials from authoritative sources.
-
-### 10. Insurance Claim Verification
-Verify medical insurance claims against fair market pricing data.
-
 ---
 
-## How It Works
+## Data
 
-```
-Clinical query + patient context → Fetch on-chain → AI cross-references → Consensus result → Auto-alerts if dangerous
-```
+### Patient Registry (50 patients)
+Pre-loaded with 50 American patients including:
+- Patient IDs (P001–P050), full names, ages (24–82), weights (54–95 kg)
+- Blood types (A+, A-, B+, B-, O+, O-, AB+, AB-)
+- Known allergies (Penicillin, Sulfa, NSAIDs, Codeine, Statins, etc.)
+- Medical conditions (Diabetes, Hypertension, Asthma, Cancer, CKD, etc.)
 
-1. **Submit** — Healthcare worker provides clinical query
-2. **Fetch** — Contract fetches trusted clinical sources on-chain via `gl.nondet.web.render()`
-3. **Analyze** — AI evaluates against pharmacological data and clinical guidelines
-4. **Consensus** — Leader and validator must agree on severity/safety, confidence (±1 rank), scores (±15–20 points)
-5. **Result** — Clinical assessment stored on-chain with quick safety check views
-6. **Alert** — If dangerous result detected, automatic emergency alert created
+### Drug Database (100 drugs)
+Comprehensive pharmaceutical catalog covering:
+- **Categories**: Antibiotics, Antihypertensives, Antidiabetics, Antidepressants, NSAIDs, Statins, Anticoagulants, Corticosteroids, Immunosuppressants, Vitamins/Supplements
+- **Data per drug**: Common dosages, side effects, contraindications
+- **Examples**: Amoxicillin, Lisinopril, Metformin, Atorvastatin, Warfarin, Insulin Glargine, Methotrexate, Epinephrine
 
 ---
 
 ## Frontend Features
 
-### Data Management (Dashboard)
-- **Import/Export** patients and drugs from CSV/JSON files
-- **Sample files** available for download (sample_patients.json/csv, sample_drugs.json/csv)
-- **localStorage persistence** — data survives page refresh
-- **Shared data** — imported data available across all pages via dropdown selectors
+### 3 Main Tabs
+| Tab | Content |
+|-----|---------|
+| **Workflow** | Animated clinical workflow — doctor walks through all 10 steps with chain flow visualization |
+| **Patients (50)** | Searchable patient table with ID, name, age, weight, blood type, allergies, conditions |
+| **Drug Database (100)** | Searchable drug table with name, category, dosages, side effects, contraindications |
+
+### Dashboard (Import/Export)
+- Import patients and drugs from CSV/JSON files
+- Sample files available for download
+- Export data as CSV/JSON
+- localStorage persistence across page refreshes
 
 ### Clinical Pages (12 pages)
 | Page | Features |
@@ -116,10 +132,26 @@ Clinical query + patient context → Fetch on-chain → AI cross-references → 
 | Insurance | Treatment + cost verification |
 | History | Full audit trail with formatted result cards |
 
-### Dropdown Selectors
-- **PatientSelector** — Select from registered patients or enter ID manually
-- **DrugSelector** — Select from drug database or enter name manually
-- **MultiDrugSelector** — Tag-style multi-select with add/remove
+---
+
+## GenLayer Rules Compliance
+
+| Rule | Status |
+|------|--------|
+| bigint u64 storage types (not Python int) | ✅ |
+| UNTRUSTED DATA markers in all prompts | ✅ |
+| gl.vm.run_nondet_unsafe consensus | ✅ |
+| Constructor NO args | ✅ |
+| gl.message.sender_address for caller tracking | ✅ |
+| gl.vm.UserError for error handling | ✅ |
+| TreeMap/DynArray auto-init | ✅ |
+| web.render + exec_prompt inside leader_fn | ✅ |
+| validator re-runs leader_fn for consensus | ✅ |
+| JSON response_format on all exec_prompt | ✅ |
+| Input validation & boundary clamping | ✅ |
+| emit_transfer (not needed — no token transfers) | ✅ |
+
+**Tests: 64/64 PASSED**
 
 ---
 
@@ -162,6 +194,27 @@ Clinical query + patient context → Fetch on-chain → AI cross-references → 
 
 ---
 
+## Consensus Architecture
+
+```python
+def leader_fn() -> dict:
+    fetched = self._fetch_all(urls, trusted)
+    evidence = self._format_evidence(fetched)
+    response = gl.nondet.exec_prompt(prompt, response_format="json")
+    return self._normalize_*(response)
+
+def validator_fn(leader_result) -> bool:
+    my = leader_fn()                    # Re-run independently
+    other = leader_result.calldata
+    return my["severity"] == other["severity"]  # Must agree exactly
+
+result = gl.vm.run_nondet_unsafe(leader_fn, validator_fn)
+```
+
+Key principle: **Clinical severity levels must agree exactly** — patient safety is non-negotiable. Confidence allows ±1 rank, scores allow ±15–20 points.
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -172,7 +225,7 @@ Clinical query + patient context → Fetch on-chain → AI cross-references → 
 | Network | GenLayer StudioNet (Chain ID 61999) |
 | Hosting | Vercel |
 | AI Consensus | GenLayer validators (leader + validator pattern) |
-| Data Persistence | localStorage + on-chain |
+| Data Persistence | localStorage + on-chain (TreeMap) |
 
 ---
 
@@ -186,17 +239,16 @@ medguard/
 │   └── test_medguard.py         # 64 invariant tests
 ├── frontend/
 │   ├── public/
-│   │   ├── favicon.svg          # Blue Y favicon
+│   │   ├── favicon.svg          # MedGuard favicon
 │   │   ├── logo.svg             # MedGuard logo
-│   │   ├── sample_patients.json # Sample patient data (5 records)
+│   │   ├── sample_patients.json # Sample patient data
 │   │   ├── sample_patients.csv  # Sample patient data (CSV)
-│   │   ├── sample_drugs.json    # Sample drug data (8 drugs)
+│   │   ├── sample_drugs.json    # Sample drug data
 │   │   └── sample_drugs.csv     # Sample drug data (CSV)
 │   ├── src/
 │   │   ├── App.tsx              # Main application (12 pages)
 │   │   ├── config.ts            # Network + contract config
 │   │   ├── importExport.ts      # CSV/JSON import/export utilities
-│   │   ├── styles.css           # Medical-themed dark UI
 │   │   ├── main.tsx             # Entry point
 │   │   ├── useGenLayer.ts       # Read/write client hooks
 │   │   ├── useWallet.ts         # Wallet connection hook
@@ -226,43 +278,6 @@ npm run preview      # Preview production build
 | Variable | Description |
 |----------|-------------|
 | `VITE_CONTRACT_ADDRESS` | Override contract address (optional) |
-
----
-
-## Sample Data
-
-### Patients (sample_patients.json)
-```json
-[
-  { "patient_id": "PAT-001", "full_name": "Nguyen Van An", "allergies": "Penicillin, Latex", "conditions": "Diabetes Type 2, Hypertension", "blood_type": "O+", "age_years": 45, "weight_kg": 72 },
-  { "patient_id": "PAT-002", "full_name": "Tran Thi Bich", "allergies": "Sulfa drugs", "conditions": "Asthma", "blood_type": "A+", "age_years": 32, "weight_kg": 58 }
-]
-```
-
-### Drugs (sample_drugs.json)
-```json
-[
-  { "drug_name": "Metformin", "category": "Antidiabetic", "common_dosages": "500mg, 850mg, 1000mg", "side_effects": "Nausea, Diarrhea, Lactic acidosis", "contraindications": "Renal impairment, Hepatic disease" },
-  { "drug_name": "Amoxicillin", "category": "Antibiotic - Penicillin", "common_dosages": "250mg, 500mg, 875mg", "side_effects": "Diarrhea, Rash, Allergic reaction", "contraindications": "Penicillin allergy, Mononucleosis" }
-]
-```
-
----
-
-## Consensus Architecture
-
-```python
-def leader_fn() -> dict:
-    fetched = self._fetch_all(urls, trusted)
-    response = gl.nondet.exec_prompt(prompt, response_format="json")
-    return self._normalize_*(response)
-
-def validator_fn(leader_result) -> bool:
-    my = leader_fn()
-    return my["severity"] == other["severity"]  # Must agree exactly
-```
-
-Key: **Clinical severity levels must agree exactly** — patient safety is non-negotiable.
 
 ---
 
