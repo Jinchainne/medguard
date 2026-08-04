@@ -492,17 +492,13 @@ export function App() {
   const [stats, setStats] = useState<any>(null);
   const [history, setHistory] = useState<CheckRecord[]>([]);
   const [historyDetail, setHistoryDetail] = useState<any>(null);
-  const [sharedPatients, setSharedPatients] = useState<any[]>(() => {
-    try { return JSON.parse(localStorage.getItem("medguard_patients") || "[]"); } catch { return []; }
-  });
-  const [sharedDrugs, setSharedDrugs] = useState<any[]>(() => {
-    try { return JSON.parse(localStorage.getItem("medguard_drugs") || "[]"); } catch { return []; }
-  });
+  const [sharedPatients, setSharedPatients] = useState<any[]>([]);
+  const [sharedDrugs, setSharedDrugs] = useState<any[]>([]);
 
-  // Auto-load sample data on first visit
+  // Always load fresh sample data from server (overwrites stale localStorage)
   useEffect(() => {
-    if (sharedPatients.length === 0) {
-      fetch("/sample_patients.json").then(r => r.json()).then(data => {
+    fetch("/sample_patients.json").then(r => r.json()).then(data => {
+      if (data.length > 0) {
         const mapped = data.map((p: any) => ({
           ...p,
           allergies: typeof p.allergies === "string" ? p.allergies.split(",").map((s: string) => s.trim()).filter(Boolean) : p.allergies || [],
@@ -510,13 +506,16 @@ export function App() {
           prescription_count: 0,
         }));
         setSharedPatients(mapped);
-      }).catch(() => {});
-    }
-    if (sharedDrugs.length === 0) {
-      fetch("/sample_drugs.json").then(r => r.json()).then(data => {
-        setSharedDrugs(data);
-      }).catch(() => {});
-    }
+      }
+    }).catch(() => {
+      // Fallback to localStorage if fetch fails
+      try { setSharedPatients(JSON.parse(localStorage.getItem("medguard_patients") || "[]")); } catch { /* noop */ }
+    });
+    fetch("/sample_drugs.json").then(r => r.json()).then(data => {
+      if (data.length > 0) setSharedDrugs(data);
+    }).catch(() => {
+      try { setSharedDrugs(JSON.parse(localStorage.getItem("medguard_drugs") || "[]")); } catch { /* noop */ }
+    });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Persist to localStorage on change
@@ -1073,7 +1072,12 @@ export function App() {
     );
 
     const lookupPatient = async () => {
-      if (!lookupId || !ca) return;
+      if (!lookupId) return;
+      // First check local data
+      const local = sharedPatients.find((p: any) => p.patient_id === lookupId);
+      if (local) { setPatientData(local); return; }
+      // Then try on-chain
+      if (!ca) return;
       try {
         const d = await read("get_patient", [lookupId]);
         if (d && typeof d === 'object' && d.patient_id) {
@@ -1082,10 +1086,10 @@ export function App() {
             setSharedPatients((prev: any[]) => [...prev, d]);
           }
         } else {
-          setPatientData({ error: "Patient not found or invalid response" });
+          setPatientData({ error: "Patient not found locally or on-chain" });
         }
       } catch (e: any) {
-        setPatientData({ error: `Lookup failed: ${e.message}` });
+        setPatientData({ error: `Patient "${lookupId}" not found. Register on-chain first or import via CSV/JSON.` });
       }
     };
 
