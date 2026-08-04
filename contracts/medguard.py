@@ -175,7 +175,7 @@ class MedGuard(gl.Contract):
         cleaned = []
         for url in urls_csv.split(","):
             url = url.strip()
-            if url and (url.startswith("https://") or url.startswith("http://")):
+            if url and url.startswith("https://"):
                 cleaned.append(url)
                 if len(cleaned) >= MAX_URLS:
                     break
@@ -713,6 +713,11 @@ Return JSON:
         if raw is None:
             raise gl.vm.UserError("PATIENT_NOT_FOUND")
         record = json.loads(str(raw))
+        caller = str(gl.message.sender_address)
+        is_owner = caller == self.owner
+        is_registrant = caller == record.get("registered_by", "")
+        if not is_owner and not is_registrant:
+            raise gl.vm.UserError("ONLY_OWNER_OR_REGISTRANT")
         field_clean = field.strip().lower()
 
         if field_clean == "allergies":
@@ -902,7 +907,7 @@ Return JSON:
         self.drug_database[name.lower()] = json.dumps(record, sort_keys=True)
         return name.lower()
 
-    @gl.public.write
+    @gl.public.view
     def search_drugs(self, query: str) -> list[dict]:
         query_clean = query.strip().lower()
         if not query_clean:
