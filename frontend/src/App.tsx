@@ -591,7 +591,7 @@ function WorkflowDoctor({ setPage }: { setPage: (p: Page) => void }) {
         {workflowSteps.map((s, i) => (
           <div
             key={i}
-            onClick={() => { setActiveStep(i); setPage(s.page); }}
+            onClick={() => { setActiveStep(i); }}
             style={{
               background: i === activeStep ? `${s.color}18` : "var(--surface)",
               border: `2px solid ${i === activeStep ? s.color : i < activeStep ? "var(--teal)" : "var(--border)"}`,
