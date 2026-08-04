@@ -1,58 +1,723 @@
 [
   {
-    "drug_name": "Metformin",
-    "category": "Antidiabetic",
-    "common_dosages": "500mg, 850mg, 1000mg",
-    "side_effects": "Nausea, Diarrhea, Lactic acidosis",
-    "contraindications": "Renal impairment, Hepatic disease, Alcohol abuse"
-  },
-  {
     "drug_name": "Amoxicillin",
-    "category": "Antibiotic - Penicillin",
+    "category": "Antibiotic",
     "common_dosages": "250mg, 500mg, 875mg",
-    "side_effects": "Diarrhea, Rash, Allergic reaction",
-    "contraindications": "Penicillin allergy, Mononucleosis"
+    "side_effects": "Nausea, Rash, Diarrhea",
+    "contraindications": "Penicillin allergy, Mono"
   },
   {
     "drug_name": "Lisinopril",
     "category": "ACE Inhibitor",
-    "common_dosages": "5mg, 10mg, 20mg, 40mg",
+    "common_dosages": "5mg, 10mg, 20mg",
     "side_effects": "Cough, Dizziness, Hyperkalemia",
-    "contraindications": "Pregnancy, Angioedema history, Bilateral renal artery stenosis"
+    "contraindications": "Pregnancy, Angioedema history"
   },
   {
-    "drug_name": "Warfarin",
-    "category": "Anticoagulant",
-    "common_dosages": "1mg, 2mg, 2.5mg, 5mg, 7.5mg, 10mg",
-    "side_effects": "Bleeding, Bruising, Necrosis",
-    "contraindications": "Active bleeding, Pregnancy, Severe liver disease"
-  },
-  {
-    "drug_name": "Omeprazole",
-    "category": "Proton Pump Inhibitor",
-    "common_dosages": "10mg, 20mg, 40mg",
-    "side_effects": "Headache, Nausea, Clostridium difficile infection",
-    "contraindications": "Hypersensitivity to PPIs, Concomitant rilpivirine"
+    "drug_name": "Metformin",
+    "category": "Antidiabetic",
+    "common_dosages": "500mg, 850mg, 1000mg",
+    "side_effects": "GI upset, Lactic acidosis risk",
+    "contraindications": "CKD (eGFR <30), Metabolic acidosis"
   },
   {
     "drug_name": "Atorvastatin",
     "category": "Statin",
     "common_dosages": "10mg, 20mg, 40mg, 80mg",
-    "side_effects": "Muscle pain, Liver enzyme elevation, Headache",
-    "contraindications": "Active liver disease, Pregnancy, Breastfeeding"
+    "side_effects": "Myalgia, Liver enzyme elevation",
+    "contraindications": "Active liver disease, Pregnancy"
   },
   {
-    "drug_name": "Aspirin",
-    "category": "NSAID / Antiplatelet",
-    "common_dosages": "81mg, 325mg, 500mg",
-    "side_effects": "GI bleeding, Tinnitus, Reye syndrome (children)",
-    "contraindications": "Bleeding disorders, Children with viral illness, Severe renal impairment"
+    "drug_name": "Omeprazole",
+    "category": "Proton Pump Inhibitor",
+    "common_dosages": "10mg, 20mg, 40mg",
+    "side_effects": "Headache, GI upset, B12 deficiency",
+    "contraindications": "Clopidogrel use, Mg deficiency"
+  },
+  {
+    "drug_name": "Amlodipine",
+    "category": "Calcium Channel Blocker",
+    "common_dosages": "2.5mg, 5mg, 10mg",
+    "side_effects": "Edema, Flushing, Dizziness",
+    "contraindications": "Severe hypotension, Cardiogenic shock"
+  },
+  {
+    "drug_name": "Sertraline",
+    "category": "SSRI Antidepressant",
+    "common_dosages": "25mg, 50mg, 100mg",
+    "side_effects": "Nausea, Insomnia, Sexual dysfunction",
+    "contraindications": "MAOIs, Pimozide use"
+  },
+  {
+    "drug_name": "Warfarin",
+    "category": "Anticoagulant",
+    "common_dosages": "1mg, 2mg, 5mg, 7.5mg, 10mg",
+    "side_effects": "Bleeding, Bruising",
+    "contraindications": "Active bleeding, Pregnancy"
+  },
+  {
+    "drug_name": "Ibuprofen",
+    "category": "NSAID",
+    "common_dosages": "200mg, 400mg, 600mg, 800mg",
+    "side_effects": "GI bleeding, Renal impairment",
+    "contraindications": "NSAID allergy, 3rd trimester pregnancy"
+  },
+  {
+    "drug_name": "Acetaminophen",
+    "category": "Analgesic",
+    "common_dosages": "325mg, 500mg, 650mg, 1000mg",
+    "side_effects": "Hepatotoxicity (overdose)",
+    "contraindications": "Severe liver disease"
+  },
+  {
+    "drug_name": "Levothyroxine",
+    "category": "Thyroid Hormone",
+    "common_dosages": "25mcg, 50mcg, 75mcg, 100mcg, 150mcg",
+    "side_effects": "Tachycardia, Tremor, Insomnia",
+    "contraindications": "Untreated adrenal insufficiency"
+  },
+  {
+    "drug_name": "Albuterol",
+    "category": "Beta-2 Agonist",
+    "common_dosages": "2mg, 4mg, 90mcg inhaler",
+    "side_effects": "Tremor, Tachycardia, Hypokalemia",
+    "contraindications": "Hypersensitivity to albuterol"
+  },
+  {
+    "drug_name": "Prednisone",
+    "category": "Corticosteroid",
+    "common_dosages": "5mg, 10mg, 20mg, 50mg",
+    "side_effects": "Weight gain, Hyperglycemia, Osteoporosis",
+    "contraindications": "Systemic fungal infections"
+  },
+  {
+    "drug_name": "Gabapentin",
+    "category": "Anticonvulsant",
+    "common_dosages": "100mg, 300mg, 600mg, 800mg",
+    "side_effects": "Somnolence, Dizziness, Edema",
+    "contraindications": "Hypersensitivity"
+  },
+  {
+    "drug_name": "Hydrochlorothiazide",
+    "category": "Thiazide Diuretic",
+    "common_dosages": "12.5mg, 25mg, 50mg",
+    "side_effects": "Hypokalemia, Hyperuricemia",
+    "contraindications": "Anuria, Sulfa allergy"
+  },
+  {
+    "drug_name": "Losartan",
+    "category": "ARB",
+    "common_dosages": "25mg, 50mg, 100mg",
+    "side_effects": "Dizziness, Hyperkalemia",
+    "contraindications": "Pregnancy, Bilateral renal artery stenosis"
+  },
+  {
+    "drug_name": "Metoprolol",
+    "category": "Beta Blocker",
+    "common_dosages": "25mg, 50mg, 100mg",
+    "side_effects": "Fatigue, Bradycardia, Hypotension",
+    "contraindications": "Heart block, Cardiogenic shock"
+  },
+  {
+    "drug_name": "Fluoxetine",
+    "category": "SSRI Antidepressant",
+    "common_dosages": "10mg, 20mg, 40mg",
+    "side_effects": "Nausea, Insomnia, Anxiety",
+    "contraindications": "MAOIs, Pimozide, Thioridazine"
+  },
+  {
+    "drug_name": "Clopidogrel",
+    "category": "Antiplatelet",
+    "common_dosages": "75mg, 300mg",
+    "side_effects": "Bleeding, TTP (rare)",
+    "contraindications": "Active bleeding, CYP2C19 poor metabolizer"
+  },
+  {
+    "drug_name": "Furosemide",
+    "category": "Loop Diuretic",
+    "common_dosages": "20mg, 40mg, 80mg",
+    "side_effects": "Dehydration, Hypokalemia, Ototoxicity",
+    "contraindications": "Anuria, Hepatic coma"
+  },
+  {
+    "drug_name": "Pantoprazole",
+    "category": "Proton Pump Inhibitor",
+    "common_dosages": "20mg, 40mg",
+    "side_effects": "Headache, Diarrhea",
+    "contraindications": "Hypersensitivity to PPIs"
+  },
+  {
+    "drug_name": "Montelukast",
+    "category": "Leukotriene Modifier",
+    "common_dosages": "4mg, 5mg, 10mg",
+    "side_effects": "Headache, Behavioral changes",
+    "contraindications": "Acute asthma attacks"
   },
   {
     "drug_name": "Ciprofloxacin",
-    "category": "Fluoroquinolone Antibiotic",
+    "category": "Fluoroquinolone",
     "common_dosages": "250mg, 500mg, 750mg",
-    "side_effects": "Tendon rupture, QT prolongation, CNS effects",
-    "contraindications": "Myasthenia gravis, Tendon disorders, Children < 18"
+    "side_effects": "Tendon rupture, QT prolongation",
+    "contraindications": "Myasthenia gravis, Tizanidine use"
+  },
+  {
+    "drug_name": "Azithromycin",
+    "category": "Macrolide Antibiotic",
+    "common_dosages": "250mg, 500mg, 1000mg",
+    "side_effects": "GI upset, QT prolongation",
+    "contraindications": "Hepatic disease, QT prolongation"
+  },
+  {
+    "drug_name": "Tramadol",
+    "category": "Opioid Analgesic",
+    "common_dosages": "50mg, 100mg, 200mg ER",
+    "side_effects": "Nausea, Dizziness, Seizure risk",
+    "contraindications": "MAOIs, Seizure disorder"
+  },
+  {
+    "drug_name": "Trazodone",
+    "category": "SARI Antidepressant",
+    "common_dosages": "50mg, 100mg, 150mg, 300mg",
+    "side_effects": "Sedation, Orthostatic hypotension",
+    "contraindications": "MAOIs, Recovery phase MI"
+  },
+  {
+    "drug_name": "Duloxetine",
+    "category": "SNRI Antidepressant",
+    "common_dosages": "20mg, 30mg, 60mg",
+    "side_effects": "Nausea, Dry mouth, Fatigue",
+    "contraindications": "MAOIs, Hepatic impairment"
+  },
+  {
+    "drug_name": "Cephalexin",
+    "category": "Cephalosporin",
+    "common_dosages": "250mg, 500mg, 750mg",
+    "side_effects": "GI upset, Rash, C. diff risk",
+    "contraindications": "Cephalosporin allergy"
+  },
+  {
+    "drug_name": "Insulin Glargine",
+    "category": "Long-acting Insulin",
+    "common_dosages": "100 units/mL",
+    "side_effects": "Hypoglycemia, Lipodystrophy",
+    "contraindications": "Hypoglycemia"
+  },
+  {
+    "drug_name": "Escitalopram",
+    "category": "SSRI Antidepressant",
+    "common_dosages": "5mg, 10mg, 20mg",
+    "side_effects": "Nausea, Headache, Insomnia",
+    "contraindications": "MAOIs, QT prolongation"
+  },
+  {
+    "drug_name": "Rosuvastatin",
+    "category": "Statin",
+    "common_dosages": "5mg, 10mg, 20mg, 40mg",
+    "side_effects": "Myalgia, Headache",
+    "contraindications": "Active liver disease, Pregnancy"
+  },
+  {
+    "drug_name": "Doxycycline",
+    "category": "Tetracycline Antibiotic",
+    "common_dosages": "50mg, 100mg",
+    "side_effects": "Photosensitivity, GI upset",
+    "contraindications": "Pregnancy, Children <8 years"
+  },
+  {
+    "drug_name": "Clonazepam",
+    "category": "Benzodiazepine",
+    "common_dosages": "0.5mg, 1mg, 2mg",
+    "side_effects": "Sedation, Dependence, Ataxia",
+    "contraindications": "Narrow-angle glaucoma, Severe liver disease"
+  },
+  {
+    "drug_name": "Meloxicam",
+    "category": "NSAID",
+    "common_dosages": "7.5mg, 15mg",
+    "side_effects": "GI bleeding, Edema",
+    "contraindications": "NSAID allergy, Post-CABG surgery"
+  },
+  {
+    "drug_name": "Cetirizine",
+    "category": "Antihistamine",
+    "common_dosages": "5mg, 10mg",
+    "side_effects": "Drowsiness, Dry mouth",
+    "contraindications": "Severe renal impairment"
+  },
+  {
+    "drug_name": "Spironolactone",
+    "category": "Potassium-sparing Diuretic",
+    "common_dosages": "25mg, 50mg, 100mg",
+    "side_effects": "Hyperkalemia, Gynecomastia",
+    "contraindications": "Hyperkalemia, Renal failure"
+  },
+  {
+    "drug_name": "Diazepam",
+    "category": "Benzodiazepine",
+    "common_dosages": "2mg, 5mg, 10mg",
+    "side_effects": "Sedation, Dependence",
+    "contraindications": "Sleep apnea, Severe liver disease"
+  },
+  {
+    "drug_name": "Carvedilol",
+    "category": "Alpha/Beta Blocker",
+    "common_dosages": "3.125mg, 6.25mg, 12.5mg, 25mg",
+    "side_effects": "Dizziness, Bradycardia, Fatigue",
+    "contraindications": "Heart block, Decompensated HF"
+  },
+  {
+    "drug_name": "Venlafaxine",
+    "category": "SNRI Antidepressant",
+    "common_dosages": "37.5mg, 75mg, 150mg, 225mg",
+    "side_effects": "Nausea, HTN, Insomnia",
+    "contraindications": "MAOIs, Uncontrolled HTN"
+  },
+  {
+    "drug_name": "Allopurinol",
+    "category": "Xanthine Oxidase Inhibitor",
+    "common_dosages": "100mg, 200mg, 300mg",
+    "side_effects": "Rash, GI upset, Hepatotoxicity",
+    "contraindications": "Hypersensitivity, Azathioprine use"
+  },
+  {
+    "drug_name": "Digoxin",
+    "category": "Cardiac Glycoside",
+    "common_dosages": "0.125mg, 0.25mg",
+    "side_effects": "Nausea, Visual changes, Arrhythmia",
+    "contraindications": "Ventricular fibrillation, Heart block"
+  },
+  {
+    "drug_name": "Nitroglycerin",
+    "category": "Anti-anginal",
+    "common_dosages": "0.4mg SL, patches, ointment",
+    "side_effects": "Headache, Hypotension",
+    "contraindications": "PDE5 inhibitor use, Severe anemia"
+  },
+  {
+    "drug_name": "Morphine",
+    "category": "Opioid Analgesic",
+    "common_dosages": "5mg, 10mg, 15mg, 30mg",
+    "side_effects": "Respiratory depression, Constipation",
+    "contraindications": "Paralytic ileus, Severe asthma"
+  },
+  {
+    "drug_name": "Vancomycin",
+    "category": "Glycopeptide Antibiotic",
+    "common_dosages": "500mg, 750mg, 1000mg IV",
+    "side_effects": "Red man syndrome, Nephrotoxicity",
+    "contraindications": "Hypersensitivity"
+  },
+  {
+    "drug_name": "Heparin",
+    "category": "Anticoagulant",
+    "common_dosages": "5000u, 10000u SC; IV drip",
+    "side_effects": "Bleeding, HIT",
+    "contraindications": "Active bleeding, HIT history"
+  },
+  {
+    "drug_name": "Epinephrine",
+    "category": "Sympathomimetic",
+    "common_dosages": "0.3mg, 0.5mg EpiPen; 1mg/mL IV",
+    "side_effects": "Tachycardia, Anxiety, Tremor",
+    "contraindications": "None (life-saving)"
+  },
+  {
+    "drug_name": "Phenytoin",
+    "category": "Anticonvulsant",
+    "common_dosages": "50mg, 100mg, 200mg",
+    "side_effects": "Gingival hyperplasia, Ataxia",
+    "contraindications": "Sinus bradycardia, Heart block"
+  },
+  {
+    "drug_name": "Naproxen",
+    "category": "NSAID",
+    "common_dosages": "220mg, 250mg, 375mg, 500mg",
+    "side_effects": "GI bleeding, Edema, Headache",
+    "contraindications": "NSAID allergy, Post-CABG"
+  },
+  {
+    "drug_name": "Levofloxacin",
+    "category": "Fluoroquinolone",
+    "common_dosages": "250mg, 500mg, 750mg",
+    "side_effects": "Tendon rupture, QT prolongation",
+    "contraindications": "Myasthenia gravis"
+  },
+  {
+    "drug_name": "Bupropion",
+    "category": "NDRI Antidepressant",
+    "common_dosages": "75mg, 100mg, 150mg SR, 300mg XL",
+    "side_effects": "Insomnia, Dry mouth, Seizure risk",
+    "contraindications": "Seizure disorder, Eating disorders"
+  },
+  {
+    "drug_name": "Metronidazole",
+    "category": "Nitroimidazole Antibiotic",
+    "common_dosages": "250mg, 500mg",
+    "side_effects": "Metallic taste, GI upset, Neuropathy",
+    "contraindications": "1st trimester pregnancy, Alcohol use"
+  },
+  {
+    "drug_name": "Cyclobenzaprine",
+    "category": "Muscle Relaxant",
+    "common_dosages": "5mg, 7.5mg, 10mg",
+    "side_effects": "Drowsiness, Dry mouth",
+    "contraindications": "MAOIs, Hyperthyroidism"
+  },
+  {
+    "drug_name": "Glipizide",
+    "category": "Sulfonylurea",
+    "common_dosages": "5mg, 10mg",
+    "side_effects": "Hypoglycemia, Weight gain",
+    "contraindications": "Type 1 DKA"
+  },
+  {
+    "drug_name": "Quetiapine",
+    "category": "Atypical Antipsychotic",
+    "common_dosages": "25mg, 50mg, 100mg, 200mg, 300mg",
+    "side_effects": "Sedation, Weight gain, Metabolic syndrome",
+    "contraindications": "Dementia-related psychosis"
+  },
+  {
+    "drug_name": "Amitriptyline",
+    "category": "TCA Antidepressant",
+    "common_dosages": "10mg, 25mg, 50mg, 75mg, 100mg",
+    "side_effects": "Sedation, Dry mouth, Weight gain",
+    "contraindications": "MI recovery, MAOIs"
+  },
+  {
+    "drug_name": "Pregabalin",
+    "category": "Anticonvulsant",
+    "common_dosages": "25mg, 50mg, 75mg, 100mg, 150mg, 200mg, 300mg",
+    "side_effects": "Dizziness, Somnolence, Edema",
+    "contraindications": "Hypersensitivity"
+  },
+  {
+    "drug_name": "Valsartan",
+    "category": "ARB",
+    "common_dosages": "40mg, 80mg, 160mg, 320mg",
+    "side_effects": "Dizziness, Hyperkalemia",
+    "contraindications": "Pregnancy, Aliskiren use in diabetics"
+  },
+  {
+    "drug_name": "Lamotrigine",
+    "category": "Anticonvulsant",
+    "common_dosages": "25mg, 50mg, 100mg, 150mg, 200mg",
+    "side_effects": "Rash (SJS risk), Headache",
+    "contraindications": "Hypersensitivity"
+  },
+  {
+    "drug_name": "Topiramate",
+    "category": "Anticonvulsant",
+    "common_dosages": "25mg, 50mg, 100mg, 200mg",
+    "side_effects": "Cognitive dulling, Kidney stones, Weight loss",
+    "contraindications": "Metabolic acidosis, Pregnancy"
+  },
+  {
+    "drug_name": "Pioglitazone",
+    "category": "Thiazolidinedione",
+    "common_dosages": "15mg, 30mg, 45mg",
+    "side_effects": "Edema, Weight gain, Fractures",
+    "contraindications": "Heart failure (NYHA III/IV), Bladder cancer"
+  },
+  {
+    "drug_name": "Ezetimibe",
+    "category": "Cholesterol Absorption Inhibitor",
+    "common_dosages": "10mg",
+    "side_effects": "Diarrhea, Fatigue",
+    "contraindications": "Hypersensitivity, Statin combo caution"
+  },
+  {
+    "drug_name": "Diltiazem",
+    "category": "Calcium Channel Blocker",
+    "common_dosages": "30mg, 60mg, 90mg, 120mg, 180mg ER, 240mg ER",
+    "side_effects": "Edema, Bradycardia, Constipation",
+    "contraindications": "Sick sinus syndrome, Heart block"
+  },
+  {
+    "drug_name": "Verapamil",
+    "category": "Calcium Channel Blocker",
+    "common_dosages": "40mg, 80mg, 120mg, 240mg ER",
+    "side_effects": "Constipation, Bradycardia",
+    "contraindications": "Heart block, Severe LV dysfunction"
+  },
+  {
+    "drug_name": "Tamoxifen",
+    "category": "SERM",
+    "common_dosages": "10mg, 20mg",
+    "side_effects": "Hot flashes, DVT risk, Endometrial cancer",
+    "contraindications": "Pregnancy, DVT history"
+  },
+  {
+    "drug_name": "Ondansetron",
+    "category": "5-HT3 Antagonist",
+    "common_dosages": "4mg, 8mg, 24mg",
+    "side_effects": "Headache, Constipation, QT prolongation",
+    "contraindications": "QT prolongation, Apomorphine use"
+  },
+  {
+    "drug_name": "Dexamethasone",
+    "category": "Corticosteroid",
+    "common_dosages": "0.5mg, 0.75mg, 1mg, 4mg, 6mg, 10mg, 20mg",
+    "side_effects": "Hyperglycemia, Insomnia, Immunosuppression",
+    "contraindications": "Systemic fungal infections"
+  },
+  {
+    "drug_name": "Loratadine",
+    "category": "Antihistamine",
+    "common_dosages": "10mg",
+    "side_effects": "Headache, Drowsiness (rare)",
+    "contraindications": "Severe liver disease"
+  },
+  {
+    "drug_name": "Citalopram",
+    "category": "SSRI Antidepressant",
+    "common_dosages": "10mg, 20mg, 40mg",
+    "side_effects": "Nausea, QT prolongation",
+    "contraindications": "MAOIs, QT prolongation"
+  },
+  {
+    "drug_name": "Risperidone",
+    "category": "Atypical Antipsychotic",
+    "common_dosages": "0.25mg, 0.5mg, 1mg, 2mg, 3mg, 4mg",
+    "side_effects": "Weight gain, Sedation, EPS",
+    "contraindications": "Dementia-related psychosis"
+  },
+  {
+    "drug_name": "Finasteride",
+    "category": "5-Alpha Reductase Inhibitor",
+    "common_dosages": "1mg, 5mg",
+    "side_effects": "Sexual dysfunction, Gynecomastia",
+    "contraindications": "Pregnancy (women), Liver disease"
+  },
+  {
+    "drug_name": "Tamsulosin",
+    "category": "Alpha-1 Blocker",
+    "common_dosages": "0.4mg",
+    "side_effects": "Orthostatic hypotension, Retrograde ejaculation",
+    "contraindications": "Cataract surgery (floppy iris)"
+  },
+  {
+    "drug_name": "Colchicine",
+    "category": "Anti-gout",
+    "common_dosages": "0.6mg",
+    "side_effects": "Diarrhea, Nausea, Myelosuppression",
+    "contraindications": "Severe renal/hepatic, CYP3A4 inhibitors"
+  },
+  {
+    "drug_name": "Methotrexate",
+    "category": "Antifolate / DMARD",
+    "common_dosages": "2.5mg, 5mg, 7.5mg, 10mg, 15mg, 25mg",
+    "side_effects": "Hepatotoxicity, Myelosuppression, Stomatitis",
+    "contraindications": "Pregnancy, Liver disease, Immunodeficiency"
+  },
+  {
+    "drug_name": "Hydroxychloroquine",
+    "category": "Antimalarial / DMARD",
+    "common_dosages": "200mg, 400mg",
+    "side_effects": "Retinopathy, GI upset, Cardiomyopathy",
+    "contraindications": "Pre-existing retinopathy"
+  },
+  {
+    "drug_name": "Sulfasalazine",
+    "category": "DMARD",
+    "common_dosages": "500mg, 1000mg",
+    "side_effects": "GI upset, Headache, Rash",
+    "contraindications": "Sulfa allergy, Intestinal obstruction"
+  },
+  {
+    "drug_name": "Tacrolimus",
+    "category": "Immunosuppressant",
+    "common_dosages": "0.5mg, 1mg, 5mg; IV",
+    "side_effects": "Nephrotoxicity, Neurotoxicity, DM",
+    "contraindications": "Hypersensitivity"
+  },
+  {
+    "drug_name": "Mycophenolate",
+    "category": "Immunosuppressant",
+    "common_dosages": "250mg, 500mg, 750mg",
+    "side_effects": "GI upset, Leukopenia, Infections",
+    "contraindications": "Pregnancy, Hypersensitivity"
+  },
+  {
+    "drug_name": "Cyclosporine",
+    "category": "Immunosuppressant",
+    "common_dosages": "25mg, 50mg, 100mg",
+    "side_effects": "Nephrotoxicity, HTN, Gingival hyperplasia",
+    "contraindications": "Uncontrolled HTN, Malignancy"
+  },
+  {
+    "drug_name": "Potassium Chloride",
+    "category": "Electrolyte Supplement",
+    "common_dosages": "8mEq, 10mEq, 20mEq ER",
+    "side_effects": "GI upset, Hyperkalemia",
+    "contraindications": "Hyperkalemia, Renal failure"
+  },
+  {
+    "drug_name": "Iron Sulfate",
+    "category": "Iron Supplement",
+    "common_dosages": "325mg (65mg elemental)",
+    "side_effects": "Constipation, GI upset, Dark stools",
+    "contraindications": "Hemochromatosis, Hemosiderosis"
+  },
+  {
+    "drug_name": "Folic Acid",
+    "category": "Vitamin Supplement",
+    "common_dosages": "0.4mg, 0.8mg, 1mg",
+    "side_effects": "Generally well tolerated",
+    "contraindications": "Pernicious anemia (masks B12 deficiency)"
+  },
+  {
+    "drug_name": "Vitamin D3",
+    "category": "Vitamin Supplement",
+    "common_dosages": "400IU, 1000IU, 2000IU, 5000IU",
+    "side_effects": "Hypercalcemia (excess)",
+    "contraindications": "Hypercalcemia, Granulomatous disease"
+  },
+  {
+    "drug_name": "Calcium Carbonate",
+    "category": "Calcium Supplement",
+    "common_dosages": "500mg, 600mg, 750mg",
+    "side_effects": "Constipation, Hypercalcemia",
+    "contraindications": "Hypercalcemia, Kidney stones"
+  },
+  {
+    "drug_name": "Aspirin",
+    "category": "Antiplatelet / NSAID",
+    "common_dosages": "81mg, 325mg, 500mg",
+    "side_effects": "GI bleeding, Reye syndrome (children)",
+    "contraindications": "Bleeding disorders, Children with viral illness"
+  },
+  {
+    "drug_name": "Propranolol",
+    "category": "Non-selective Beta Blocker",
+    "common_dosages": "10mg, 20mg, 40mg, 60mg, 80mg",
+    "side_effects": "Fatigue, Bradycardia, Bronchospasm",
+    "contraindications": "Asthma, Heart block, Cardiogenic shock"
+  },
+  {
+    "drug_name": "Methylphenidate",
+    "category": "CNS Stimulant",
+    "common_dosages": "5mg, 10mg, 18mg, 20mg, 27mg, 36mg, 54mg",
+    "side_effects": "Insomnia, Appetite loss, HTN",
+    "contraindications": "Glaucoma, MAOIs, Motor tics"
+  },
+  {
+    "drug_name": "Atomoxetine",
+    "category": "NRI (ADHD)",
+    "common_dosages": "10mg, 18mg, 25mg, 40mg, 60mg, 80mg, 100mg",
+    "side_effects": "Nausea, Decreased appetite, Suicidality risk",
+    "contraindications": "MAOIs, Pheochromocytoma"
+  },
+  {
+    "drug_name": "Diphenhydramine",
+    "category": "Antihistamine",
+    "common_dosages": "25mg, 50mg",
+    "side_effects": "Sedation, Dry mouth, Urinary retention",
+    "contraindications": "Narrow-angle glaucoma, Newborns"
+  },
+  {
+    "drug_name": "Loperamide",
+    "category": "Anti-diarrheal",
+    "common_dosages": "2mg",
+    "side_effects": "Constipation, Abdominal pain",
+    "contraindications": "C. diff, Dysentery, Children <2"
+  },
+  {
+    "drug_name": "Bisacodyl",
+    "category": "Stimulant Laxative",
+    "common_dosages": "5mg, 10mg",
+    "side_effects": "Cramping, Diarrhea",
+    "contraindications": "Appendicitis, Bowel obstruction"
+  },
+  {
+    "drug_name": "Docusate",
+    "category": "Stool Softener",
+    "common_dosages": "50mg, 100mg",
+    "side_effects": "Throat irritation (liquid)",
+    "contraindications": "Mineral oil concurrent use"
+  },
+  {
+    "drug_name": "Polyethylene Glycol 3350",
+    "category": "Osmotic Laxative",
+    "common_dosages": "17g powder",
+    "side_effects": "Bloating, Cramping",
+    "contraindications": "Bowel obstruction"
+  },
+  {
+    "drug_name": "Lidocaine",
+    "category": "Local Anesthetic",
+    "common_dosages": "1%, 2% injection; 4% topical",
+    "side_effects": "Dizziness, Arrhythmia (IV)",
+    "contraindications": "Heart block, Amide anesthetic allergy"
+  },
+  {
+    "drug_name": "Baclofen",
+    "category": "Muscle Relaxant",
+    "common_dosages": "5mg, 10mg, 20mg",
+    "side_effects": "Drowsiness, Weakness, Nausea",
+    "contraindications": "Hypersensitivity"
+  },
+  {
+    "drug_name": "Fluconazole",
+    "category": "Antifungal",
+    "common_dosages": "50mg, 100mg, 150mg, 200mg",
+    "side_effects": "Headache, GI upset, Hepatotoxicity",
+    "contraindications": "QT prolongation, CYP interactions"
+  },
+  {
+    "drug_name": "Acyclovir",
+    "category": "Antiviral",
+    "common_dosages": "200mg, 400mg, 800mg",
+    "side_effects": "Nausea, Headache, Nephrotoxicity (IV)",
+    "contraindications": "Hypersensitivity"
+  },
+  {
+    "drug_name": "Oseltamivir",
+    "category": "Antiviral (Influenza)",
+    "common_dosages": "30mg, 45mg, 75mg",
+    "side_effects": "Nausea, Vomiting, Headache",
+    "contraindications": "Hypersensitivity"
+  },
+  {
+    "drug_name": "Nitrofurantoin",
+    "category": "Urinary Antibiotic",
+    "common_dosages": "50mg, 100mg",
+    "side_effects": "GI upset, Pulmonary toxicity, Neuropathy",
+    "contraindications": "eGFR <30, Pregnancy (term)"
+  },
+  {
+    "drug_name": "Fosfomycin",
+    "category": "Urinary Antibiotic",
+    "common_dosages": "3g single dose",
+    "side_effects": "Diarrhea, Headache",
+    "contraindications": "Severe renal impairment"
+  },
+  {
+    "drug_name": "Isosorbide Mononitrate",
+    "category": "Nitrate",
+    "common_dosages": "30mg, 60mg, 120mg ER",
+    "side_effects": "Headache, Hypotension",
+    "contraindications": "PDE5 inhibitor use, Cardiogenic shock"
+  },
+  {
+    "drug_name": "Fenofibrate",
+    "category": "Fibrate",
+    "common_dosages": "48mg, 54mg, 145mg, 160mg",
+    "side_effects": "Myalgia, GI upset, Liver enzymes",
+    "contraindications": "Severe renal/hepatic disease, Gallbladder"
+  },
+  {
+    "drug_name": "Triamcinolone",
+    "category": "Corticosteroid",
+    "common_dosages": "4mg; injectable; topical",
+    "side_effects": "Immunosuppression, Hyperglycemia",
+    "contraindications": "Systemic fungal infections"
+  },
+  {
+    "drug_name": "Meclizine",
+    "category": "Antihistamine (Anti-vertigo)",
+    "common_dosages": "12.5mg, 25mg",
+    "side_effects": "Drowsiness, Dry mouth",
+    "contraindications": "Hypersensitivity"
   }
 ]

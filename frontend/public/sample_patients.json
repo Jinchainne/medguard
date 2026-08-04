@@ -1,47 +1,452 @@
 [
   {
-    "patient_id": "PAT-001",
-    "full_name": "Nguyen Van An",
-    "allergies": "Penicillin, Latex",
-    "conditions": "Diabetes Type 2, Hypertension",
-    "blood_type": "O+",
+    "patient_id": "P001",
+    "full_name": "James Robert Smith",
     "age_years": 45,
-    "weight_kg": 72
-  },
-  {
-    "patient_id": "PAT-002",
-    "full_name": "Tran Thi Bich",
-    "allergies": "Sulfa drugs",
-    "conditions": "Asthma",
+    "weight_kg": 82,
     "blood_type": "A+",
-    "age_years": 32,
-    "weight_kg": 58
+    "allergies": "Penicillin",
+    "conditions": "Hypertension"
   },
   {
-    "patient_id": "PAT-003",
-    "full_name": "Le Minh Cuong",
-    "allergies": "NSAIDs, Aspirin",
-    "conditions": "Heart disease, High cholesterol",
-    "blood_type": "B+",
+    "patient_id": "P002",
+    "full_name": "Mary Elizabeth Johnson",
     "age_years": 67,
-    "weight_kg": 85
-  },
-  {
-    "patient_id": "PAT-004",
-    "full_name": "Pham Thi Dao",
-    "allergies": "Iodine",
-    "conditions": "Thyroid disorder",
-    "blood_type": "AB+",
-    "age_years": 28,
-    "weight_kg": 52
-  },
-  {
-    "patient_id": "PAT-005",
-    "full_name": "Hoang Van Em",
-    "allergies": "Codeine, Morphine",
-    "conditions": "Chronic kidney disease, Anemia",
+    "weight_kg": 65,
     "blood_type": "O-",
+    "allergies": "Sulfa drugs",
+    "conditions": "Type 2 Diabetes, Arthritis"
+  },
+  {
+    "patient_id": "P003",
+    "full_name": "John William Davis",
+    "age_years": 34,
+    "weight_kg": 91,
+    "blood_type": "B+",
+    "allergies": "",
+    "conditions": "Asthma"
+  },
+  {
+    "patient_id": "P004",
+    "full_name": "Patricia Ann Wilson",
+    "age_years": 52,
+    "weight_kg": 70,
+    "blood_type": "AB+",
+    "allergies": "Aspirin, Ibuprofen",
+    "conditions": "Migraine, GERD"
+  },
+  {
+    "patient_id": "P005",
+    "full_name": "Michael James Brown",
+    "age_years": 78,
+    "weight_kg": 75,
+    "blood_type": "A-",
+    "allergies": "Codeine",
+    "conditions": "COPD, Heart Failure"
+  },
+  {
+    "patient_id": "P006",
+    "full_name": "Jennifer Lynn Taylor",
+    "age_years": 29,
+    "weight_kg": 58,
+    "blood_type": "O+",
+    "allergies": "Latex",
+    "conditions": "Pregnancy (32 weeks)"
+  },
+  {
+    "patient_id": "P007",
+    "full_name": "Robert Lee Anderson",
+    "age_years": 61,
+    "weight_kg": 95,
+    "blood_type": "B-",
+    "allergies": "Morphine",
+    "conditions": "Chronic Pain, Obesity"
+  },
+  {
+    "patient_id": "P008",
+    "full_name": "Linda Marie Thomas",
+    "age_years": 43,
+    "weight_kg": 62,
+    "blood_type": "A+",
+    "allergies": "Cephalosporins",
+    "conditions": "Depression, Anxiety"
+  },
+  {
+    "patient_id": "P009",
+    "full_name": "William Charles Jackson",
     "age_years": 55,
-    "weight_kg": 68
+    "weight_kg": 88,
+    "blood_type": "AB-",
+    "allergies": "NSAIDs",
+    "conditions": "Gout, Hypertension"
+  },
+  {
+    "patient_id": "P010",
+    "full_name": "Barbara Jean White",
+    "age_years": 71,
+    "weight_kg": 59,
+    "blood_type": "O+",
+    "allergies": "Sulfonamides",
+    "conditions": "Osteoporosis, Hypothyroid"
+  },
+  {
+    "patient_id": "P011",
+    "full_name": "David Michael Harris",
+    "age_years": 38,
+    "weight_kg": 77,
+    "blood_type": "B+",
+    "allergies": "",
+    "conditions": "Epilepsy"
+  },
+  {
+    "patient_id": "P012",
+    "full_name": "Susan Carol Martin",
+    "age_years": 49,
+    "weight_kg": 68,
+    "blood_type": "A-",
+    "allergies": "Tetracycline",
+    "conditions": "Fibromyalgia"
+  },
+  {
+    "patient_id": "P013",
+    "full_name": "Richard Paul Garcia",
+    "age_years": 63,
+    "weight_kg": 92,
+    "blood_type": "O-",
+    "allergies": "ACE Inhibitors",
+    "conditions": "CHF, Diabetes"
+  },
+  {
+    "patient_id": "P014",
+    "full_name": "Karen Diane Martinez",
+    "age_years": 36,
+    "weight_kg": 55,
+    "blood_type": "AB+",
+    "allergies": "Penicillin",
+    "conditions": "Lupus"
+  },
+  {
+    "patient_id": "P015",
+    "full_name": "Joseph Edward Robinson",
+    "age_years": 82,
+    "weight_kg": 72,
+    "blood_type": "A+",
+    "allergies": "Warfarin",
+    "conditions": "Atrial Fibrillation, Dementia"
+  },
+  {
+    "patient_id": "P016",
+    "full_name": "Nancy Ruth Clark",
+    "age_years": 27,
+    "weight_kg": 60,
+    "blood_type": "B-",
+    "allergies": "",
+    "conditions": "Type 1 Diabetes"
+  },
+  {
+    "patient_id": "P017",
+    "full_name": "Thomas Alan Rodriguez",
+    "age_years": 58,
+    "weight_kg": 85,
+    "blood_type": "O+",
+    "allergies": "Statins",
+    "conditions": "High Cholesterol, CAD"
+  },
+  {
+    "patient_id": "P018",
+    "full_name": "Margaret Eve Lewis",
+    "age_years": 44,
+    "weight_kg": 63,
+    "blood_type": "A-",
+    "allergies": "Iodine",
+    "conditions": "Thyroid Disorder"
+  },
+  {
+    "patient_id": "P019",
+    "full_name": "Charles Henry Lee",
+    "age_years": 70,
+    "weight_kg": 79,
+    "blood_type": "AB-",
+    "allergies": "Benzodiazepines",
+    "conditions": "Parkinson's Disease"
+  },
+  {
+    "patient_id": "P020",
+    "full_name": "Dorothy May Walker",
+    "age_years": 56,
+    "weight_kg": 67,
+    "blood_type": "O+",
+    "allergies": "Metformin",
+    "conditions": "Type 2 Diabetes, CKD"
+  },
+  {
+    "patient_id": "P021",
+    "full_name": "Christopher Scott Hall",
+    "age_years": 31,
+    "weight_kg": 83,
+    "blood_type": "B+",
+    "allergies": "",
+    "conditions": "Allergic Rhinitis"
+  },
+  {
+    "patient_id": "P022",
+    "full_name": "Sandra Kay Allen",
+    "age_years": 65,
+    "weight_kg": 61,
+    "blood_type": "A+",
+    "allergies": "Fluoroquinolones",
+    "conditions": "UTI (Recurrent)"
+  },
+  {
+    "patient_id": "P023",
+    "full_name": "Daniel Matthew Young",
+    "age_years": 47,
+    "weight_kg": 90,
+    "blood_type": "O-",
+    "allergies": "Shellfish",
+    "conditions": "Hypertension, Gout"
+  },
+  {
+    "patient_id": "P024",
+    "full_name": "Betty Lou Hernandez",
+    "age_years": 73,
+    "weight_kg": 56,
+    "blood_type": "AB+",
+    "allergies": "Opioids",
+    "conditions": "Osteoarthritis"
+  },
+  {
+    "patient_id": "P025",
+    "full_name": "Paul Steven King",
+    "age_years": 39,
+    "weight_kg": 78,
+    "blood_type": "A-",
+    "allergies": "NSAIDs",
+    "conditions": "Crohn's Disease"
+  },
+  {
+    "patient_id": "P026",
+    "full_name": "Ashley Nicole Wright",
+    "age_years": 24,
+    "weight_kg": 57,
+    "blood_type": "O+",
+    "allergies": "Amoxicillin",
+    "conditions": "Anxiety, Asthma"
+  },
+  {
+    "patient_id": "P027",
+    "full_name": "Mark Andrew Lopez",
+    "age_years": 53,
+    "weight_kg": 87,
+    "blood_type": "B+",
+    "allergies": "Allopurinol",
+    "conditions": "Gout, Diabetes"
+  },
+  {
+    "patient_id": "P028",
+    "full_name": "Donna Marie Hill",
+    "age_years": 60,
+    "weight_kg": 64,
+    "blood_type": "A+",
+    "allergies": "Latex, Iodine",
+    "conditions": "Breast Cancer (Remission)"
+  },
+  {
+    "patient_id": "P029",
+    "full_name": "Steven Ray Scott",
+    "age_years": 41,
+    "weight_kg": 81,
+    "blood_type": "O-",
+    "allergies": "",
+    "conditions": "Ankylosing Spondylitis"
+  },
+  {
+    "patient_id": "P030",
+    "full_name": "Michelle Ann Green",
+    "age_years": 35,
+    "weight_kg": 59,
+    "blood_type": "AB-",
+    "allergies": "Sulfa drugs",
+    "conditions": "Endometriosis"
+  },
+  {
+    "patient_id": "P031",
+    "full_name": "Kevin Joseph Adams",
+    "age_years": 68,
+    "weight_kg": 86,
+    "blood_type": "B-",
+    "allergies": "Beta-blockers",
+    "conditions": "COPD, Hypertension"
+  },
+  {
+    "patient_id": "P032",
+    "full_name": "Laura Beth Baker",
+    "age_years": 50,
+    "weight_kg": 66,
+    "blood_type": "A+",
+    "allergies": "Penicillin",
+    "conditions": "Rheumatoid Arthritis"
+  },
+  {
+    "patient_id": "P033",
+    "full_name": "Brian Keith Gonzalez",
+    "age_years": 33,
+    "weight_kg": 76,
+    "blood_type": "O+",
+    "allergies": "",
+    "conditions": "Healthy \u2014 Pre-surgical"
+  },
+  {
+    "patient_id": "P034",
+    "full_name": "Cynthia Rose Nelson",
+    "age_years": 58,
+    "weight_kg": 62,
+    "blood_type": "AB+",
+    "allergies": "ACE Inhibitors",
+    "conditions": "Heart Failure, Anemia"
+  },
+  {
+    "patient_id": "P035",
+    "full_name": "George William Carter",
+    "age_years": 75,
+    "weight_kg": 73,
+    "blood_type": "A-",
+    "allergies": "Warfarin, Aspirin",
+    "conditions": "DVT, Atrial Fibrillation"
+  },
+  {
+    "patient_id": "P036",
+    "full_name": "Amanda Joy Mitchell",
+    "age_years": 28,
+    "weight_kg": 54,
+    "blood_type": "O+",
+    "allergies": "Ciprofloxacin",
+    "conditions": "IBS, Migraine"
+  },
+  {
+    "patient_id": "P037",
+    "full_name": "Edward Lee Perez",
+    "age_years": 62,
+    "weight_kg": 89,
+    "blood_type": "B+",
+    "allergies": "Statins",
+    "conditions": "Hyperlipidemia, CAD"
+  },
+  {
+    "patient_id": "P038",
+    "full_name": "Stephanie Mae Roberts",
+    "age_years": 46,
+    "weight_kg": 61,
+    "blood_type": "A+",
+    "allergies": "NSAIDs, Aspirin",
+    "conditions": "Asthma, GERD"
+  },
+  {
+    "patient_id": "P039",
+    "full_name": "Ronald Dean Turner",
+    "age_years": 79,
+    "weight_kg": 70,
+    "blood_type": "O-",
+    "allergies": "Morphine, Codeine",
+    "conditions": "Prostate Cancer, CKD"
+  },
+  {
+    "patient_id": "P040",
+    "full_name": "Rebecca Sue Phillips",
+    "age_years": 37,
+    "weight_kg": 58,
+    "blood_type": "AB-",
+    "allergies": "Tetracycline",
+    "conditions": "PCOS, Hypothyroid"
+  },
+  {
+    "patient_id": "P041",
+    "full_name": "Jason Thomas Campbell",
+    "age_years": 42,
+    "weight_kg": 84,
+    "blood_type": "B+",
+    "allergies": "",
+    "conditions": "Lower Back Pain"
+  },
+  {
+    "patient_id": "P042",
+    "full_name": "Sharon Lee Parker",
+    "age_years": 66,
+    "weight_kg": 63,
+    "blood_type": "A-",
+    "allergies": "Fluoroquinolones",
+    "conditions": "Pneumonia (Acute)"
+  },
+  {
+    "patient_id": "P043",
+    "full_name": "Ryan Michael Evans",
+    "age_years": 30,
+    "weight_kg": 79,
+    "blood_type": "O+",
+    "allergies": "Penicillin",
+    "conditions": "Tonsillitis"
+  },
+  {
+    "patient_id": "P044",
+    "full_name": "Kathleen Faye Edwards",
+    "age_years": 54,
+    "weight_kg": 60,
+    "blood_type": "AB+",
+    "allergies": "Sulfonamides",
+    "conditions": "Multiple Sclerosis"
+  },
+  {
+    "patient_id": "P045",
+    "full_name": "Larry Wayne Collins",
+    "age_years": 72,
+    "weight_kg": 82,
+    "blood_type": "B-",
+    "allergies": "ACE Inhibitors",
+    "conditions": "Diabetes, Neuropathy"
+  },
+  {
+    "patient_id": "P046",
+    "full_name": "Christina Marie Stewart",
+    "age_years": 26,
+    "weight_kg": 56,
+    "blood_type": "O+",
+    "allergies": "",
+    "conditions": "Healthy \u2014 Annual Checkup"
+  },
+  {
+    "patient_id": "P047",
+    "full_name": "Timothy James Sanchez",
+    "age_years": 51,
+    "weight_kg": 88,
+    "blood_type": "A+",
+    "allergies": "Allopurinol",
+    "conditions": "Gout, Hypertension"
+  },
+  {
+    "patient_id": "P048",
+    "full_name": "Deborah Kay Morris",
+    "age_years": 64,
+    "weight_kg": 65,
+    "blood_type": "AB-",
+    "allergies": "Benzodiazepines",
+    "conditions": "COPD, Osteoporosis"
+  },
+  {
+    "patient_id": "P049",
+    "full_name": "Andrew David Rogers",
+    "age_years": 32,
+    "weight_kg": 75,
+    "blood_type": "O-",
+    "allergies": "",
+    "conditions": "Type 1 Diabetes"
+  },
+  {
+    "patient_id": "P050",
+    "full_name": "Carolyn Ann Reed",
+    "age_years": 57,
+    "weight_kg": 62,
+    "blood_type": "B+",
+    "allergies": "Metformin",
+    "conditions": "Type 2 Diabetes, HTN"
   }
 ]

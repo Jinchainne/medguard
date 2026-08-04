@@ -1,6 +1,51 @@
 patient_id,full_name,allergies,conditions,blood_type,age_years,weight_kg
-PAT-001,Nguyen Van An,"Penicillin, Latex","Diabetes Type 2, Hypertension",O+,45,72
-PAT-002,Tran Thi Bich,Sulfa drugs,Asthma,A+,32,58
-PAT-003,Le Minh Cuong,"NSAIDs, Aspirin","Heart disease, High cholesterol",B+,67,85
-PAT-004,Pham Thi Dao,Iodine,Thyroid disorder,AB+,28,52
-PAT-005,Hoang Van Em,"Codeine, Morphine","Chronic kidney disease, Anemia",O-,55,68
+"P001","James Robert Smith","Penicillin","Hypertension","A+",45,82
+"P002","Mary Elizabeth Johnson","Sulfa drugs","Type 2 Diabetes, Arthritis","O-",67,65
+"P003","John William Davis","","Asthma","B+",34,91
+"P004","Patricia Ann Wilson","Aspirin, Ibuprofen","Migraine, GERD","AB+",52,70
+"P005","Michael James Brown","Codeine","COPD, Heart Failure","A-",78,75
+"P006","Jennifer Lynn Taylor","Latex","Pregnancy (32 weeks)","O+",29,58
+"P007","Robert Lee Anderson","Morphine","Chronic Pain, Obesity","B-",61,95
+"P008","Linda Marie Thomas","Cephalosporins","Depression, Anxiety","A+",43,62
+"P009","William Charles Jackson","NSAIDs","Gout, Hypertension","AB-",55,88
+"P010","Barbara Jean White","Sulfonamides","Osteoporosis, Hypothyroid","O+",71,59
+"P011","David Michael Harris","","Epilepsy","B+",38,77
+"P012","Susan Carol Martin","Tetracycline","Fibromyalgia","A-",49,68
+"P013","Richard Paul Garcia","ACE Inhibitors","CHF, Diabetes","O-",63,92
+"P014","Karen Diane Martinez","Penicillin","Lupus","AB+",36,55
+"P015","Joseph Edward Robinson","Warfarin","Atrial Fibrillation, Dementia","A+",82,72
+"P016","Nancy Ruth Clark","","Type 1 Diabetes","B-",27,60
+"P017","Thomas Alan Rodriguez","Statins","High Cholesterol, CAD","O+",58,85
+"P018","Margaret Eve Lewis","Iodine","Thyroid Disorder","A-",44,63
+"P019","Charles Henry Lee","Benzodiazepines","Parkinson's Disease","AB-",70,79
+"P020","Dorothy May Walker","Metformin","Type 2 Diabetes, CKD","O+",56,67
+"P021","Christopher Scott Hall","","Allergic Rhinitis","B+",31,83
+"P022","Sandra Kay Allen","Fluoroquinolones","UTI (Recurrent)","A+",65,61
+"P023","Daniel Matthew Young","Shellfish","Hypertension, Gout","O-",47,90
+"P024","Betty Lou Hernandez","Opioids","Osteoarthritis","AB+",73,56
+"P025","Paul Steven King","NSAIDs","Crohn's Disease","A-",39,78
+"P026","Ashley Nicole Wright","Amoxicillin","Anxiety, Asthma","O+",24,57
+"P027","Mark Andrew Lopez","Allopurinol","Gout, Diabetes","B+",53,87
+"P028","Donna Marie Hill","Latex, Iodine","Breast Cancer (Remission)","A+",60,64
+"P029","Steven Ray Scott","","Ankylosing Spondylitis","O-",41,81
+"P030","Michelle Ann Green","Sulfa drugs","Endometriosis","AB-",35,59
+"P031","Kevin Joseph Adams","Beta-blockers","COPD, Hypertension","B-",68,86
+"P032","Laura Beth Baker","Penicillin","Rheumatoid Arthritis","A+",50,66
+"P033","Brian Keith Gonzalez","","Healthy — Pre-surgical","O+",33,76
+"P034","Cynthia Rose Nelson","ACE Inhibitors","Heart Failure, Anemia","AB+",58,62
+"P035","George William Carter","Warfarin, Aspirin","DVT, Atrial Fibrillation","A-",75,73
+"P036","Amanda Joy Mitchell","Ciprofloxacin","IBS, Migraine","O+",28,54
+"P037","Edward Lee Perez","Statins","Hyperlipidemia, CAD","B+",62,89
+"P038","Stephanie Mae Roberts","NSAIDs, Aspirin","Asthma, GERD","A+",46,61
+"P039","Ronald Dean Turner","Morphine, Codeine","Prostate Cancer, CKD","O-",79,70
+"P040","Rebecca Sue Phillips","Tetracycline","PCOS, Hypothyroid","AB-",37,58
+"P041","Jason Thomas Campbell","","Lower Back Pain","B+",42,84
+"P042","Sharon Lee Parker","Fluoroquinolones","Pneumonia (Acute)","A-",66,63
+"P043","Ryan Michael Evans","Penicillin","Tonsillitis","O+",30,79
+"P044","Kathleen Faye Edwards","Sulfonamides","Multiple Sclerosis","AB+",54,60
+"P045","Larry Wayne Collins","ACE Inhibitors","Diabetes, Neuropathy","B-",72,82
+"P046","Christina Marie Stewart","","Healthy — Annual Checkup","O+",26,56
+"P047","Timothy James Sanchez","Allopurinol","Gout, Hypertension","A+",51,88
+"P048","Deborah Kay Morris","Benzodiazepines","COPD, Osteoporosis","AB-",64,65
+"P049","Andrew David Rogers","","Type 1 Diabetes","O-",32,75
+"P050","Carolyn Ann Reed","Metformin","Type 2 Diabetes, HTN","B+",57,62

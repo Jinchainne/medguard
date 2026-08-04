@@ -499,6 +499,26 @@ export function App() {
     try { return JSON.parse(localStorage.getItem("medguard_drugs") || "[]"); } catch { return []; }
   });
 
+  // Auto-load sample data on first visit
+  useEffect(() => {
+    if (sharedPatients.length === 0) {
+      fetch("/sample_patients.json").then(r => r.json()).then(data => {
+        const mapped = data.map((p: any) => ({
+          ...p,
+          allergies: typeof p.allergies === "string" ? p.allergies.split(",").map((s: string) => s.trim()).filter(Boolean) : p.allergies || [],
+          conditions: typeof p.conditions === "string" ? p.conditions.split(",").map((s: string) => s.trim()).filter(Boolean) : p.conditions || [],
+          prescription_count: 0,
+        }));
+        setSharedPatients(mapped);
+      }).catch(() => {});
+    }
+    if (sharedDrugs.length === 0) {
+      fetch("/sample_drugs.json").then(r => r.json()).then(data => {
+        setSharedDrugs(data);
+      }).catch(() => {});
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Persist to localStorage on change
   useEffect(() => { localStorage.setItem("medguard_patients", JSON.stringify(sharedPatients)); }, [sharedPatients]);
   useEffect(() => { localStorage.setItem("medguard_drugs", JSON.stringify(sharedDrugs)); }, [sharedDrugs]);
