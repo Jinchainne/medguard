@@ -1,6 +1,6 @@
 # MedGuard
 
-**Clinical Decision Support Oracle on GenLayer** — Full-stack healthcare platform with 10 on-chain AI-powered clinical tools, 50-patient registry, 100-drug pharmaceutical database, and animated clinical workflow visualization.
+**Clinical Decision Support Oracle on GenLayer** — Full-stack healthcare platform with 10 on-chain AI-powered clinical tools, animated workflow visualization, 50-patient registry, and 103-drug pharmaceutical database.
 
 ---
 
@@ -18,13 +18,35 @@
 
 ---
 
-## What It Does
+## GenLayer Rules Compliance
 
-MedGuard is an intelligent contract platform for healthcare professionals. It provides **10 core clinical functions**, all executed on-chain with AI consensus:
+| # | Rule | Status |
+|---|------|--------|
+| 1 | gl.vm.run_nondet_unsafe consensus (7 functions) | ✅ |
+| 2 | Validator re-runs leader_fn independently (7/7) | ✅ |
+| 3 | gl.nondet.web.render for fetching inside leader_fn | ✅ |
+| 4 | gl.nondet.exec_prompt with response_format="json" (7/7) | ✅ |
+| 5 | UNTRUSTED DATA markers in all prompts (7/7) | ✅ |
+| 6 | Constructor NO args: def __init__(self) | ✅ |
+| 7 | u64 storage types for numerics (9 fields) | ✅ |
+| 8 | TreeMap/DynArray auto-initialized (7+1) | ✅ |
+| 9 | gl.message.sender_address for caller tracking | ✅ |
+| 10 | gl.vm.UserError for error handling (42 calls) | ✅ |
+| 11 | Input validation (46 strip + 8 len checks) | ✅ |
+| 12 | Access control (_require_owner) on admin functions | ✅ |
+| 13 | HTTPS-only trusted source enforcement | ✅ |
+| 14 | No silent error fallbacks | ✅ |
+| 15 | Meaningful non-deterministic results (not trivial) | ✅ |
+
+**Tests: 64/64 PASSED**
+
+---
+
+## 10 Clinical Workflow Steps
 
 | # | Tool | Description | Type |
 |---|------|-------------|------|
-| 1 | **Drug Interaction** | Check two drugs for harmful interactions with AI-powered analysis | write |
+| 1 | **Drug Interaction** | Check two drugs for harmful interactions with AI analysis | write |
 | 2 | **Dosage Verification** | Verify medication dosages against patient weight and age | write |
 | 3 | **Allergy Risk** | Cross-reference medications with known patient allergies | write |
 | 4 | **Treatment Validation** | Validate proposed treatments against medical conditions | write |
@@ -37,67 +59,14 @@ MedGuard is an intelligent contract platform for healthcare professionals. It pr
 
 ---
 
-## Clinical Workflow
+## Clinical Workflow Animation
 
-```
-User Query → Contract (write tx) → Web Fetch (trusted sources) → AI Analysis → Consensus (leader + validator) → Result → Auto-Alert (if dangerous)
-```
-
-Each clinical tool follows the same on-chain consensus pattern:
-
-1. **Submit** — Healthcare worker provides clinical query (drug names, dosages, patient info)
-2. **Fetch** — Contract fetches from trusted medical sources via `gl.nondet.web.render()`
-3. **Analyze** — AI evaluates against pharmacological data and clinical guidelines
-4. **Consensus** — Leader and validator must agree on severity/safety levels exactly
-5. **Store** — Clinical assessment stored on-chain with unique record ID
-6. **Alert** — If dangerous result detected, automatic emergency alert created
-
----
-
-## Severity & Safety Levels
-
-### Drug Interaction Severity
-| Level | Meaning |
-|-------|---------|
-| NONE | No known interaction |
-| MINOR | Minimal significance, monitor patient |
-| MODERATE | May require dose adjustment or monitoring |
-| MAJOR | Avoid combination if possible |
-| CONTRAINDICATED | Do not combine under any circumstances |
-
-### Dosage Safety
-| Level | Meaning |
-|-------|---------|
-| SAFE | Within therapeutic range |
-| SUBTHERAPEUTIC | Below effective dose |
-| ABOVE_THERAPEUTIC | Exceeds recommended range |
-| DANGEROUS | Potentially toxic dose |
-
-### Allergy Risk
-| Level | Meaning |
-|-------|---------|
-| NO_RISK | No cross-reactivity found |
-| MILD_RISK | Low likelihood, monitor |
-| MODERATE_RISK | Consider alternatives |
-| SEVERE_RISK | Avoid medication |
-| ANAPHYLAXIS_RISK | Life-threatening — do not administer |
-
----
-
-## Data
-
-### Patient Registry (50 patients)
-Pre-loaded with 50 American patients including:
-- Patient IDs (P001–P050), full names, ages (24–82), weights (54–95 kg)
-- Blood types (A+, A-, B+, B-, O+, O-, AB+, AB-)
-- Known allergies (Penicillin, Sulfa, NSAIDs, Codeine, Statins, etc.)
-- Medical conditions (Diabetes, Hypertension, Asthma, Cancer, CKD, etc.)
-
-### Drug Database (100 drugs)
-Comprehensive pharmaceutical catalog covering:
-- **Categories**: Antibiotics, Antihypertensives, Antidiabetics, Antidepressants, NSAIDs, Statins, Anticoagulants, Corticosteroids, Immunosuppressants, Vitamins/Supplements
-- **Data per drug**: Common dosages, side effects, contraindications
-- **Examples**: Amoxicillin, Lisinopril, Metformin, Atorvastatin, Warfarin, Insulin Glargine, Methotrexate, Epinephrine
+The dashboard features an animated clinical workflow with:
+- **Glowing arrow transitions** between steps that light up sequentially
+- **Pixel art MC doctor** character in the bottom-right corner (bouncing, blinking, retro game style)
+- **Auto Play** mode with 1.6s per step
+- **Progress bar** showing current step (X/10)
+- **Step cards** with glow effects, checkmarks, and active indicators
 
 ---
 
@@ -106,59 +75,44 @@ Comprehensive pharmaceutical catalog covering:
 ### 3 Main Tabs
 | Tab | Content |
 |-----|---------|
-| **Workflow** | Animated clinical workflow — doctor walks through all 10 steps with chain flow visualization |
-| **Patients (50)** | Searchable patient table with ID, name, age, weight, blood type, allergies, conditions |
-| **Drug Database (100)** | Searchable drug table with name, category, dosages, side effects, contraindications |
+| **Dashboard** | Stats, Import/Export, Clinical Workflow animation, Clinical Tools grid |
+| **Patients (50)** | Auto-loaded patient table with search (P001–P050, American names) |
+| **Drug Database (103)** | Auto-loaded drug table with search (103 drugs across all categories) |
 
-### Dashboard (Import/Export)
-- Import patients and drugs from CSV/JSON files
-- Sample files available for download
-- Export data as CSV/JSON
-- localStorage persistence across page refreshes
-
-### Clinical Pages (12 pages)
-| Page | Features |
-|------|----------|
-| Dashboard | Stats, Import/Export, Clinical Tools grid |
-| Drug Interaction | Drug A + Drug B selectors from database |
-| Dosage Check | Drug selector + patient weight/age |
-| Allergy Check | Patient selector (auto-fills allergies) + multi-drug selector |
-| Treatment | Condition + treatment validation |
-| Patients | Register new + Select/Lookup existing |
-| Prescription | Patient selector + multi-drug selector |
-| Drug Database | Add drug + Search + Lookup |
-| Alerts | Patient selector for alert lookup |
-| Clinical Trials | Condition-based trial matching |
-| Insurance | Treatment + cost verification |
-| History | Full audit trail with formatted result cards |
+### Key Features
+- **Auto-load sample data** on first visit (50 patients, 103 drugs from JSON)
+- **Local-first patient lookup** (checks localStorage before on-chain)
+- **Import/Export** patients and drugs via CSV/JSON
+- **Dropdown selectors** populated from local data across all pages
+- **Wallet integration** with OKX/MetaMask on StudioNet
+- **12 pages**: Dashboard, Interaction, Dosage, Allergy, Treatment, Patients, Prescription, Drugs, Alerts, Trials, Insurance, History
 
 ---
 
-## GenLayer Rules Compliance
+## Consensus Architecture
 
-| Rule | Status |
-|------|--------|
-| bigint u64 storage types (not Python int) | ✅ |
-| UNTRUSTED DATA markers in all prompts | ✅ |
-| gl.vm.run_nondet_unsafe consensus | ✅ |
-| Constructor NO args | ✅ |
-| gl.message.sender_address for caller tracking | ✅ |
-| gl.vm.UserError for error handling | ✅ |
-| TreeMap/DynArray auto-init | ✅ |
-| web.render + exec_prompt inside leader_fn | ✅ |
-| validator re-runs leader_fn for consensus | ✅ |
-| JSON response_format on all exec_prompt | ✅ |
-| Input validation & boundary clamping | ✅ |
-| emit_transfer (not needed — no token transfers) | ✅ |
+```python
+def leader_fn() -> dict:
+    fetched = self._fetch_all(urls, trusted)        # Fetch clinical sources
+    evidence = self._format_evidence(fetched)        # Format evidence
+    response = gl.nondet.exec_prompt(prompt, ...)    # AI analysis
+    return self._normalize_*(response)               # Validate & normalize
 
-**Tests: 64/64 PASSED**
+def validator_fn(leader_result) -> bool:
+    my = leader_fn()                                 # Re-run independently
+    other = leader_result.calldata
+    return my["severity"] == other["severity"]       # Must agree exactly
+
+result = gl.vm.run_nondet_unsafe(leader_fn, validator_fn)
+```
+
+**Key principle**: Clinical severity levels must agree exactly between leader and validator — patient safety is non-negotiable.
 
 ---
 
 ## Contract Functions
 
 ### Write (13 functions)
-
 | Function | Description |
 |----------|-------------|
 | `check_drug_interaction(drug_a, drug_b, context, urls)` | Screen two drugs for interactions |
@@ -176,7 +130,6 @@ Comprehensive pharmaceutical catalog covering:
 | `remove_trusted_source(index)` | Remove trusted source (owner) |
 
 ### View (12 functions)
-
 | Function | Description |
 |----------|-------------|
 | `get_check(id)` | Get full clinical check result |
@@ -194,27 +147,6 @@ Comprehensive pharmaceutical catalog covering:
 
 ---
 
-## Consensus Architecture
-
-```python
-def leader_fn() -> dict:
-    fetched = self._fetch_all(urls, trusted)
-    evidence = self._format_evidence(fetched)
-    response = gl.nondet.exec_prompt(prompt, response_format="json")
-    return self._normalize_*(response)
-
-def validator_fn(leader_result) -> bool:
-    my = leader_fn()                    # Re-run independently
-    other = leader_result.calldata
-    return my["severity"] == other["severity"]  # Must agree exactly
-
-result = gl.vm.run_nondet_unsafe(leader_fn, validator_fn)
-```
-
-Key principle: **Clinical severity levels must agree exactly** — patient safety is non-negotiable. Confidence allows ±1 rank, scores allow ±15–20 points.
-
----
-
 ## Tech Stack
 
 | Layer | Technology |
@@ -225,7 +157,6 @@ Key principle: **Clinical severity levels must agree exactly** — patient safet
 | Network | GenLayer StudioNet (Chain ID 61999) |
 | Hosting | Vercel |
 | AI Consensus | GenLayer validators (leader + validator pattern) |
-| Data Persistence | localStorage + on-chain (TreeMap) |
 
 ---
 
@@ -234,29 +165,23 @@ Key principle: **Clinical severity levels must agree exactly** — patient safet
 ```
 medguard/
 ├── contracts/
-│   └── medguard.py              # Intelligent Contract (13 write + 12 view functions)
+│   └── medguard.py              # Intelligent Contract (13 write + 12 view)
 ├── tests/
 │   └── test_medguard.py         # 64 invariant tests
 ├── frontend/
 │   ├── public/
-│   │   ├── favicon.svg          # MedGuard favicon
-│   │   ├── logo.svg             # MedGuard logo
-│   │   ├── sample_patients.json # Sample patient data
-│   │   ├── sample_patients.csv  # Sample patient data (CSV)
-│   │   ├── sample_drugs.json    # Sample drug data
-│   │   └── sample_drugs.csv     # Sample drug data (CSV)
+│   │   ├── sample_patients.json # 50 American patients
+│   │   ├── sample_patients.csv  # Patient data (CSV)
+│   │   ├── sample_drugs.json    # 103 drugs
+│   │   └── sample_drugs.csv     # Drug data (CSV)
 │   ├── src/
-│   │   ├── App.tsx              # Main application (12 pages)
+│   │   ├── App.tsx              # Main app (workflow + 12 pages)
 │   │   ├── config.ts            # Network + contract config
-│   │   ├── importExport.ts      # CSV/JSON import/export utilities
-│   │   ├── main.tsx             # Entry point
+│   │   ├── importExport.ts      # CSV/JSON utilities
 │   │   ├── useGenLayer.ts       # Read/write client hooks
 │   │   ├── useWallet.ts         # Wallet connection hook
-│   │   └── env.d.ts             # TypeScript declarations
-│   ├── index.html
-│   ├── package.json
-│   ├── tsconfig.json
-│   └── vite.config.ts
+│   │   └── styles.css           # Dark theme + animations
+│   └── package.json
 ├── .gitignore
 └── README.md
 ```
@@ -268,16 +193,9 @@ medguard/
 ```bash
 cd frontend
 npm install
-npm run dev          # Development server at localhost:5173
+npm run dev          # localhost:5173
 npm run build        # Production build
-npm run preview      # Preview production build
 ```
-
-### Environment Variables
-
-| Variable | Description |
-|----------|-------------|
-| `VITE_CONTRACT_ADDRESS` | Override contract address (optional) |
 
 ---
 
