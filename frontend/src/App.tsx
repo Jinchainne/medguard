@@ -964,9 +964,7 @@ export function App() {
           />
         </div>
 
-        {/* ── Clinical Workflow Animation ── */}
-        <div className="section-title">Clinical Workflow</div>
-        <WorkflowDoctor activeStep={wfStep} setActiveStep={setWfStep} playing={wfPlaying} setPlaying={setWfPlaying} />
+        {/* Clinical Workflow — rendered outside DashboardPage to prevent unmount */}
 
         <div className="section-title">Clinical Tools</div>
         <div className="feature-grid">
@@ -2096,6 +2094,13 @@ export function App() {
 
       {/* Main Content */}
       <main className="main">
+        {/* Workflow animation — rendered here to survive DashboardPage unmounts */}
+        {page === "dashboard" && (
+          <>
+            <div className="section-title">Clinical Workflow</div>
+            <WorkflowDoctor activeStep={wfStep} setActiveStep={setWfStep} playing={wfPlaying} setPlaying={setWfPlaying} />
+          </>
+        )}
         {renderPage()}
       </main>
 
