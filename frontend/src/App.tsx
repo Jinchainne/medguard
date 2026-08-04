@@ -494,109 +494,6 @@ const workflowSteps = [
   { num: 10, icon: "🏦", title: "Insurance", page: "insurance" as Page, color: "#d97706" },
 ];
 
-/* Pixel Art Doctor — big, smiling, with animated walking legs */
-function DoctorSVG({ walking }: { walking?: boolean }) {
-  return (
-    <svg width="80" height="110" viewBox="0 0 80 110" style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.4))" }}>
-      {/* === HEAD === */}
-      {/* Hair */}
-      <rect x="24" y="4" width="32" height="8" rx="4" fill="#2c3e50" />
-      <rect x="22" y="8" width="4" height="12" rx="2" fill="#2c3e50" />
-      <rect x="54" y="8" width="4" height="12" rx="2" fill="#2c3e50" />
-      {/* Face */}
-      <rect x="26" y="10" width="28" height="24" rx="6" fill="#fcd5b8" />
-      {/* Head mirror */}
-      <rect x="34" y="0" width="12" height="8" rx="2" fill="#bdc3c7" />
-      <rect x="36" y="1" width="8" height="5" rx="1" fill="#ecf0f1" />
-      {/* Eyes — happy squint */}
-      <rect x="32" y="18" width="6" height="4" rx="2" fill="#2c3e50" />
-      <rect x="42" y="18" width="6" height="4" rx="2" fill="#2c3e50" />
-      {/* Eye shine */}
-      <rect x="34" y="18" width="2" height="2" rx="1" fill="white" />
-      <rect x="44" y="18" width="2" height="2" rx="1" fill="white" />
-      {/* Big smile */}
-      <path d="M32 26 Q40 34 48 26" stroke="#e74c3c" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-      {/* Cheek blush */}
-      <circle cx="28" cy="26" r="3" fill="#ffb3b3" opacity="0.5" />
-      <circle cx="52" cy="26" r="3" fill="#ffb3b3" opacity="0.5" />
-      {/* Glasses */}
-      <rect x="29" y="15" width="10" height="9" rx="3" fill="none" stroke="#546e7a" strokeWidth="1.5" />
-      <rect x="41" y="15" width="10" height="9" rx="3" fill="none" stroke="#546e7a" strokeWidth="1.5" />
-      <line x1="39" y1="19" x2="41" y2="19" stroke="#546e7a" strokeWidth="1.5" />
-
-      {/* === BODY (White Coat) === */}
-      <rect x="22" y="36" width="36" height="34" rx="5" fill="white" stroke="#ddd" strokeWidth="1" />
-      {/* Coat lapels */}
-      <path d="M30 36 L40 46 L50 36" fill="#f0f4ff" stroke="#ccc" strokeWidth="0.5" />
-      {/* Blue scrubs underneath */}
-      <rect x="34" y="36" width="12" height="10" fill="#2563eb" opacity="0.3" />
-      {/* Stethoscope */}
-      <path d="M28 36 Q22 44 24 54" stroke="#3498db" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-      <circle cx="24" cy="56" r="4" fill="#3498db" />
-      <circle cx="24" cy="56" r="2" fill="#2980b9" />
-      {/* Pocket */}
-      <rect x="44" y="50" width="10" height="12" rx="2" fill="#f0f4ff" stroke="#ddd" strokeWidth="0.5" />
-      {/* Pen in pocket */}
-      <rect x="47" y="46" width="2" height="8" rx="1" fill="#2563eb" />
-
-      {/* === ARMS === */}
-      <rect x="12" y="38" width="10" height="24" rx="5" fill="white" stroke="#ddd" strokeWidth="1" />
-      <rect x="58" y="38" width="10" height="24" rx="5" fill="white" stroke="#ddd" strokeWidth="1" />
-      {/* Hands */}
-      <rect x="14" y="62" width="8" height="6" rx="3" fill="#fcd5b8" />
-      <rect x="58" y="62" width="8" height="6" rx="3" fill="#fcd5b8" />
-      {/* Clipboard in right hand */}
-      <rect x="60" y="48" width="16" height="22" rx="3" fill="#2563eb" />
-      <rect x="62" y="51" width="12" height="3" rx="1" fill="white" opacity="0.7" />
-      <rect x="62" y="56" width="12" height="2" rx="1" fill="white" opacity="0.5" />
-      <rect x="62" y="60" width="8" height="2" rx="1" fill="white" opacity="0.4" />
-      <rect x="62" y="64" width="10" height="2" rx="1" fill="white" opacity="0.3" />
-
-      {/* === LEGS (animated walking) === */}
-      {walking ? (
-        <>
-          {/* Left leg — forward */}
-          <rect x="28" y="70" width="10" height="20" rx="4" fill="#1e3a5f">
-            <animateTransform attributeName="transform" type="rotate" values="-15 33 70;15 33 70;-15 33 70" dur="0.5s" repeatCount="indefinite" />
-          </rect>
-          {/* Right leg — back */}
-          <rect x="42" y="70" width="10" height="20" rx="4" fill="#1e3a5f">
-            <animateTransform attributeName="transform" type="rotate" values="15 47 70;-15 47 70;15 47 70" dur="0.5s" repeatCount="indefinite" />
-          </rect>
-          {/* Left shoe */}
-          <rect x="24" y="88" width="14" height="7" rx="3" fill="#2c3e50">
-            <animateTransform attributeName="transform" type="rotate" values="-15 31 88;15 31 88;-15 31 88" dur="0.5s" repeatCount="indefinite" />
-          </rect>
-          {/* Right shoe */}
-          <rect x="42" y="88" width="14" height="7" rx="3" fill="#2c3e50">
-            <animateTransform attributeName="transform" type="rotate" values="15 49 88;-15 49 88;15 49 88" dur="0.5s" repeatCount="indefinite" />
-          </rect>
-          {/* Walking motion lines */}
-          <line x1="8" y1="80" x2="2" y2="80" stroke="var(--teal)" strokeWidth="1.5" opacity="0.4">
-            <animate attributeName="opacity" values="0.4;0;0.4" dur="0.3s" repeatCount="indefinite" />
-          </line>
-          <line x1="8" y1="85" x2="0" y2="85" stroke="var(--teal)" strokeWidth="1" opacity="0.3">
-            <animate attributeName="opacity" values="0.3;0;0.3" dur="0.4s" repeatCount="indefinite" />
-          </line>
-        </>
-      ) : (
-        <>
-          {/* Standing legs */}
-          <rect x="28" y="70" width="10" height="20" rx="4" fill="#1e3a5f" />
-          <rect x="42" y="70" width="10" height="20" rx="4" fill="#1e3a5f" />
-          {/* Standing shoes */}
-          <rect x="24" y="88" width="14" height="7" rx="3" fill="#2c3e50" />
-          <rect x="42" y="88" width="14" height="7" rx="3" fill="#2c3e50" />
-        </>
-      )}
-
-      {/* ID Badge */}
-      <rect x="50" y="40" width="8" height="10" rx="1.5" fill="#e2e8f0" stroke="#ccc" strokeWidth="0.5" />
-      <rect x="51" y="41" width="6" height="4" rx="1" fill="#2563eb" opacity="0.5" />
-    </svg>
-  );
-}
-
 function WorkflowDoctor({ activeStep, setActiveStep, playing, setPlaying }: { activeStep: number; setActiveStep: (n: number | ((p: number) => number)) => void; playing: boolean; setPlaying: (b: boolean) => void }) {
   const intervalRef = React.useRef<number | null>(null);
 
@@ -605,23 +502,22 @@ function WorkflowDoctor({ activeStep, setActiveStep, playing, setPlaying }: { ac
       if (prev >= workflowSteps.length - 1) return -1;
       return prev + 1;
     });
-  }, []);
+  }, [setActiveStep]);
 
   React.useEffect(() => {
     if (playing) {
       nextStep();
-      intervalRef.current = window.setInterval(nextStep, 2000);
+      intervalRef.current = window.setInterval(nextStep, 1800);
     }
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [playing, nextStep]);
 
-  const isWalking = playing && activeStep >= 0;
-  const pct = activeStep >= 0 ? (activeStep / (workflowSteps.length - 1)) * 100 : 0;
+  const isWalking = playing;
 
   return (
-    <div style={{ background: "var(--surface-high)", borderRadius: 16, border: "1px solid var(--border)", padding: 20, marginBottom: 24 }}>
+    <div style={{ marginBottom: 24 }}>
       {/* Controls */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, background: "var(--surface-high)", borderRadius: 12, padding: "12px 16px", border: "1px solid var(--border)" }}>
         <button className={`btn btn-sm ${playing ? "btn-danger" : "btn-primary"}`} onClick={() => setPlaying(!playing)}>
           {playing ? "⏸ Pause" : "▶ Auto Play"}
         </button>
@@ -633,58 +529,143 @@ function WorkflowDoctor({ activeStep, setActiveStep, playing, setPlaying }: { ac
         </span>
       </div>
 
-      {/* Doctor walking track — TALL enough for big doctor */}
-      <div style={{ position: "relative", height: 130, background: "var(--surface)", borderRadius: 14, marginBottom: 16, overflow: "hidden", border: "1px solid var(--border)" }}>
-        {/* Ground line */}
-        <div style={{ position: "absolute", bottom: 18, left: 0, right: 0, height: 2, background: "var(--border)", opacity: 0.5 }} />
-        {/* Footstep dots on ground */}
-        {workflowSteps.map((_, i) => (
-          <div key={i} style={{ position: "absolute", bottom: 12, left: `${(i / (workflowSteps.length - 1)) * 100}%`, transform: "translateX(-50%)", width: 8, height: 8, borderRadius: "50%", background: i <= activeStep ? "var(--teal)" : "var(--border)", opacity: i <= activeStep ? 1 : 0.3, transition: "all 0.4s" }} />
-        ))}
-        {/* Doctor character */}
-        <div style={{
-          position: "absolute", left: `calc(${pct}% - 40px)`, bottom: 20,
-          transition: "left 1s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-        }}>
-          <DoctorSVG walking={isWalking} />
-        </div>
-        {/* Step labels */}
-        <div style={{ position: "absolute", bottom: 0, left: 16, right: 16, display: "flex", justifyContent: "space-between", padding: "0 2%" }}>
-          {workflowSteps.map((s, i) => (
-            <span key={i} style={{ fontSize: 10, color: i <= activeStep ? "var(--teal)" : "var(--text-muted)", fontFamily: "var(--mono)", fontWeight: i === activeStep ? 700 : 400, transition: "all 0.4s" }}>
-              {s.num}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Steps grid */}
+      {/* Steps grid with doctor walking ON the cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10 }}>
         {workflowSteps.map((s, i) => (
           <div
             key={i}
             onClick={() => setActiveStep(i)}
             style={{
-              background: i === activeStep ? `${s.color}18` : i < activeStep ? "var(--surface)" : "var(--surface)",
+              position: "relative",
+              background: i === activeStep ? `${s.color}20` : "var(--surface-high)",
               border: `2px solid ${i === activeStep ? s.color : i < activeStep ? "var(--teal)" : "var(--border)"}`,
-              borderRadius: 12, padding: "12px 10px", cursor: "pointer", transition: "all 0.4s",
-              opacity: i <= activeStep ? 1 : 0.45,
-              transform: i === activeStep ? "scale(1.03)" : "scale(1)",
-              boxShadow: i === activeStep ? `0 0 16px ${s.color}33` : "none",
+              borderRadius: 14, padding: "14px 12px 14px 12px", cursor: "pointer", transition: "all 0.5s ease",
+              opacity: i <= activeStep ? 1 : 0.4,
+              transform: i === activeStep ? "scale(1.04)" : "scale(1)",
+              boxShadow: i === activeStep ? `0 0 24px ${s.color}40, inset 0 0 20px ${s.color}10` : "none",
+              minHeight: 120,
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-              <span style={{ fontSize: 9, color: "var(--text-muted)", fontFamily: "var(--mono)" }}>STEP {s.num}</span>
-              <span style={{ width: 18, height: 18, borderRadius: "50%", background: i < activeStep ? "var(--teal)" : i === activeStep ? s.color : "var(--border)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "white", transition: "all 0.3s", fontWeight: 700 }}>
+            {/* Doctor stands ON this card when active */}
+            {i === activeStep && activeStep >= 0 && (
+              <div style={{
+                position: "absolute",
+                top: -55,
+                left: "50%",
+                transform: "translateX(-50%)",
+                zIndex: 10,
+                animation: "doctorBounce 0.6s ease-in-out infinite",
+                filter: "drop-shadow(0 4px 12px rgba(0,212,170,0.4))",
+              }}>
+                <PixelDoctor walking={isWalking} />
+              </div>
+            )}
+
+            {/* Arrow from previous step */}
+            {i > 0 && i <= activeStep && (
+              <div style={{
+                position: "absolute", left: -14, top: "50%", transform: "translateY(-50%)",
+                fontSize: 12, color: "var(--teal)", fontWeight: 700,
+              }}>→</div>
+            )}
+
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <span style={{ fontSize: 9, color: i === activeStep ? s.color : "var(--text-muted)", fontFamily: "var(--mono)", fontWeight: i === activeStep ? 700 : 400, letterSpacing: "0.05em" }}>STEP {s.num}</span>
+              <span style={{
+                width: 20, height: 20, borderRadius: "50%",
+                background: i < activeStep ? "var(--teal)" : i === activeStep ? s.color : "var(--border)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 10, color: "white", transition: "all 0.3s", fontWeight: 700,
+                boxShadow: i === activeStep ? `0 0 10px ${s.color}66` : "none",
+              }}>
                 {i < activeStep ? "✓" : i === activeStep ? "●" : ""}
               </span>
             </div>
-            <div style={{ fontSize: 22, marginBottom: 6 }}>{s.icon}</div>
-            <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text)", lineHeight: 1.3 }}>{s.title}</div>
+            <div style={{ fontSize: 26, marginBottom: 8, textAlign: "center" }}>{s.icon}</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: i === activeStep ? "white" : "var(--text)", lineHeight: 1.3, textAlign: "center" }}>{s.title}</div>
           </div>
         ))}
       </div>
     </div>
+  );
+}
+
+/* Pixel Art Doctor — walks directly on workflow cards */
+function PixelDoctor({ walking }: { walking?: boolean }) {
+  return (
+    <svg width="48" height="64" viewBox="0 0 48 64" style={{ imageRendering: "pixelated" as any }}>
+      {/* Head */}
+      <rect x="16" y="2" width="16" height="14" rx="3" fill="#fcd5b8" />
+      {/* Hair */}
+      <rect x="14" y="0" width="20" height="6" rx="2" fill="#2c3e50" />
+      {/* Eyes — happy */}
+      <rect x="20" y="8" width="3" height="3" rx="1" fill="#2c3e50" />
+      <rect x="27" y="8" width="3" height="3" rx="1" fill="#2c3e50" />
+      <rect x="21" y="8" width="1" height="1" fill="white" />
+      <rect x="28" y="8" width="1" height="1" fill="white" />
+      {/* Big smile */}
+      <path d="M20 13 Q24 17 28 13" stroke="#e74c3c" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+      {/* Blush */}
+      <circle cx="18" cy="12" r="2" fill="#ffb3b3" opacity="0.5" />
+      <circle cx="32" cy="12" r="2" fill="#ffb3b3" opacity="0.5" />
+      {/* Glasses */}
+      <rect x="18" y="6" width="6" height="5" rx="1.5" fill="none" stroke="#546e7a" strokeWidth="1" />
+      <rect x="26" y="6" width="6" height="5" rx="1.5" fill="none" stroke="#546e7a" strokeWidth="1" />
+      <line x1="24" y1="8" x2="26" y2="8" stroke="#546e7a" strokeWidth="1" />
+      {/* Head mirror */}
+      <rect x="22" y="0" width="4" height="3" rx="1" fill="#bdc3c7" />
+
+      {/* White coat body */}
+      <rect x="14" y="16" width="20" height="20" rx="3" fill="white" stroke="#ddd" strokeWidth="0.5" />
+      {/* Stethoscope */}
+      <path d="M18 16 Q14 20 15 26" stroke="#3498db" strokeWidth="1.5" fill="none" />
+      <circle cx="15" cy="27" r="2" fill="#3498db" />
+      {/* Clipboard */}
+      <rect x="30" y="22" width="8" height="12" rx="2" fill="#2563eb" />
+      <rect x="31" y="24" width="6" height="1.5" rx="0.5" fill="white" opacity="0.7" />
+      <rect x="31" y="27" width="6" height="1" rx="0.5" fill="white" opacity="0.5" />
+      <rect x="31" y="30" width="4" height="1" rx="0.5" fill="white" opacity="0.4" />
+
+      {/* Arms */}
+      <rect x="8" y="18" width="6" height="14" rx="3" fill="white" stroke="#ddd" strokeWidth="0.5" />
+      <rect x="34" y="18" width="6" height="14" rx="3" fill="white" stroke="#ddd" strokeWidth="0.5" />
+      {/* Hands */}
+      <rect x="9" y="32" width="5" height="4" rx="2" fill="#fcd5b8" />
+      <rect x="34" y="32" width="5" height="4" rx="2" fill="#fcd5b8" />
+
+      {/* Legs — animated walking */}
+      {walking ? (
+        <>
+          <rect x="17" y="36" width="6" height="14" rx="3" fill="#1e3a5f">
+            <animateTransform attributeName="transform" type="rotate" values="-20 20 36;20 20 36;-20 20 36" dur="0.4s" repeatCount="indefinite" />
+          </rect>
+          <rect x="27" y="36" width="6" height="14" rx="3" fill="#1e3a5f">
+            <animateTransform attributeName="transform" type="rotate" values="20 30 36;-20 30 36;20 30 36" dur="0.4s" repeatCount="indefinite" />
+          </rect>
+          {/* Shoes */}
+          <rect x="14" y="48" width="9" height="5" rx="2" fill="#2c3e50">
+            <animateTransform attributeName="transform" type="rotate" values="-20 18 48;20 18 48;-20 18 48" dur="0.4s" repeatCount="indefinite" />
+          </rect>
+          <rect x="27" y="48" width="9" height="5" rx="2" fill="#2c3e50">
+            <animateTransform attributeName="transform" type="rotate" values="20 31 48;-20 31 48;20 31 48" dur="0.4s" repeatCount="indefinite" />
+          </rect>
+          {/* Speed lines */}
+          <line x1="4" y1="38" x2="0" y2="38" stroke="var(--teal)" strokeWidth="1" opacity="0.5">
+            <animate attributeName="opacity" values="0.5;0;0.5" dur="0.25s" repeatCount="indefinite" />
+          </line>
+          <line x1="4" y1="42" x2="0" y2="44" stroke="var(--teal)" strokeWidth="0.8" opacity="0.3">
+            <animate attributeName="opacity" values="0.3;0;0.3" dur="0.35s" repeatCount="indefinite" />
+          </line>
+        </>
+      ) : (
+        <>
+          <rect x="17" y="36" width="6" height="14" rx="3" fill="#1e3a5f" />
+          <rect x="27" y="36" width="6" height="14" rx="3" fill="#1e3a5f" />
+          <rect x="14" y="48" width="9" height="5" rx="2" fill="#2c3e50" />
+          <rect x="27" y="48" width="9" height="5" rx="2" fill="#2c3e50" />
+        </>
+      )}
+    </svg>
   );
 }
 

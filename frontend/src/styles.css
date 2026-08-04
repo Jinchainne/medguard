@@ -619,3 +619,5 @@ tr:hover td { background: rgba(0, 180, 216, 0.02); }
 }
 
 @keyframes doctorFloat { 0%,100% { transform: translate(-50%, -50%) translateY(0); } 50% { transform: translate(-50%, -50%) translateY(-5px); } }
+
+@keyframes doctorBounce { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-6px); } }
