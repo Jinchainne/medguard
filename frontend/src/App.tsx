@@ -184,6 +184,22 @@ function tryParse(raw: string): any {
   try { return JSON.parse(raw); } catch { return raw; }
 }
 
+/* Friendly error messages for viem/contract errors */
+function friendlyError(e: any, context?: string): string {
+  const msg = e?.message || String(e);
+  if (msg.includes("NOT_FOUND") || msg.includes("PATIENT_NOT_FOUND") || msg.includes("DRUG_NOT_FOUND")) {
+    return `Record not found on-chain. ${context || "It may not have been registered yet."}`;
+  }
+  if (msg.includes("Missing or invalid parameters") || msg.includes("execution failed")) {
+    return `Record not found or not available on-chain. ${context || "Check the ID and try again."}`;
+  }
+  if (msg.includes("ONLY_OWNER")) return "Only the contract owner can perform this action.";
+  if (msg.includes("PATIENT_EXISTS")) return "A patient with this ID already exists.";
+  if (msg.includes("DRUG_EXISTS")) return "A drug with this name already exists in the database.";
+  if (msg.includes("user rejected") || msg.includes("User rejected")) return "Transaction was cancelled by user.";
+  return msg.slice(0, 200);
+}
+
 /* ─── Main App ─── */
 function ResultDetailCard({ data, onClose }: { data: any; onClose: () => void }) {
   const result = data?.result || {};
@@ -1331,7 +1347,7 @@ export function App() {
             </div>
             <div className="result-body">
               <button className="btn btn-sm" onClick={async () => {
-                try { const d = await read("get_check", [result]); setResult(typeof d === "string" ? d : JSON.stringify(d, null, 2)); } catch (e: any) { setResult(e.message); }
+                try { const d = await read("get_check", [result]); setResult(typeof d === "string" ? d : JSON.stringify(d, null, 2)); } catch (e: any) { setResult(friendlyError(e)); }
               }}>Load Full Result</button>
             </div>
           </div>
@@ -1401,7 +1417,7 @@ export function App() {
             </div>
             <div className="result-body">
               <button className="btn btn-sm" onClick={async () => {
-                try { const d = await read("get_check", [result]); setResult(typeof d === "string" ? d : JSON.stringify(d, null, 2)); } catch (e: any) { setResult(e.message); }
+                try { const d = await read("get_check", [result]); setResult(typeof d === "string" ? d : JSON.stringify(d, null, 2)); } catch (e: any) { setResult(friendlyError(e)); }
               }}>Load Full Result</button>
             </div>
           </div>
@@ -1470,7 +1486,7 @@ export function App() {
             </div>
             <div className="result-body">
               <button className="btn btn-sm" onClick={async () => {
-                try { const d = await read("get_check", [result]); setResult(typeof d === "string" ? d : JSON.stringify(d, null, 2)); } catch (e: any) { setResult(e.message); }
+                try { const d = await read("get_check", [result]); setResult(typeof d === "string" ? d : JSON.stringify(d, null, 2)); } catch (e: any) { setResult(friendlyError(e)); }
               }}>Load Full Result</button>
             </div>
           </div>
@@ -1535,7 +1551,7 @@ export function App() {
             </div>
             <div className="result-body">
               <button className="btn btn-sm" onClick={async () => {
-                try { const d = await read("get_check", [result]); setResult(typeof d === "string" ? d : JSON.stringify(d, null, 2)); } catch (e: any) { setResult(e.message); }
+                try { const d = await read("get_check", [result]); setResult(typeof d === "string" ? d : JSON.stringify(d, null, 2)); } catch (e: any) { setResult(friendlyError(e)); }
               }}>Load Full Result</button>
             </div>
           </div>
@@ -1625,7 +1641,7 @@ export function App() {
           setPatientData({ error: "Patient not found locally or on-chain" });
         }
       } catch (e: any) {
-        setPatientData({ error: `Patient "${lookupId}" not found. Register on-chain first or import via CSV/JSON.` });
+        setPatientData({ error: friendlyError(e, "Patient not found. Register on-chain or import via CSV/JSON.") });
       }
     };
 
@@ -1779,7 +1795,7 @@ export function App() {
           setPrescData(String(d || "Not found"));
         }
       } catch (e: any) {
-        setPrescData(`Error: ${e.message}`);
+        setPrescData(friendlyError(e, "Prescription not found."));
       }
     };
 
@@ -1893,7 +1909,7 @@ export function App() {
           setDrugInfoResult(String(d || "Drug not found"));
         }
       } catch (e: any) {
-        setDrugInfoResult(`Error: ${e.message}`);
+        setDrugInfoResult(friendlyError(e, "Drug not found in database."));
       }
     };
 
@@ -1998,7 +2014,7 @@ export function App() {
           setAlertData(String(d || "Alert not found"));
         }
       } catch (e: any) {
-        setAlertData(`Error: ${e.message}`);
+        setAlertData(friendlyError(e, "Alert not found. It may not have been generated yet."));
       }
     };
 
@@ -2008,7 +2024,7 @@ export function App() {
         const d = await read("get_alerts_for_patient", [alertPatientId]);
         setPatientAlerts(d);
       } catch (e: any) {
-        setPatientAlerts({ error: e.message });
+        setPatientAlerts({ error: friendlyError(e, "No alerts found for this patient.") });
       }
     };
 
@@ -2128,7 +2144,7 @@ export function App() {
             </div>
             <div className="result-body">
               <button className="btn btn-sm" onClick={async () => {
-                try { const d = await read("get_check", [result]); setResult(typeof d === "string" ? d : JSON.stringify(d, null, 2)); } catch (e: any) { setResult(e.message); }
+                try { const d = await read("get_check", [result]); setResult(typeof d === "string" ? d : JSON.stringify(d, null, 2)); } catch (e: any) { setResult(friendlyError(e)); }
               }}>Load Full Result</button>
             </div>
           </div>
@@ -2198,7 +2214,7 @@ export function App() {
             </div>
             <div className="result-body">
               <button className="btn btn-sm" onClick={async () => {
-                try { const d = await read("get_check", [result]); setResult(typeof d === "string" ? d : JSON.stringify(d, null, 2)); } catch (e: any) { setResult(e.message); }
+                try { const d = await read("get_check", [result]); setResult(typeof d === "string" ? d : JSON.stringify(d, null, 2)); } catch (e: any) { setResult(friendlyError(e)); }
               }}>Load Full Result</button>
             </div>
           </div>
@@ -2258,10 +2274,10 @@ export function App() {
                           if (typeof d === "string") { try { d = JSON.parse(d); } catch { d = { result: { description: d } }; } }
                           setHistoryDetail(d);
                         } catch (err: any) {
-                          setHistoryDetail({ result: { description: `Error: ${err.message}` }, type: h.type, query: {} });
+                          setHistoryDetail({ result: { description: friendlyError(err) }, type: h.type, query: {} });
                         }
                         } catch (e: any) {
-                          setHistoryDetail(`Error: ${e.message}`);
+                          setHistoryDetail(friendlyError(e));
                         }
                       }}>View</button>
                     </td>
