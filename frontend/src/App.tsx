@@ -495,89 +495,332 @@ const workflowSteps = [
 ];
 
 /* ── Pixel MC Doctor — bounces/blinks in corner like retro game ── */
-function PixelMCDoc() {
+/* ── AI Guide — auto-reads English instructions per page ── */
+const aiGuides: Record<string, { title: string; steps: string[] }> = {
+  dashboard: {
+    title: "Welcome to MedGuard",
+    steps: [
+      "Welcome to MedGuard — your AI-powered Clinical Decision Support Oracle on GenLayer blockchain.",
+      "This dashboard shows 10 clinical tools. Each tool runs on-chain with AI consensus for patient safety.",
+      "STEP 1: Import patient data using the Import CSV/JSON button, or use the auto-loaded 50 sample patients.",
+      "STEP 2: Import drug data using the Import CSV/JSON button, or use the auto-loaded 103 sample drugs.",
+      "STEP 3: Click any Clinical Tool card below to start a clinical check. Each tool fetches trusted medical sources on-chain.",
+      "STEP 4: Connect your wallet (OKX or MetaMask) to submit transactions. The contract is on GenLayer StudioNet (Chain 61999).",
+      "STEP 5: Watch the Clinical Workflow animation above — it shows how data flows through all 10 tools with glowing arrows.",
+      "All clinical results are stored on-chain and can be viewed in the History page. Let's begin!"
+    ]
+  },
+  interaction: {
+    title: "Drug Interaction Check",
+    steps: [
+      "This tool checks if two drugs can be safely taken together using AI analysis.",
+      "STEP 1: Select Drug A from the dropdown (populated from your Drug Database) or type a drug name.",
+      "STEP 2: Select Drug B the same way. These are the two drugs you want to check for interactions.",
+      "STEP 3: Optionally add patient context — age, weight, conditions — for more accurate results.",
+      "STEP 4: Click 'Check Interaction' to submit. The contract fetches from trusted sources (drugs.com, PubMed, FDA).",
+      "STEP 5: AI analyzes the interaction and returns severity (NONE to CONTRAINDICATED), risk score, and recommendation.",
+      "If severity is MAJOR or CONTRAINDICATED, an automatic alert is created for the patient."
+    ]
+  },
+  dosage: {
+    title: "Dosage Verification",
+    steps: [
+      "This tool verifies if a medication dosage is safe for a specific patient.",
+      "STEP 1: Select or type the drug name from your database.",
+      "STEP 2: Enter the prescribed dosage in milligrams (mg).",
+      "STEP 3: Enter patient weight in kg and age in years for personalized dosing.",
+      "STEP 4: Click 'Verify Dosage' to submit. AI checks against therapeutic guidelines.",
+      "STEP 5: Result shows SAFE, SUBTHERAPEUTIC, ABOVE_THERAPEUTIC, or DANGEROUS with recommended range.",
+      "If DANGEROUS, an automatic critical alert is created immediately."
+    ]
+  },
+  allergy: {
+    title: "Allergy Cross-Check",
+    steps: [
+      "This tool cross-references medications against known patient allergies.",
+      "STEP 1: Enter medications as a comma-separated list (e.g., Amoxicillin, Ibuprofen).",
+      "STEP 2: Enter known allergies as a comma-separated list (e.g., Penicillin, Sulfa drugs).",
+      "STEP 3: Add patient context if available for better cross-reactivity analysis.",
+      "STEP 4: Click 'Check Allergy Risk' to submit. AI checks cross-reactivity patterns.",
+      "STEP 5: Result shows risk level (NO_RISK to ANAPHYLAXIS_RISK) with flagged medications.",
+      "CRITICAL: If ANAPHYLAXIS_RISK, an automatic critical alert is created. Never assume safety when uncertain."
+    ]
+  },
+  treatment: {
+    title: "Treatment Validation",
+    steps: [
+      "This tool validates if a proposed treatment is appropriate for a medical condition.",
+      "STEP 1: Enter the medical condition (e.g., Type 2 Diabetes, Hypertension).",
+      "STEP 2: Enter the proposed treatment (e.g., Metformin 500mg twice daily).",
+      "STEP 3: Add patient context for personalized validation.",
+      "STEP 4: Click 'Validate Treatment' to submit. AI checks against clinical guidelines.",
+      "STEP 5: Result shows verdict (APPROPRIATE to INAPPROPRIATE) with guideline source and alternatives."
+    ]
+  },
+  patients: {
+    title: "Patient Registry",
+    steps: [
+      "This page manages patient records on-chain. Data is also stored locally for quick access.",
+      "TO REGISTER: Enter Patient ID, Full Name, Allergies, Conditions, Blood Type, Age, and Weight.",
+      "Click 'Register Patient' to store the record on-chain. This requires a wallet transaction.",
+      "TO LOOKUP: Select a patient from the dropdown or enter their ID and click 'Lookup'.",
+      "Local patients (imported via CSV/JSON) are shown in the dropdown immediately.",
+      "On-chain patients require a blockchain lookup. The system checks local data first, then on-chain.",
+      "TIP: Import the 50 sample patients from the Dashboard to populate the dropdown instantly."
+    ]
+  },
+  prescription: {
+    title: "Prescription Verification",
+    steps: [
+      "This tool verifies a prescription against the patient's full medical record.",
+      "STEP 1: Select or enter the Patient ID. The system loads their allergies and conditions.",
+      "STEP 2: Enter prescribed medications as a comma-separated list.",
+      "STEP 3: Add prescriber notes if available.",
+      "STEP 4: Click 'Verify Prescription' to submit. AI performs a comprehensive safety check.",
+      "STEP 5: The AI cross-references ALL allergies, drug interactions, and dosage appropriateness.",
+      "Result: VERIFIED (safe), FLAGGED (concerns found), or REJECTED (unsafe). Auto-alerts if flagged/rejected."
+    ]
+  },
+  drugs: {
+    title: "Drug Database",
+    steps: [
+      "This page manages the on-chain pharmaceutical database.",
+      "TO ADD: Enter Drug Name, Category, Common Dosages, Side Effects, and Contraindications.",
+      "Click 'Add Drug' to store on-chain. Only the contract owner can add drugs.",
+      "TO SEARCH: Enter a drug name in the search field. Results show partial matches.",
+      "The database is pre-loaded with 103 drugs from the Dashboard import.",
+      "Drug data is used by other tools — the dropdown selectors pull from this database.",
+      "TIP: Import the 103 sample drugs from the Dashboard to populate the database instantly."
+    ]
+  },
+  alerts: {
+    title: "Medical Alerts",
+    steps: [
+      "This page shows critical patient alerts and safety notifications.",
+      "Alerts are AUTO-GENERATED when dangerous interactions, dosages, or allergy risks are detected.",
+      "Alert types: DRUG_INTERACTION, ALLERGY_RISK, DOSAGE_ERROR, CONTRAINDICATION.",
+      "Severity levels: LOW, MEDIUM, HIGH, CRITICAL.",
+      "TO VIEW: Select a patient from the dropdown to see their specific alerts.",
+      "Alerts are stored on-chain and cannot be deleted. They serve as a permanent safety audit trail."
+    ]
+  },
+  trials: {
+    title: "Clinical Trial Matching",
+    steps: [
+      "This tool matches patients to relevant clinical trial opportunities.",
+      "STEP 1: Enter the patient's medical condition (e.g., Breast Cancer, Multiple Sclerosis).",
+      "STEP 2: Add patient context — age, stage, prior treatments — for better matching.",
+      "STEP 3: Click 'Match Trials' to submit. AI searches clinicaltrials.gov and WHO databases.",
+      "STEP 4: Results show matching trials with NCT IDs, Phase, Status, Eligibility, and Contact info.",
+      "Only reputable sources are used. If no suitable trials found, an empty list is returned."
+    ]
+  },
+  insurance: {
+    title: "Insurance Claim Verification",
+    steps: [
+      "This tool verifies insurance claims against fair market pricing data.",
+      "STEP 1: Enter the treatment description (e.g., Knee Replacement Surgery).",
+      "STEP 2: Enter the claimed cost in dollars.",
+      "STEP 3: Optionally enter the insurance provider name.",
+      "STEP 4: Click 'Verify Claim' to submit. AI checks against medical pricing databases.",
+      "STEP 5: Result shows verdict (APPROVED, DENIED, PARTIAL_COVERAGE, NEEDS_REVIEW) with fair cost estimate.",
+      "If data is insufficient, the system returns NEEDS_REVIEW instead of guessing."
+    ]
+  },
+  history: {
+    title: "Check History",
+    steps: [
+      "This page shows all clinical checks performed during this session.",
+      "Each entry shows: Type, Input parameters, Result ID, and Timestamp.",
+      "Click 'View' on any entry to see the full clinical assessment with severity, confidence, and recommendations.",
+      "History is session-based (stored in React state). Export results using the Dashboard export tools.",
+      "On-chain results can be looked up by their Result ID using the contract's get_check function."
+    ]
+  }
+};
+
+function PixelMCDoc({ currentPage }: { currentPage: string }) {
+  const [open, setOpen] = React.useState(false);
+  const [stepIdx, setStepIdx] = React.useState(0);
+  const [typedText, setTypedText] = React.useState("");
+  const [isTyping, setIsTyping] = React.useState(false);
+  const guide = aiGuides[currentPage] || aiGuides.dashboard;
+  const currentStep = guide.steps[stepIdx] || guide.steps[0];
+
+  // Typewriter effect
+  React.useEffect(() => {
+    if (!open) return;
+    setTypedText("");
+    setIsTyping(true);
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      setTypedText(currentStep.slice(0, i));
+      if (i >= currentStep.length) {
+        clearInterval(interval);
+        setIsTyping(false);
+      }
+    }, 18);
+    return () => clearInterval(interval);
+  }, [open, currentStep]);
+
+  // Reset step when page changes
+  React.useEffect(() => {
+    setStepIdx(0);
+  }, [currentPage]);
+
+  const nextStep = () => {
+    if (stepIdx < guide.steps.length - 1) setStepIdx(stepIdx + 1);
+  };
+  const prevStep = () => {
+    if (stepIdx > 0) setStepIdx(stepIdx - 1);
+  };
+
   return (
-    <div style={{
-      position: "fixed", bottom: 20, right: 20, zIndex: 1000,
-      animation: "mcBounce 0.8s ease-in-out infinite",
-      cursor: "pointer", filter: "drop-shadow(0 4px 16px rgba(0,212,170,0.3))",
-    }} title="Dr. MedGuard — Your Clinical AI Assistant!">
-      <svg width="64" height="88" viewBox="0 0 64 88" style={{ imageRendering: "pixelated" as any }}>
-        {/* Speech bubble */}
-        <rect x="0" y="-22" width="58" height="20" rx="4" fill="white" opacity="0.95" />
-        <polygon points="20,−2 28,−2 22,4" fill="white" opacity="0.95" />
-        <text x="29" y="-8" textAnchor="middle" fontSize="7" fill="#1e3a5f" fontWeight="700" fontFamily="monospace">Hi! I'm Dr.</text>
+    <>
+      {/* Chat panel */}
+      {open && (
+        <div style={{
+          position: "fixed", bottom: 110, right: 20, width: 380, maxHeight: 420,
+          background: "var(--surface-high, #0f172a)", border: "2px solid var(--teal, #00d4aa)",
+          borderRadius: 16, zIndex: 1001, display: "flex", flexDirection: "column",
+          boxShadow: "0 8px 32px rgba(0,212,170,0.2), 0 0 60px rgba(0,212,170,0.08)",
+          overflow: "hidden",
+        }}>
+          {/* Header */}
+          <div style={{
+            padding: "12px 16px", background: "linear-gradient(135deg, #00d4aa, #2563eb)",
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 18 }}>🩺</span>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: "white" }}>Dr. MedGuard AI</div>
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)" }}>Clinical Guide — {guide.title}</div>
+              </div>
+            </div>
+            <button onClick={() => setOpen(false)} style={{
+              background: "rgba(255,255,255,0.2)", border: "none", color: "white",
+              borderRadius: 8, width: 28, height: 28, cursor: "pointer", fontSize: 14, fontWeight: 700,
+            }}>✕</button>
+          </div>
 
-        {/* Hair */}
-        <rect x="18" y="4" width="28" height="10" rx="4" fill="#2c3e50" />
-        <rect x="16" y="10" width="4" height="10" rx="2" fill="#2c3e50" />
-        <rect x="44" y="10" width="4" height="10" rx="2" fill="#2c3e50" />
-        {/* Head */}
-        <rect x="20" y="12" width="24" height="22" rx="5" fill="#fcd5b8" />
-        {/* Head mirror */}
-        <rect x="28" y="2" width="8" height="6" rx="2" fill="#bdc3c7" />
-        <rect x="30" y="3" width="4" height="3" rx="1" fill="#ecf0f1" />
-        {/* Eyes — blink animation */}
-        <rect x="26" y="20" width="5" height="4" rx="2" fill="#2c3e50">
-          <animate attributeName="height" values="4;1;4" dur="3s" repeatCount="indefinite" begin="0s" />
-          <animate attributeName="y" values="20;22;20" dur="3s" repeatCount="indefinite" begin="0s" />
-        </rect>
-        <rect x="34" y="20" width="5" height="4" rx="2" fill="#2c3e50">
-          <animate attributeName="height" values="4;1;4" dur="3s" repeatCount="indefinite" begin="0s" />
-          <animate attributeName="y" values="20;22;20" dur="3s" repeatCount="indefinite" begin="0s" />
-        </rect>
-        {/* Eye shine */}
-        <rect x="27" y="20" width="2" height="2" rx="1" fill="white">
-          <animate attributeName="opacity" values="1;0;1" dur="3s" repeatCount="indefinite" begin="0s" />
-        </rect>
-        <rect x="35" y="20" width="2" height="2" rx="1" fill="white">
-          <animate attributeName="opacity" values="1;0;1" dur="3s" repeatCount="indefinite" begin="0s" />
-        </rect>
-        {/* Big smile */}
-        <path d="M26 28 Q32 34 38 28" stroke="#e74c3c" strokeWidth="2" fill="none" strokeLinecap="round" />
-        {/* Blush */}
-        <circle cx="22" cy="28" r="3" fill="#ffb3b3" opacity="0.5" />
-        <circle cx="42" cy="28" r="3" fill="#ffb3b3" opacity="0.5" />
-        {/* Glasses */}
-        <rect x="23" y="17" width="8" height="7" rx="2" fill="none" stroke="#546e7a" strokeWidth="1.5" />
-        <rect x="33" y="17" width="8" height="7" rx="2" fill="none" stroke="#546e7a" strokeWidth="1.5" />
-        <line x1="31" y1="20" x2="33" y2="20" stroke="#546e7a" strokeWidth="1.5" />
+          {/* Content */}
+          <div style={{ flex: 1, padding: 16, overflow: "auto" }}>
+            <div style={{
+              fontSize: 12, color: "var(--text-muted, #94a3b8)", fontFamily: "var(--mono, monospace)",
+              marginBottom: 8, letterSpacing: "0.05em", textTransform: "uppercase",
+            }}>
+              Step {stepIdx + 1} of {guide.steps.length}
+            </div>
+            <div style={{
+              fontSize: 14, color: "var(--text, #e2e8f0)", lineHeight: 1.7,
+              fontFamily: "var(--mono, monospace)", minHeight: 80,
+            }}>
+              {typedText}
+              {isTyping && <span style={{ color: "var(--teal)", animation: "mcBounce 0.5s infinite" }}>▌</span>}
+            </div>
+          </div>
 
-        {/* White coat */}
-        <rect x="16" y="36" width="32" height="28" rx="4" fill="white" stroke="#ddd" strokeWidth="1" />
-        {/* Coat V */}
-        <path d="M24 36 L32 44 L40 36" fill="#f0f4ff" stroke="#ccc" strokeWidth="0.5" />
-        {/* Stethoscope */}
-        <path d="M22 36 Q16 42 18 52" stroke="#3498db" strokeWidth="2" fill="none" />
-        <circle cx="18" cy="54" r="3" fill="#3498db" />
-        <circle cx="18" cy="54" r="1.5" fill="#2980b9" />
-        {/* Clipboard */}
-        <rect x="38" y="42" width="12" height="18" rx="2" fill="#2563eb" />
-        <rect x="40" y="44" width="8" height="2" rx="1" fill="white" opacity="0.7" />
-        <rect x="40" y="48" width="8" height="1.5" rx="0.5" fill="white" opacity="0.5" />
-        <rect x="40" y="52" width="5" height="1.5" rx="0.5" fill="white" opacity="0.4" />
-        {/* Arms */}
-        <rect x="8" y="38" width="8" height="18" rx="4" fill="white" stroke="#ddd" strokeWidth="0.5" />
-        <rect x="48" y="38" width="8" height="18" rx="4" fill="white" stroke="#ddd" strokeWidth="0.5" />
-        {/* Hands */}
-        <rect x="10" y="56" width="6" height="5" rx="2.5" fill="#fcd5b8" />
-        <rect x="48" y="56" width="6" height="5" rx="2.5" fill="#fcd5b8" />
+          {/* Navigation */}
+          <div style={{
+            padding: "10px 16px", borderTop: "1px solid var(--border, #1e293b)",
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+          }}>
+            <button onClick={prevStep} disabled={stepIdx === 0} style={{
+              background: stepIdx === 0 ? "transparent" : "var(--surface, #1e293b)",
+              border: "1px solid var(--border, #334155)", color: stepIdx === 0 ? "#475569" : "var(--teal)",
+              borderRadius: 8, padding: "6px 14px", cursor: stepIdx === 0 ? "default" : "pointer",
+              fontSize: 12, fontWeight: 600,
+            }}>← Back</button>
+            <div style={{ display: "flex", gap: 4 }}>
+              {guide.steps.map((_, i) => (
+                <div key={i} style={{
+                  width: 6, height: 6, borderRadius: "50%",
+                  background: i === stepIdx ? "var(--teal)" : "var(--border, #334155)",
+                  transition: "all 0.3s",
+                }} />
+              ))}
+            </div>
+            <button onClick={nextStep} disabled={stepIdx === guide.steps.length - 1} style={{
+              background: stepIdx === guide.steps.length - 1 ? "transparent" : "var(--teal, #00d4aa)",
+              border: "1px solid var(--teal, #00d4aa)", color: stepIdx === guide.steps.length - 1 ? "#475569" : "#0f172a",
+              borderRadius: 8, padding: "6px 14px",
+              cursor: stepIdx === guide.steps.length - 1 ? "default" : "pointer",
+              fontSize: 12, fontWeight: 700,
+            }}>{stepIdx === guide.steps.length - 1 ? "Done ✓" : "Next →"}</button>
+          </div>
+        </div>
+      )}
 
-        {/* Legs */}
-        <rect x="20" y="64" width="8" height="14" rx="4" fill="#1e3a5f" />
-        <rect x="36" y="64" width="8" height="14" rx="4" fill="#1e3a5f" />
-        {/* Shoes */}
-        <rect x="17" y="76" width="12" height="6" rx="3" fill="#2c3e50" />
-        <rect x="35" y="76" width="12" height="6" rx="3" fill="#2c3e50" />
-
-        {/* ID Badge */}
-        <rect x="42" y="40" width="7" height="9" rx="1.5" fill="#e2e8f0" />
-        <rect x="43" y="41" width="5" height="3" rx="0.5" fill="#2563eb" opacity="0.5" />
-      </svg>
-    </div>
+      {/* Doctor character — click to toggle */}
+      <div onClick={() => setOpen(!open)} style={{
+        position: "fixed", bottom: 20, right: 20, zIndex: 1000,
+        animation: "mcBounce 0.8s ease-in-out infinite",
+        cursor: "pointer", filter: "drop-shadow(0 4px 16px rgba(0,212,170,0.3))",
+      }} title="Click me for AI guide!">
+        {/* Notification bubble when closed */}
+        {!open && (
+          <div style={{
+            position: "absolute", top: -32, right: 0,
+            background: "white", color: "#1e3a5f", fontSize: 10, fontWeight: 700,
+            padding: "4px 10px", borderRadius: 12, whiteSpace: "nowrap",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.2)", fontFamily: "var(--mono, monospace)",
+          }}>
+            Need help? Click me!
+          </div>
+        )}
+        <svg width="64" height="88" viewBox="0 0 64 88" style={{ imageRendering: "pixelated" as any }}>
+          <rect x="18" y="4" width="28" height="10" rx="4" fill="#2c3e50" />
+          <rect x="16" y="10" width="4" height="10" rx="2" fill="#2c3e50" />
+          <rect x="44" y="10" width="4" height="10" rx="2" fill="#2c3e50" />
+          <rect x="20" y="12" width="24" height="22" rx="5" fill="#fcd5b8" />
+          <rect x="28" y="2" width="8" height="6" rx="2" fill="#bdc3c7" />
+          <rect x="30" y="3" width="4" height="3" rx="1" fill="#ecf0f1" />
+          <rect x="26" y="20" width="5" height="4" rx="2" fill="#2c3e50">
+            <animate attributeName="height" values="4;1;4" dur="3s" repeatCount="indefinite" />
+            <animate attributeName="y" values="20;22;20" dur="3s" repeatCount="indefinite" />
+          </rect>
+          <rect x="34" y="20" width="5" height="4" rx="2" fill="#2c3e50">
+            <animate attributeName="height" values="4;1;4" dur="3s" repeatCount="indefinite" />
+            <animate attributeName="y" values="20;22;20" dur="3s" repeatCount="indefinite" />
+          </rect>
+          <rect x="27" y="20" width="2" height="2" rx="1" fill="white">
+            <animate attributeName="opacity" values="1;0;1" dur="3s" repeatCount="indefinite" />
+          </rect>
+          <rect x="35" y="20" width="2" height="2" rx="1" fill="white">
+            <animate attributeName="opacity" values="1;0;1" dur="3s" repeatCount="indefinite" />
+          </rect>
+          <path d="M26 28 Q32 34 38 28" stroke="#e74c3c" strokeWidth="2" fill="none" strokeLinecap="round" />
+          <circle cx="22" cy="28" r="3" fill="#ffb3b3" opacity="0.5" />
+          <circle cx="42" cy="28" r="3" fill="#ffb3b3" opacity="0.5" />
+          <rect x="23" y="17" width="8" height="7" rx="2" fill="none" stroke="#546e7a" strokeWidth="1.5" />
+          <rect x="33" y="17" width="8" height="7" rx="2" fill="none" stroke="#546e7a" strokeWidth="1.5" />
+          <line x1="31" y1="20" x2="33" y2="20" stroke="#546e7a" strokeWidth="1.5" />
+          <rect x="16" y="36" width="32" height="28" rx="4" fill="white" stroke="#ddd" strokeWidth="1" />
+          <path d="M24 36 L32 44 L40 36" fill="#f0f4ff" stroke="#ccc" strokeWidth="0.5" />
+          <path d="M22 36 Q16 42 18 52" stroke="#3498db" strokeWidth="2" fill="none" />
+          <circle cx="18" cy="54" r="3" fill="#3498db" />
+          <circle cx="18" cy="54" r="1.5" fill="#2980b9" />
+          <rect x="38" y="42" width="12" height="18" rx="2" fill="#2563eb" />
+          <rect x="40" y="44" width="8" height="2" rx="1" fill="white" opacity="0.7" />
+          <rect x="40" y="48" width="8" height="1.5" rx="0.5" fill="white" opacity="0.5" />
+          <rect x="40" y="52" width="5" height="1.5" rx="0.5" fill="white" opacity="0.4" />
+          <rect x="8" y="38" width="8" height="18" rx="4" fill="white" stroke="#ddd" strokeWidth="0.5" />
+          <rect x="48" y="38" width="8" height="18" rx="4" fill="white" stroke="#ddd" strokeWidth="0.5" />
+          <rect x="10" y="56" width="6" height="5" rx="2.5" fill="#fcd5b8" />
+          <rect x="48" y="56" width="6" height="5" rx="2.5" fill="#fcd5b8" />
+          <rect x="20" y="64" width="8" height="14" rx="4" fill="#1e3a5f" />
+          <rect x="36" y="64" width="8" height="14" rx="4" fill="#1e3a5f" />
+          <rect x="17" y="76" width="12" height="6" rx="3" fill="#2c3e50" />
+          <rect x="35" y="76" width="12" height="6" rx="3" fill="#2c3e50" />
+          <rect x="42" y="40" width="7" height="9" rx="1.5" fill="#e2e8f0" />
+          <rect x="43" y="41" width="5" height="3" rx="0.5" fill="#2563eb" opacity="0.5" />
+        </svg>
+      </div>
+    </>
   );
 }
-
 /* ── Workflow with glowing arrow transitions ── */
 function WorkflowDoctor({ activeStep, setActiveStep, playing, setPlaying }: { activeStep: number; setActiveStep: (n: number | ((p: number) => number)) => void; playing: boolean; setPlaying: (b: boolean) => void }) {
   const intervalRef = React.useRef<number | null>(null);
@@ -2113,7 +2356,7 @@ export function App() {
           {ca && <a href={explorerAddress(ca)} target="_blank" rel="noopener noreferrer">Contract</a>}
         </div>
       </footer>
-      <PixelMCDoc />
+      <PixelMCDoc currentPage={page} />
     </>
   );
 }
