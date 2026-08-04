@@ -644,12 +644,42 @@ function PixelMCDoc({ currentPage }: { currentPage: string }) {
   const [stepIdx, setStepIdx] = React.useState(0);
   const [typedText, setTypedText] = React.useState("");
   const [isTyping, setIsTyping] = React.useState(false);
+  const [muted, setMuted] = React.useState(false);
+  const [speaking, setSpeaking] = React.useState(false);
   const guide = aiGuides[currentPage] || aiGuides.dashboard;
   const currentStep = guide.steps[stepIdx] || guide.steps[0];
+  const synthRef = React.useRef<SpeechSynthesisUtterance | null>(null);
 
-  // Typewriter effect
+  // Speak text aloud
+  const speak = React.useCallback((text: string) => {
+    if (muted || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.rate = 0.95;
+    utter.pitch = 1.0;
+    utter.volume = 1.0;
+    // Pick a good English voice
+    const voices = window.speechSynthesis.getVoices();
+    const enVoice = voices.find(v => v.lang.startsWith("en") && v.name.includes("Google")) ||
+                    voices.find(v => v.lang.startsWith("en-US")) ||
+                    voices.find(v => v.lang.startsWith("en")) || null;
+    if (enVoice) utter.voice = enVoice;
+    utter.onstart = () => setSpeaking(true);
+    utter.onend = () => setSpeaking(false);
+    utter.onerror = () => setSpeaking(false);
+    synthRef.current = utter;
+    window.speechSynthesis.speak(utter);
+  }, [muted]);
+
+  // Stop speaking
+  const stopSpeak = React.useCallback(() => {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    setSpeaking(false);
+  }, []);
+
+  // Typewriter + speak effect
   React.useEffect(() => {
-    if (!open) return;
+    if (!open) { stopSpeak(); return; }
     setTypedText("");
     setIsTyping(true);
     let i = 0;
@@ -661,8 +691,10 @@ function PixelMCDoc({ currentPage }: { currentPage: string }) {
         setIsTyping(false);
       }
     }, 18);
-    return () => clearInterval(interval);
-  }, [open, currentStep]);
+    // Start speaking immediately
+    speak(currentStep);
+    return () => { clearInterval(interval); stopSpeak(); };
+  }, [open, currentStep, speak, stopSpeak]);
 
   // Reset step when page changes
   React.useEffect(() => {
@@ -699,10 +731,31 @@ function PixelMCDoc({ currentPage }: { currentPage: string }) {
                 <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)" }}>Clinical Guide — {guide.title}</div>
               </div>
             </div>
-            <button onClick={() => setOpen(false)} style={{
-              background: "rgba(255,255,255,0.2)", border: "none", color: "white",
-              borderRadius: 8, width: 28, height: 28, cursor: "pointer", fontSize: 14, fontWeight: 700,
-            }}>✕</button>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              {/* Speaking indicator */}
+              {speaking && (
+                <div style={{ display: "flex", alignItems: "center", gap: 3, marginRight: 4 }}>
+                  <div style={{ width: 3, height: 8, background: "white", borderRadius: 2, animation: "mcBounce 0.3s infinite" }} />
+                  <div style={{ width: 3, height: 12, background: "white", borderRadius: 2, animation: "mcBounce 0.4s infinite" }} />
+                  <div style={{ width: 3, height: 6, background: "white", borderRadius: 2, animation: "mcBounce 0.35s infinite" }} />
+                </div>
+              )}
+              {/* Mute button */}
+              <button onClick={() => { setMuted(!muted); if (!muted) stopSpeak(); }} style={{
+                background: muted ? "rgba(255,0,0,0.3)" : "rgba(255,255,255,0.2)", border: "none", color: "white",
+                borderRadius: 8, width: 28, height: 28, cursor: "pointer", fontSize: 13,
+              }} title={muted ? "Unmute" : "Mute"}>{muted ? "🔇" : "🔊"}</button>
+              {/* Replay button */}
+              <button onClick={() => speak(currentStep)} style={{
+                background: "rgba(255,255,255,0.2)", border: "none", color: "white",
+                borderRadius: 8, width: 28, height: 28, cursor: "pointer", fontSize: 13,
+              }} title="Replay">🔁</button>
+              {/* Close */}
+              <button onClick={() => setOpen(false)} style={{
+                background: "rgba(255,255,255,0.2)", border: "none", color: "white",
+                borderRadius: 8, width: 28, height: 28, cursor: "pointer", fontSize: 14, fontWeight: 700,
+              }}>✕</button>
+            </div>
           </div>
 
           {/* Content */}
