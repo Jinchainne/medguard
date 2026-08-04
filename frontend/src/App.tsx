@@ -597,9 +597,7 @@ function DoctorSVG({ walking }: { walking?: boolean }) {
   );
 }
 
-function WorkflowDoctor({ setPage: _setPage }: { setPage: (p: Page) => void }) {
-  const [activeStep, setActiveStep] = React.useState(-1);
-  const [playing, setPlaying] = React.useState(false);
+function WorkflowDoctor({ activeStep, setActiveStep, playing, setPlaying }: { activeStep: number; setActiveStep: (n: number | ((p: number) => number)) => void; playing: boolean; setPlaying: (b: boolean) => void }) {
   const intervalRef = React.useRef<number | null>(null);
 
   const nextStep = React.useCallback(() => {
@@ -699,6 +697,8 @@ export function App() {
   );
 
   const [page, setPage] = useState<Page>("dashboard");
+  const [wfStep, setWfStep] = useState(-1);
+  const [wfPlaying, setWfPlaying] = useState(false);
   const [stats, setStats] = useState<any>(null);
   const [history, setHistory] = useState<CheckRecord[]>([]);
   const [historyDetail, setHistoryDetail] = useState<any>(null);
@@ -938,7 +938,7 @@ export function App() {
 
         {/* ── Clinical Workflow Animation ── */}
         <div className="section-title">Clinical Workflow</div>
-        <WorkflowDoctor setPage={setPage} />
+        <WorkflowDoctor activeStep={wfStep} setActiveStep={setWfStep} playing={wfPlaying} setPlaying={setWfPlaying} />
 
         <div className="section-title">Clinical Tools</div>
         <div className="feature-grid">
