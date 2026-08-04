@@ -496,21 +496,19 @@ const workflowSteps = [
 
 function WorkflowDoctor({ activeStep, setActiveStep, playing, setPlaying }: { activeStep: number; setActiveStep: (n: number | ((p: number) => number)) => void; playing: boolean; setPlaying: (b: boolean) => void }) {
   const intervalRef = React.useRef<number | null>(null);
-
-  const nextStep = React.useCallback(() => {
-    setActiveStep(prev => {
-      if (prev >= workflowSteps.length - 1) return -1;
-      return prev + 1;
-    });
-  }, [setActiveStep]);
+  const stepRef = React.useRef(activeStep);
+  stepRef.current = activeStep;
 
   React.useEffect(() => {
     if (playing) {
-      nextStep();
-      intervalRef.current = window.setInterval(nextStep, 1800);
+      // Immediate first step
+      setActiveStep(prev => prev >= workflowSteps.length - 1 ? 0 : prev + 1);
+      intervalRef.current = window.setInterval(() => {
+        setActiveStep(prev => prev >= workflowSteps.length - 1 ? 0 : prev + 1);
+      }, 1800);
     }
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [playing, nextStep]);
+    return () => { if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; } };
+  }, [playing]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const isWalking = playing;
 
