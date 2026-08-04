@@ -480,6 +480,140 @@ function ImportExportPanel({ type, onImport, onExportData }: {
   );
 }
 
+/* ── Workflow Doctor Animation Component ── */
+const workflowSteps = [
+  { num: 1, icon: "💊", title: "Drug Interaction", page: "interaction" as Page, color: "#2563eb" },
+  { num: 2, icon: "⚖️", title: "Dosage Check", page: "dosage" as Page, color: "#059669" },
+  { num: 3, icon: "🛡️", title: "Allergy Risk", page: "allergy" as Page, color: "#dc2626" },
+  { num: 4, icon: "🩺", title: "Treatment", page: "treatment" as Page, color: "#0891b2" },
+  { num: 5, icon: "👤", title: "Patients", page: "patients" as Page, color: "#d97706" },
+  { num: 6, icon: "📋", title: "Prescription", page: "prescription" as Page, color: "#2563eb" },
+  { num: 7, icon: "💉", title: "Drug DB", page: "drugs" as Page, color: "#059669" },
+  { num: 8, icon: "🔔", title: "Alerts", page: "alerts" as Page, color: "#dc2626" },
+  { num: 9, icon: "🧪", title: "Trials", page: "trials" as Page, color: "#0891b2" },
+  { num: 10, icon: "🏦", title: "Insurance", page: "insurance" as Page, color: "#d97706" },
+];
+
+function DoctorSVG() {
+  return (
+    <svg width="50" height="68" viewBox="0 0 60 80" fill="none" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.3))" }}>
+      <circle cx="30" cy="14" r="11" fill="#fcd5b8" />
+      <path d="M19 12 Q19 3 30 3 Q41 3 41 12" fill="#2c3e50" />
+      <rect x="22" y="2" width="16" height="6" rx="2" fill="#fff" />
+      <rect x="27" y="0" width="6" height="3" rx="1" fill="#e74c3c" />
+      <circle cx="25" cy="12" r="1.5" fill="#2c3e50" />
+      <circle cx="35" cy="12" r="1.5" fill="#2c3e50" />
+      <path d="M26 17 Q30 21 34 17" stroke="#c0392b" strokeWidth="0.8" fill="none" />
+      <circle cx="25" cy="12" r="4" stroke="#34495e" strokeWidth="1" fill="none" opacity="0.4" />
+      <circle cx="35" cy="12" r="4" stroke="#34495e" strokeWidth="1" fill="none" opacity="0.4" />
+      <line x1="29" y1="12" x2="31" y2="12" stroke="#34495e" strokeWidth="1" opacity="0.4" />
+      <circle cx="30" cy="2" r="4" fill="#bdc3c7" />
+      <circle cx="30" cy="2" r="2.5" fill="#ecf0f1" />
+      <rect x="18" y="25" width="24" height="32" rx="5" fill="white" stroke="#e2e8f0" strokeWidth="1" />
+      <path d="M24 25 L30 32 L36 25" fill="#f0f4ff" stroke="#e2e8f0" strokeWidth="0.5" />
+      <path d="M22 25 Q18 32 20 40" stroke="#3498db" strokeWidth="2" fill="none" />
+      <circle cx="20" cy="41" r="3" fill="#3498db" />
+      <circle cx="20" cy="41" r="1.5" fill="#2980b9" />
+      <rect x="10" y="27" width="8" height="22" rx="4" fill="white" stroke="#e2e8f0" strokeWidth="1" />
+      <rect x="42" y="27" width="8" height="22" rx="4" fill="white" stroke="#e2e8f0" strokeWidth="1" />
+      <circle cx="14" cy="51" r="4" fill="#fcd5b8" />
+      <circle cx="46" cy="51" r="4" fill="#fcd5b8" />
+      <rect x="41" y="40" width="14" height="18" rx="2" fill="#2563eb" />
+      <rect x="43" y="42" width="10" height="2" rx="1" fill="white" opacity="0.6" />
+      <rect x="43" y="46" width="10" height="2" rx="1" fill="white" opacity="0.4" />
+      <rect x="43" y="50" width="7" height="2" rx="1" fill="white" opacity="0.3" />
+      <rect x="20" y="57" width="9" height="16" rx="4" fill="#1e3a5f" />
+      <rect x="31" y="57" width="9" height="16" rx="4" fill="#1e3a5f" />
+      <ellipse cx="24.5" cy="75" rx="6" ry="3.5" fill="#1e3a5f" />
+      <ellipse cx="35.5" cy="75" rx="6" ry="3.5" fill="#1e3a5f" />
+      <path d="M24 25 Q20 30 22 36" stroke="#7f8c8d" strokeWidth="1.5" fill="none" />
+      <circle cx="22" cy="37" r="2.5" fill="#95a5a6" />
+      <rect x="34" y="30" width="7" height="9" rx="1" fill="#e2e8f0" />
+      <rect x="35" y="31" width="5" height="3" rx="0.5" fill="#2563eb" opacity="0.4" />
+    </svg>
+  );
+}
+
+function WorkflowDoctor({ setPage }: { setPage: (p: Page) => void }) {
+  const [activeStep, setActiveStep] = React.useState(-1);
+  const [playing, setPlaying] = React.useState(false);
+  const intervalRef = React.useRef<number | null>(null);
+
+  const nextStep = React.useCallback(() => {
+    setActiveStep(prev => {
+      if (prev >= workflowSteps.length - 1) return -1;
+      return prev + 1;
+    });
+  }, []);
+
+  React.useEffect(() => {
+    if (playing) {
+      intervalRef.current = window.setInterval(nextStep, 2500);
+      nextStep();
+    }
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [playing, nextStep]);
+
+  const pct = activeStep >= 0 ? (activeStep / (workflowSteps.length - 1)) * 100 : 0;
+
+  return (
+    <div style={{ background: "var(--surface-high)", borderRadius: 16, border: "1px solid var(--border)", padding: 20, marginBottom: 24 }}>
+      {/* Controls */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+        <button className={`btn btn-sm ${playing ? "btn-danger" : "btn-primary"}`} onClick={() => setPlaying(!playing)}>
+          {playing ? "⏸ Pause" : "▶ Auto Play"}
+        </button>
+        <div style={{ flex: 1, height: 4, background: "var(--border)", borderRadius: 2, overflow: "hidden" }}>
+          <div style={{ height: "100%", width: `${activeStep >= 0 ? ((activeStep + 1) / workflowSteps.length) * 100 : 0}%`, background: "linear-gradient(90deg, var(--teal), var(--blue))", borderRadius: 2, transition: "width 0.6s ease" }} />
+        </div>
+        <span style={{ fontSize: 12, fontFamily: "var(--mono)", color: "var(--text-muted)", minWidth: 50, textAlign: "right" }}>
+          {activeStep + 1} / {workflowSteps.length}
+        </span>
+      </div>
+
+      {/* Doctor walking track */}
+      <div style={{ position: "relative", height: 72, background: "var(--surface)", borderRadius: 12, marginBottom: 16, overflow: "hidden", border: "1px solid var(--border)" }}>
+        <div style={{ position: "absolute", left: `${pct}%`, top: "50%", transform: "translate(-50%, -50%)", transition: "left 0.8s cubic-bezier(0.4,0,0.2,1)", animation: activeStep >= 0 ? "doctorFloat 2s ease-in-out infinite" : "none" }}>
+          <DoctorSVG />
+        </div>
+        {/* Step labels on track */}
+        <div style={{ position: "absolute", bottom: 4, left: 16, right: 16, display: "flex", justifyContent: "space-between" }}>
+          {workflowSteps.map((s, i) => (
+            <span key={i} style={{ fontSize: 9, color: i <= activeStep ? "var(--teal)" : "var(--text-muted)", fontFamily: "var(--mono)", opacity: i <= activeStep ? 1 : 0.4, transition: "all 0.4s" }}>
+              {s.num}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Steps grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8 }}>
+        {workflowSteps.map((s, i) => (
+          <div
+            key={i}
+            onClick={() => { setActiveStep(i); setPage(s.page); }}
+            style={{
+              background: i === activeStep ? `${s.color}18` : "var(--surface)",
+              border: `2px solid ${i === activeStep ? s.color : i < activeStep ? "var(--teal)" : "var(--border)"}`,
+              borderRadius: 10, padding: "10px 8px", cursor: "pointer", transition: "all 0.4s",
+              opacity: i <= activeStep ? 1 : 0.5,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+              <span style={{ fontSize: 9, color: "var(--text-muted)", fontFamily: "var(--mono)" }}>STEP {s.num}</span>
+              <span style={{ width: 16, height: 16, borderRadius: "50%", background: i < activeStep ? "var(--teal)" : i === activeStep ? s.color : "var(--border)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, color: "white", transition: "all 0.3s" }}>
+                {i < activeStep ? "✓" : ""}
+              </span>
+            </div>
+            <div style={{ fontSize: 18, marginBottom: 4 }}>{s.icon}</div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text)" }}>{s.title}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function App() {
   const wallet = useWallet();
   const ca = getContractAddress();
@@ -725,6 +859,10 @@ export function App() {
             onExportData={() => sharedDrugs}
           />
         </div>
+
+        {/* ── Clinical Workflow Animation ── */}
+        <div className="section-title">Clinical Workflow</div>
+        <WorkflowDoctor setPage={setPage} />
 
         <div className="section-title">Clinical Tools</div>
         <div className="feature-grid">
