@@ -1111,7 +1111,8 @@ export function App() {
         setTx({ status: "success", hash: hashStr });
         // Get the latest check ID from contract after tx
         try {
-          const s = await read("get_stats") as any;
+          const sRaw = await read("get_stats") as any;
+          const s = typeof sRaw === "string" ? JSON.parse(sRaw) : sRaw;
           const latestId = String(s?.total_checks ?? "");
           if (onResult) onResult(latestId || hashStr);
         } catch {
@@ -1649,7 +1650,8 @@ export function App() {
       if (!ca) return;
       setListLoading(true);
       try {
-        const s = await read("get_stats") as any;
+        const sRaw = await read("get_stats") as any;
+        const s = typeof sRaw === "string" ? JSON.parse(sRaw) : sRaw;
         const totalChecks = s?.total_checks ?? 0;
         const patients: any[] = [];
         // Scan recent checks for patient registrations
@@ -1892,10 +1894,13 @@ export function App() {
     );
 
     const doSearch = withTx(
-      () => write("search_drugs", [searchQ]),
+      () => read("search_drugs", [searchQ]),
       (r) => {
         addHistory("Drug Search", searchQ, r);
-        setSearchResults({ message: "Search submitted. Check history for results." });
+        try {
+          const parsed = typeof r.data === "string" ? JSON.parse(r.data) : r.data;
+          setSearchResults(Array.isArray(parsed) ? { results: parsed, count: parsed.length } : { results: [], count: 0 });
+        } catch { setSearchResults({ results: [], count: 0 }); }
       }
     );
 
@@ -2021,7 +2026,8 @@ export function App() {
     const lookupPatientAlerts = async () => {
       if (!alertPatientId || !ca) return;
       try {
-        const d = await read("get_alerts_for_patient", [alertPatientId]);
+        const dRaw = await read("get_alerts_for_patient", [alertPatientId]);
+        const d = typeof dRaw === "string" ? JSON.parse(dRaw) : dRaw;
         setPatientAlerts(d);
       } catch (e: any) {
         setPatientAlerts({ error: friendlyError(e, "No alerts found for this patient.") });

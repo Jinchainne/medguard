@@ -86,7 +86,35 @@ MAX_DRUGS_LIST = 20
 MAX_ALLERGIES_LIST = 30
 MAX_DESCRIPTION_LEN = 2000
 
-# Default trusted clinical sources
+# Query-specific authoritative sources
+SOURCES_DRUG_INTERACTION = [
+    "https://www.drugs.com/drug_interactions.html",
+    "https://dailymed.nlm.nih.gov",
+    "https://pubmed.ncbi.nlm.nih.gov",
+]
+SOURCES_DOSAGE = [
+    "https://medlineplus.gov/druginformation.html",
+    "https://www.fda.gov/drugs",
+    "https://dailymed.nlm.nih.gov",
+]
+SOURCES_ALLERGY = [
+    "https://www.drugs.com/drug_interactions.html",
+    "https://medlineplus.gov/druginformation.html",
+]
+SOURCES_TREATMENT = [
+    "https://pubmed.ncbi.nlm.nih.gov",
+    "https://www.who.int/medicines",
+    "https://www.fda.gov/drugs",
+]
+SOURCES_TRIALS = [
+    "https://clinicaltrials.gov",
+    "https://pubmed.ncbi.nlm.nih.gov",
+]
+SOURCES_INSURANCE = [
+    "https://www.cms.gov/medicare",
+    "https://www.fda.gov/drugs",
+]
+
 DEFAULT_TRUSTED = [
     "https://www.drugs.com/drug_interactions.html",
     "https://pubmed.ncbi.nlm.nih.gov",
@@ -198,6 +226,18 @@ class MedGuard(gl.Contract):
             if src_str not in urls:
                 results.append(self._fetch_url(src_str))
         return results
+
+    def _fetch_query_sources(self, user_urls: list[str], category_sources: list[str]) -> tuple[list[dict], bool]:
+        """Fetch user URLs + category-specific authoritative sources. Returns (results, has_evidence)."""
+        all_urls = list(user_urls)
+        for src in category_sources:
+            if src not in all_urls:
+                all_urls.append(src)
+        results = []
+        for url in all_urls:
+            results.append(self._fetch_url(url))
+        has_evidence = any(r["status"] == "fetched" and len(r["content"]) > 80 for r in results)
+        return results, has_evidence
 
     def _format_evidence(self, fetched: list[dict]) -> str:
         parts = []
@@ -320,10 +360,13 @@ class MedGuard(gl.Contract):
 
         context_clean = patient_context.strip()[:MAX_CONTEXT_LEN]
         urls = self._clean_urls(reference_urls_csv)
-        trusted = [str(s) for s in self.trusted_sources]
 
         def leader_fn() -> dict:
-            fetched = self._fetch_all(urls, trusted)
+            fetched, has_evidence = self._fetch_query_sources(urls, SOURCES_DRUG_INTERACTION)
+            if not has_evidence:
+                return {"severity": "UNAVAILABLE", "confidence": "none", "risk_score": 0,
+                        "description": "No clinical evidence could be fetched from authoritative sources.",
+                        "mechanism": "N/A", "recommendation": "Retry when sources are accessible."}
             evidence_text = self._format_evidence(fetched)
             prompt = f"""You are a clinical pharmacology decision support oracle on GenLayer.
 
@@ -582,10 +625,13 @@ Return JSON:
 
         context_clean = patient_context.strip()[:MAX_CONTEXT_LEN]
         urls = self._clean_urls(reference_urls_csv)
-        trusted = [str(s) for s in self.trusted_sources]
 
         def leader_fn() -> dict:
-            fetched = self._fetch_all(urls, trusted)
+            fetched, has_evidence = self._fetch_query_sources(urls, SOURCES_TREATMENT)
+            if not has_evidence:
+                return {"compliance": "UNAVAILABLE", "confidence": "none", "condition": "",
+                        "guideline_source": "N/A", "deviations": [], "description": "No clinical evidence could be fetched.",
+                        "recommendation": "Retry when sources are accessible."}
             evidence_text = self._format_evidence(fetched)
             prompt = f"""You are a clinical treatment protocol validation oracle on GenLayer.
 
@@ -908,7 +954,7 @@ Return JSON:
         return name.lower()
 
     @gl.public.view
-    def search_drugs(self, query: str) -> list[dict]:
+    def search_drugs(self, query: str) -> str:
         query_clean = query.strip().lower()
         if not query_clean:
             raise gl.vm.UserError("Search query required")
@@ -920,7 +966,7 @@ Return JSON:
                 raw = self.drug_database.get(key_str)
                 if raw is not None:
                     results.append(json.loads(str(raw)))
-        return results
+        return json.dumps(results, sort_keys=True)
 
     # ═══════════════════════════════════════════════
     # 8. CLINICAL TRIAL MATCHING
@@ -939,10 +985,12 @@ Return JSON:
 
         context_clean = patient_context.strip()[:MAX_CONTEXT_LEN]
         urls = self._clean_urls(reference_urls_csv)
-        trusted = [str(s) for s in self.trusted_sources]
 
         def leader_fn() -> dict:
-            fetched = self._fetch_all(urls, trusted)
+            fetched, has_evidence = self._fetch_query_sources(urls, SOURCES_TRIALS)
+            if not has_evidence:
+                return {"matched_trials": [], "total_found": 0, "description": "No clinical evidence could be fetched.",
+                        "recommendation": "Retry when clinicaltrials.gov is accessible."}
             evidence_text = self._format_evidence(fetched)
             prompt = f"""You are a clinical trial matching oracle on GenLayer.
 
@@ -1166,7 +1214,7 @@ Return JSON:
         return str(raw)
 
     @gl.public.view
-    def get_alerts_for_patient(self, patient_id: str) -> list[dict]:
+    def get_alerts_for_patient(self, patient_id: str) -> str:
         results = []
         for key in self.alerts:
             raw = self.alerts.get(str(key))
@@ -1174,15 +1222,15 @@ Return JSON:
                 alert = json.loads(str(raw))
                 if alert.get("patient_id") == patient_id:
                     results.append(alert)
-        return results
+        return json.dumps(results, sort_keys=True)
 
     @gl.public.view
-    def get_trusted_sources(self) -> list[str]:
-        return [str(s) for s in self.trusted_sources]
+    def get_trusted_sources(self) -> str:
+        return json.dumps([str(s) for s in self.trusted_sources], sort_keys=True)
 
     @gl.public.view
-    def get_stats(self) -> dict[str, typing.Any]:
-        return {
+    def get_stats(self) -> str:
+        return json.dumps({
             "owner": self.owner,
             "total_checks": int(self.next_id) - 1,
             "trusted_sources_count": len(self.trusted_sources),
@@ -1195,7 +1243,7 @@ Return JSON:
             "total_treatment_checks": int(self.total_treatment_checks),
             "total_claims": int(self.total_claims),
             "drug_database_size": len(self.drug_database),
-        }
+        }, sort_keys=True)
 
     @gl.public.view
     def is_interaction_safe(self, check_id: str) -> bool:
