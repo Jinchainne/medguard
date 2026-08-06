@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 350" font-family="'Segoe UI',system-ui,sans-serif">
+  <defs>
+    <linearGradient id="fg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ef4444;stop-opacity:0.2"/><stop offset="100%" style="stop-color:#ef4444;stop-opacity:0.05"/>
+    </linearGradient>
+    <linearGradient id="cg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.2"/><stop offset="100%" style="stop-color:#10b981;stop-opacity:0.05"/>
+    </linearGradient>
+    <linearGradient id="vg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:0.2"/><stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0.05"/>
+    </linearGradient>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444"/>
+    </marker>
+    <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#10b981"/>
+    </marker>
+  </defs>
+  <rect width="900" height="350" rx="12" fill="#0f172a"/>
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+  </pattern>
+  <rect width="900" height="350" rx="12" fill="url(#grid)"/>
+  <text x="450" y="28" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="600" letter-spacing="3">SYSTEM ARCHITECTURE</text>
+
+  <!-- FRONTEND -->
+  <rect x="30" y="42" width="840" height="85" rx="10" fill="url(#fg)" stroke="#ef4444" stroke-width="1"/>
+  <text x="50" y="62" fill="#ef4444" font-size="10" font-weight="700" letter-spacing="2">FRONTEND</text>
+
+  <rect x="50" y="72" width="120" height="40" rx="6" fill="#1e1b4b" stroke="#ef4444" stroke-width="1"/>
+  <text x="110" y="95" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">👛 Wallet</text>
+
+  <rect x="185" y="72" width="140" height="40" rx="6" fill="#1e1b4b" stroke="#ef4444" stroke-width="1"/>
+  <text x="255" y="95" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">📦 genlayer-js</text>
+
+  <rect x="340" y="72" width="160" height="40" rx="6" fill="#1e1b4b" stroke="#ef4444" stroke-width="1"/>
+  <text x="420" y="90" text-anchor="middle" fill="#fff" font-size="9" font-weight="600">🔬 10 Clinical Tools</text>
+  <text x="420" y="103" text-anchor="middle" fill="#fca5a5" font-size="7">Drug · Dosage · Allergy · Rx</text>
+
+  <rect x="515" y="72" width="150" height="40" rx="6" fill="#1e1b4b" stroke="#ef4444" stroke-width="1"/>
+  <text x="590" y="90" text-anchor="middle" fill="#fff" font-size="9" font-weight="600">📊 Import/Export</text>
+  <text x="590" y="103" text-anchor="middle" fill="#fca5a5" font-size="7">50 patients · 103 drugs CSV</text>
+
+  <rect x="680" y="72" width="170" height="40" rx="6" fill="#1e1b4b" stroke="#ef4444" stroke-width="1"/>
+  <text x="765" y="90" text-anchor="middle" fill="#fff" font-size="9" font-weight="600">🤖 AI Guide</text>
+  <text x="765" y="103" text-anchor="middle" fill="#fca5a5" font-size="7">Web Speech TTS · Typewriter</text>
+
+  <!-- Arrow down -->
+  <line x1="450" y1="127" x2="450" y2="155" stroke="#ef4444" stroke-width="2" marker-end="url(#a)"/>
+  <text x="460" y="145" fill="#4b5563" font-size="8">RPC</text>
+
+  <!-- CONTRACT -->
+  <rect x="30" y="158" width="840" height="90" rx="10" fill="url(#cg)" stroke="#10b981" stroke-width="1"/>
+  <text x="50" y="178" fill="#10b981" font-size="10" font-weight="700" letter-spacing="2">GENLAYER STUDIO NET (61999)</text>
+
+  <rect x="100" y="190" width="700" height="45" rx="8" fill="#064e3b" stroke="#10b981" stroke-width="1.5"/>
+  <text x="450" y="210" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">MedGuard Contract</text>
+  <text x="450" y="228" text-anchor="middle" fill="#6ee7b7" font-size="9">7 write functions · Query-specific sources · Leader/validator consensus · Auto-alerts · Patient registry · Drug DB</text>
+
+  <rect x="250" y="240" width="400" height="16" rx="4" fill="#020617" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="450" y="252" text-anchor="middle" fill="#4b5563" font-size="8" font-family="monospace">0x2916Ec2952B83210B6c02f3D00E3CC2452Be4703</text>
+
+  <!-- Arrow down -->
+  <line x1="350" y1="248" x2="200" y2="278" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#a)"/>
+  <line x1="450" y1="256" x2="450" y2="278" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#a)"/>
+  <line x1="550" y1="248" x2="700" y2="278" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#a)"/>
+
+  <!-- VALIDATORS -->
+  <rect x="30" y="275" width="840" height="60" rx="10" fill="url(#vg)" stroke="#8b5cf6" stroke-width="1"/>
+  <text x="50" y="295" fill="#8b5cf6" font-size="10" font-weight="700" letter-spacing="2">VALIDATOR CONSENSUS</text>
+
+  <rect x="80" y="302" width="200" height="25" rx="5" fill="#1e1b4b" stroke="#8b5cf6" stroke-width="1"/>
+  <text x="180" y="318" text-anchor="middle" fill="#fff" font-size="9" font-weight="600">🔍 Leader — gl.nondet.exec_prompt</text>
+
+  <rect x="350" y="302" width="200" height="25" rx="5" fill="#1e1b4b" stroke="#8b5cf6" stroke-width="1"/>
+  <text x="450" y="318" text-anchor="middle" fill="#fff" font-size="9" font-weight="600">🔍 Validator — same sources + prompt</text>
+
+  <rect x="620" y="302" width="200" height="25" rx="5" fill="#1e1b4b" stroke="#8b5cf6" stroke-width="1"/>
+  <text x="720" y="318" text-anchor="middle" fill="#fff" font-size="9" font-weight="600">🔍 Severity must agree exactly</text>
+</svg>

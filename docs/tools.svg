@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 350" font-family="'Segoe UI',system-ui,sans-serif">
+  <defs>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ef4444"/><stop offset="100%" style="stop-color:#f97316"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3b82f6"/><stop offset="100%" style="stop-color:#06b6d4"/>
+    </linearGradient>
+    <linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#10b981"/><stop offset="100%" style="stop-color:#34d399"/>
+    </linearGradient>
+    <linearGradient id="g4" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#8b5cf6"/><stop offset="100%" style="stop-color:#a78bfa"/>
+    </linearGradient>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444"/>
+    </marker>
+  </defs>
+  <rect width="900" height="350" rx="12" fill="#0f172a"/>
+  <text x="450" y="28" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="600" letter-spacing="3">MEDGUARD — 10 CLINICAL TOOLS</text>
+
+  <!-- Tool grid 2x5 -->
+  <!-- Row 1 -->
+  <rect x="20" y="45" width="165" height="55" rx="8" fill="#1e1b4b" stroke="#ef4444" stroke-width="1"/>
+  <text x="102" y="68" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">💊 Drug Interaction</text>
+  <text x="102" y="85" text-anchor="middle" fill="#fca5a5" font-size="8">Severity screening</text>
+
+  <rect x="195" y="45" width="165" height="55" rx="8" fill="#1e1b4b" stroke="#3b82f6" stroke-width="1"/>
+  <text x="277" y="68" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">💉 Dosage Verify</text>
+  <text x="277" y="85" text-anchor="middle" fill="#93c5fd" font-size="8">Range validation</text>
+
+  <rect x="370" y="45" width="165" height="55" rx="8" fill="#1e1b4b" stroke="#f59e0b" stroke-width="1"/>
+  <text x="452" y="68" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">⚠️ Allergy Check</text>
+  <text x="452" y="85" text-anchor="middle" fill="#fcd34d" font-size="8">Cross-reactivity</text>
+
+  <rect x="545" y="45" width="165" height="55" rx="8" fill="#1e1b4b" stroke="#10b981" stroke-width="1"/>
+  <text x="627" y="68" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">🩺 Treatment</text>
+  <text x="627" y="85" text-anchor="middle" fill="#6ee7b7" font-size="8">Protocol validation</text>
+
+  <rect x="720" y="45" width="165" height="55" rx="8" fill="#1e1b4b" stroke="#8b5cf6" stroke-width="1"/>
+  <text x="802" y="68" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">👤 Patient Registry</text>
+  <text x="802" y="85" text-anchor="middle" fill="#c4b5fd" font-size="8">50 patient records</text>
+
+  <!-- Row 2 -->
+  <rect x="20" y="110" width="165" height="55" rx="8" fill="#1e1b4b" stroke="#ec4899" stroke-width="1"/>
+  <text x="102" y="133" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">📋 Prescription</text>
+  <text x="102" y="150" text-anchor="middle" fill="#f9a8d4" font-size="8">Conflict detection</text>
+
+  <rect x="195" y="110" width="165" height="55" rx="8" fill="#1e1b4b" stroke="#14b8a6" stroke-width="1"/>
+  <text x="277" y="133" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">💊 Drug Database</text>
+  <text x="277" y="150" text-anchor="middle" fill="#5eead4" font-size="8">103 drugs searchable</text>
+
+  <rect x="370" y="110" width="165" height="55" rx="8" fill="#1e1b4b" stroke="#f43f5e" stroke-width="1"/>
+  <text x="452" y="133" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">🚨 Medical Alerts</text>
+  <text x="452" y="150" text-anchor="middle" fill="#fda4af" font-size="8">Auto-create on danger</text>
+
+  <rect x="545" y="110" width="165" height="55" rx="8" fill="#1e1b4b" stroke="#6366f1" stroke-width="1"/>
+  <text x="627" y="133" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">🔬 Clinical Trials</text>
+  <text x="627" y="150" text-anchor="middle" fill="#a5b4fc" font-size="8">clinicaltrials.gov</text>
+
+  <rect x="720" y="110" width="165" height="55" rx="8" fill="#1e1b4b" stroke="#fbbf24" stroke-width="1"/>
+  <text x="802" y="133" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">🏥 Insurance</text>
+  <text x="802" y="150" text-anchor="middle" fill="#fde68a" font-size="8">Claim verification</text>
+
+  <!-- Flow section -->
+  <text x="450" y="195" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="600" letter-spacing="2">WORKFLOW</text>
+
+  <rect x="40" y="210" width="140" height="45" rx="6" fill="#1e293b" stroke="#64748b" stroke-width="1"/>
+  <text x="110" y="230" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">1. User Query</text>
+  <text x="110" y="245" text-anchor="middle" fill="#94a3b8" font-size="8">drugs, dosages, patient</text>
+
+  <line x1="180" y1="232" x2="208" y2="232" stroke="#ef4444" stroke-width="2" marker-end="url(#arr)"/>
+
+  <rect x="210" y="210" width="140" height="45" rx="6" fill="#1e293b" stroke="#3b82f6" stroke-width="1"/>
+  <text x="280" y="230" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">2. Fetch Sources</text>
+  <text x="280" y="245" text-anchor="middle" fill="#93c5fd" font-size="8">gl.nondet.web.render</text>
+
+  <line x1="350" y1="232" x2="378" y2="232" stroke="#ef4444" stroke-width="2" marker-end="url(#arr)"/>
+
+  <rect x="380" y="210" width="140" height="45" rx="6" fill="#1e293b" stroke="#8b5cf6" stroke-width="1"/>
+  <text x="450" y="230" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">3. AI Analysis</text>
+  <text x="450" y="245" text-anchor="middle" fill="#c4b5fd" font-size="8">gl.nondet.exec_prompt</text>
+
+  <line x1="520" y1="232" x2="548" y2="232" stroke="#ef4444" stroke-width="2" marker-end="url(#arr)"/>
+
+  <rect x="550" y="210" width="140" height="45" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1"/>
+  <text x="620" y="230" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">4. Consensus</text>
+  <text x="620" y="245" text-anchor="middle" fill="#6ee7b7" font-size="8">leader/validator agree</text>
+
+  <line x1="690" y1="232" x2="718" y2="232" stroke="#ef4444" stroke-width="2" marker-end="url(#arr)"/>
+
+  <rect x="720" y="210" width="140" height="45" rx="6" fill="#064e3b" stroke="#10b981" stroke-width="1"/>
+  <text x="790" y="230" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">5. On-chain Result</text>
+  <text x="790" y="245" text-anchor="middle" fill="#6ee7b7" font-size="8">auto-alert if dangerous</text>
+
+  <!-- Security bar -->
+  <rect x="40" y="275" width="820" height="35" rx="6" fill="#1e293b" opacity="0.5"/>
+  <text x="60" y="297" fill="#ef4444" font-size="10" font-weight="600">SECURITY:</text>
+  <text x="130" y="297" fill="#94a3b8" font-size="9">UNTRUSTED DATA markers · HTTPS-only · Access control · Input validation · Fail-safely on evidence unavailability</text>
+
+  <!-- Sources bar -->
+  <rect x="40" y="315" width="820" height="25" rx="6" fill="#1e293b" opacity="0.3"/>
+  <text x="60" y="332" fill="#3b82f6" font-size="9" font-weight="600">SOURCES:</text>
+  <text x="130" y="332" fill="#64748b" font-size="8">drugs.com · dailymed.nlm.nih.gov · pubmed.ncbi.nlm.nih.gov · fda.gov · medlineplus.gov · clinicaltrials.gov · cms.gov · who.int</text>
+</svg>
