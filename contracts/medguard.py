@@ -460,10 +460,13 @@ Return JSON:
         age_val = int(max(0, min(150, patient_age_years)))
 
         urls = self._clean_urls(reference_urls_csv)
-        trusted = [str(s) for s in self.trusted_sources]
 
         def leader_fn() -> dict:
-            fetched = self._fetch_all(urls, trusted)
+            fetched, has_evidence = self._fetch_query_sources(urls, SOURCES_DOSAGE)
+            if not has_evidence:
+                return {"safety": "UNAVAILABLE", "confidence": "none", "prescribed_mg": 0,
+                        "recommended_range": "N/A", "deviation_pct": 0,
+                        "description": "No clinical evidence could be fetched.", "recommendation": "Retry when sources are accessible."}
             evidence_text = self._format_evidence(fetched)
             patient_info = ""
             if weight_val > 0:
@@ -544,10 +547,13 @@ Return JSON:
 
         context_clean = patient_context.strip()[:MAX_CONTEXT_LEN]
         urls = self._clean_urls(reference_urls_csv)
-        trusted = [str(s) for s in self.trusted_sources]
 
         def leader_fn() -> dict:
-            fetched = self._fetch_all(urls, trusted)
+            fetched, has_evidence = self._fetch_query_sources(urls, SOURCES_ALLERGY)
+            if not has_evidence:
+                return {"risk_level": "UNAVAILABLE", "confidence": "none", "allergen": "",
+                        "cross_reactive_medications": [], "description": "No clinical evidence could be fetched.",
+                        "recommendation": "Retry when sources are accessible."}
             evidence_text = self._format_evidence(fetched)
             prompt = f"""You are a clinical allergy cross-check oracle on GenLayer.
 
@@ -806,12 +812,14 @@ Return JSON:
 
         notes = prescriber_notes.strip()[:MAX_CONTEXT_LEN]
         urls = self._clean_urls(reference_urls_csv)
-        trusted = [str(s) for s in self.trusted_sources]
         patient_allergies = patient.get("allergies", [])
         patient_conditions = patient.get("conditions", [])
 
         def leader_fn() -> dict:
-            fetched = self._fetch_all(urls, trusted)
+            fetched, has_evidence = self._fetch_query_sources(urls, SOURCES_DOSAGE)
+            if not has_evidence:
+                return {"status": "UNAVAILABLE", "confidence": "none", "conflicts": [],
+                        "description": "No clinical evidence could be fetched.", "recommendation": "Retry when sources are accessible."}
             evidence_text = self._format_evidence(fetched)
 
             prompt = f"""You are a clinical prescription verification oracle on GenLayer.
@@ -1070,10 +1078,12 @@ Return JSON:
         provider = insurance_provider.strip()[:MAX_NAME_LEN]
         context_clean = patient_context.strip()[:MAX_CONTEXT_LEN]
         urls = self._clean_urls(reference_urls_csv)
-        trusted = [str(s) for s in self.trusted_sources]
 
         def leader_fn() -> dict:
-            fetched = self._fetch_all(urls, trusted)
+            fetched, has_evidence = self._fetch_query_sources(urls, SOURCES_INSURANCE)
+            if not has_evidence:
+                return {"verdict": "UNAVAILABLE", "confidence": "none", "covered_amount": 0,
+                        "description": "No clinical evidence could be fetched.", "reasoning": "Retry when sources are accessible."}
             evidence_text = self._format_evidence(fetched)
             prompt = f"""You are a medical insurance claim verification oracle on GenLayer.
 
