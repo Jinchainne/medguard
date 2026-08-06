@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 180" font-family="'Segoe UI',system-ui,sans-serif">
+  <defs>
+    <linearGradient id="hdr" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0c4a6e"/><stop offset="50%" style="stop-color:#164e63"/><stop offset="100%" style="stop-color:#134e4a"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="180" rx="0" fill="url(#hdr)"/>
+
+  <!-- Pulse line -->
+  <polyline points="0,90 150,90 180,40 210,140 240,60 270,120 300,90 450,90 480,50 510,130 540,70 570,110 600,90 900,90" fill="none" stroke="#22d3ee" stroke-width="2" opacity="0.3"/>
+
+  <!-- Cross icon -->
+  <rect x="55" y="55" width="70" height="70" rx="12" fill="none" stroke="#fff" stroke-width="2.5" opacity="0.9"/>
+  <line x1="75" y1="70" x2="105" y2="70" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+  <line x1="90" y1="55" x2="90" y2="85" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+
+  <text x="160" y="78" fill="#fff" font-size="38" font-weight="800" letter-spacing="2">MedGuard</text>
+  <text x="160" y="108" fill="#67e8f9" font-size="16" font-weight="400">Clinical Decision Support Oracle</text>
+  <text x="160" y="132" fill="#94a3b8" font-size="12">10 on-chain AI tools · 50 patients · 103 drugs · GenLayer StudioNet</text>
+
+  <!-- Stats pills -->
+  <rect x="620" y="60" width="110" height="28" rx="14" fill="#0e7490" opacity="0.6"/>
+  <text x="675" y="79" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">10 Tools</text>
+  <rect x="740" y="60" width="110" height="28" rx="14" fill="#0e7490" opacity="0.6"/>
+  <text x="795" y="79" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">7 Consensus</text>
+  <rect x="620" y="95" width="110" height="28" rx="14" fill="#0e7490" opacity="0.6"/>
+  <text x="675" y="114" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">50 Patients</text>
+  <rect x="740" y="95" width="110" height="28" rx="14" fill="#0e7490" opacity="0.6"/>
+  <text x="795" y="114" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">103 Drugs</text>
+</svg>
