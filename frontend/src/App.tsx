@@ -4,6 +4,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { createClient } from "genlayer-js";
 import { studionet } from "genlayer-js/chains";
+import { TransactionStatus } from "genlayer-js/types";
 import { explorerAddress, explorerTx, getContractAddress, RPC_URL } from "./config";
 import { useReadClient, useWriteClient } from "./useGenLayer";
 import { useWallet } from "./useWallet";
@@ -1106,10 +1107,11 @@ export function App() {
       if (!ensureReady()) return;
       setTx({ status: "pending" });
       try {
-        const hash = await fn();
-        const hashStr = typeof hash === "string" ? hash : String(hash);
+        const txResult = await fn();
+        // write() returns {hash, result}, read() returns data directly
+        const hashStr = typeof txResult === "object" && txResult?.hash ? txResult.hash : String(txResult);
         setTx({ status: "success", hash: hashStr });
-        // Get the latest check ID from contract after tx
+        // Get the latest check ID from contract after tx finality
         try {
           const sRaw = await read("get_stats") as any;
           const s = typeof sRaw === "string" ? JSON.parse(sRaw) : sRaw;
@@ -1127,15 +1129,29 @@ export function App() {
 
   const [tx, setTx] = useState<TxState>({ status: "idle" });
 
-  /* Generic write helper */
-  async function write(functionName: string, args: any[]): Promise<string> {
+  /* Generic write helper — waits for transaction finality */
+  async function write(functionName: string, args: any[]): Promise<{hash: string, result: any}> {
     const hash = await writeClient!.writeContract({
       address: ca!,
       functionName,
       args,
       value: 0n,
     });
-    return typeof hash === "string" ? hash : String(hash);
+    const hashStr = typeof hash === "string" ? hash : String(hash);
+    // Wait for transaction finality
+    const receipt = await writeClient!.waitForTransactionReceipt({
+      hash: hashStr as any,
+      status: TransactionStatus.ACCEPTED,
+      interval: 2000,
+      retries: 150,
+    });
+    // Extract result from transaction
+    let result = null;
+    try {
+      const txData = await writeClient!.getTransaction({ hash: hashStr as any });
+      result = txData;
+    } catch {}
+    return { hash: hashStr, result: receipt || result };
   }
 
   /* Generic read helper */
