@@ -58,7 +58,7 @@
   <text x="450" y="228" text-anchor="middle" fill="#6ee7b7" font-size="9">7 write functions · Query-specific sources · Leader/validator consensus · Auto-alerts · Patient registry · Drug DB</text>
 
   <rect x="250" y="240" width="400" height="16" rx="4" fill="#020617" stroke="#1e293b" stroke-width="0.5"/>
-  <text x="450" y="252" text-anchor="middle" fill="#4b5563" font-size="8" font-family="monospace">0x2916Ec2952B83210B6c02f3D00E3CC2452Be4703</text>
+  <text x="450" y="252" text-anchor="middle" fill="#4b5563" font-size="8" font-family="monospace">0x99Bec3Db10D95c3561b72Ae9577EccBF5adE334b</text>
 
   <!-- Arrow down -->
   <line x1="350" y1="248" x2="200" y2="278" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#a)"/>

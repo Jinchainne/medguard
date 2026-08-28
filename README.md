@@ -2,7 +2,7 @@
 
 <img src="docs/banner.svg" alt="MedGuard — Clinical Decision Support Oracle" width="100%"/>
 
-[![GenLayer](https://img.shields.io/badge/StudioNet-61999-0ea5e9?style=for-the-badge&logo=ethereum&logoColor=white)](https://explorer-studio.genlayer.com/address/0x2916Ec2952B83210B6c02f3D00E3CC2452Be4703)
+[![GenLayer](https://img.shields.io/badge/StudioNet-61999-0ea5e9?style=for-the-badge&logo=ethereum&logoColor=white)](https://explorer-studio.genlayer.com/address/0x99Bec3Db10D95c3561b72Ae9577EccBF5adE334b)
 [![License](https://img.shields.io/badge/License-MIT-10b981?style=for-the-badge)](LICENSE)
 [![Vercel](https://img.shields.io/badge/Live-App-000?style=for-the-badge&logo=vercel&logoColor=white)](https://genlayer-medguard.vercel.app)
 
@@ -10,7 +10,7 @@
 
 **AI-powered on-chain clinical decision support with 10 tools, real GEN consensus, and fail-safe evidence handling.**
 
-[Live App](https://genlayer-medguard.vercel.app) · [Explorer](https://explorer-studio.genlayer.com/address/0x2916Ec2952B83210B6c02f3D00E3CC2452Be4703) · [Contract](contracts/medguard.py)
+[Live App](https://genlayer-medguard.vercel.app) · [Explorer](https://explorer-studio.genlayer.com/address/0x99Bec3Db10D95c3561b72Ae9577EccBF5adE334b) · [Deploy Tx](https://explorer-studio.genlayer.com/tx/0x5dacc940881c0f8c654f505f0a467d2a82bd454f7e2b7a6d80acf9036aad55cb) · [Contract](contracts/medguard.py) · [Milestones](docs/milestones/phase-1-consensus-security.md) · [Changelog](CHANGELOG.md)
 
 </div>
 
@@ -81,25 +81,27 @@ Every write function uses **leader/validator** pattern:
 | **Access** | Patient updates locked to registrant + owner |
 | **Input** | Name length, CSV format, range validation |
 | **Evidence** | Fail-safely — returns UNAVAILABLE when sources down |
-| **Sources** | Query-specific — each tool fetches from relevant databases |
+| **Sources** | Reserved budgets — user pages cannot crowd out clinical databases |
+| **Quorum** | At least one authoritative clinical source must be fetched |
+| **Prompt integrity** | Exact safety canary required across all 7 AI workflows |
 
 ---
 
 ## Contract
 
 ```
-0x2916Ec2952B83210B6c02f3D00E3CC2452Be4703  (StudioNet 61999)
+0x99Bec3Db10D95c3561b72Ae9577EccBF5adE334b  (StudioNet 61999, medguard/2.1.0)
 ```
 
-### Writes (7 — all use leader/validator)
+### Clinical Consensus Writes (7 — all use leader/validator)
 ```
 check_drug_interaction(drug_a, drug_b, context, urls)
-check_dosage(drug, dose_mg, unit, age, weight, context, urls)
+verify_dosage(drug, dose_mg, weight_kg, age_years, urls)
 check_allergy_risk(medications_csv, allergies_csv, context, urls)
 validate_treatment(condition, treatment, context, urls)
-verify_prescription(patient_id, drug, dose, freq, context, urls)
+verify_prescription(patient_id, medications_csv, notes, urls)
 match_clinical_trial(condition, context, urls)
-verify_insurance_claim(insurance, treatment, context, urls)
+verify_insurance_claim(treatment, cost_cents, provider, context, urls)
 ```
 
 ### Reads (9)
@@ -129,13 +131,18 @@ medguard/
 │   │   ├── sample_patients.json # 50 patient records
 │   │   └── sample_drugs.json    # 103-drug database
 │   └── package.json
+├── deployments/
+│   └── studionet.json           # Address + deployment proof
 ├── tests/
-│   └── test_medguard.py
+│   ├── test_medguard.py
+│   └── test_consensus_security.py
 ├── docs/
 │   ├── banner.svg               # Header banner
 │   ├── workflow.svg             # Workflow diagram
 │   ├── tools.svg                # 10 tools diagram
-│   └── architecture.svg         # Architecture
+│   ├── architecture.svg         # Architecture
+│   └── milestones/              # Reviewable milestone evidence
+├── CHANGELOG.md
 └── README.md
 ```
 

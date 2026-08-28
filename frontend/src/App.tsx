@@ -1382,7 +1382,7 @@ export function App() {
     const [result, setResult] = useState<string | null>(null);
 
     const submit = withTx(
-      () => write("verify_dosage", [drug, parseFloat(dosage), parseFloat(weight), parseInt(age), ""]),
+      () => write("verify_dosage", [drug, Math.round(Number(dosage)), Math.round(Number(weight || 0)), parseInt(age || "0"), ""]),
       (r) => {
         setResult(r);
         addHistory("Dosage Check", `${drug} ${dosage}mg, ${weight}kg, ${age}y`, r);
@@ -1631,7 +1631,7 @@ export function App() {
     const [listLoading, setListLoading] = useState(false);
 
     const regSubmit = withTx(
-      () => write("register_patient", [patientId, fullName, pAllergies, conditions, bloodType, parseInt(pAge), parseFloat(pWeight)]),
+      () => write("register_patient", [patientId, fullName, pAllergies, conditions, bloodType, parseInt(pAge || "0"), Math.round(Number(pWeight || 0))]),
       (r) => {
         addHistory("Patient Register", `${patientId}: ${fullName}`, r);
         // Auto-add to list
@@ -2184,7 +2184,7 @@ export function App() {
     const [result, setResult] = useState<string | null>(null);
 
     const submit = withTx(
-      () => write("verify_insurance_claim", [iTreatment, parseFloat(iCost), iProvider, iContext, ""]),
+      () => write("verify_insurance_claim", [iTreatment, Math.round(Number(iCost) * 100), iProvider, iContext, ""]),
       (r) => {
         setResult(r);
         addHistory("Insurance Claim", `${iTreatment} — $${iCost} via ${iProvider}`, r);

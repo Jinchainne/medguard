@@ -6,11 +6,14 @@ drug database, alerts, clinical trials, insurance claims, access control.
 from pathlib import Path
 import re
 
-SOURCE = (Path(__file__).parents[1] / "contracts" / "medguard.py").read_text()
+SOURCE = (Path(__file__).parents[1] / "contracts" / "medguard.py").read_text(encoding="utf-8")
 
 def test_valid_syntax():
     import ast
     ast.parse(SOURCE)
+
+def test_public_schema_has_no_float_parameters():
+    assert not re.search(r"def\s+\w+\([^)]*:\s*float", SOURCE, re.DOTALL)
 
 # ═══════════════════════════════════════════════
 # CONSENSUS PRIMITIVES
@@ -33,7 +36,7 @@ def test_fetch_inside_leader_fn():
     matches = re.findall(r'def leader_fn\(\).*?def validator_fn', SOURCE, re.DOTALL)
     assert len(matches) >= 6  # 7 consensus functions
     for match in matches:
-        assert "_fetch_all" in match or "web.render" in match
+        assert "_fetch_query_sources" in match or "_fetch_all" in match or "web.render" in match
 
 def test_validator_re_runs_leader():
     matches = re.findall(r'def validator_fn.*?gl\.vm\.run_nondet_unsafe', SOURCE, re.DOTALL)
@@ -145,7 +148,7 @@ def test_is_safe_views():
 
 def test_get_version():
     assert "def get_version" in SOURCE
-    assert "medguard/2.0.0" in SOURCE
+    assert "medguard/2.1.0" in SOURCE
 
 # ═══════════════════════════════════════════════
 # AUTO-ALERT SYSTEM

@@ -1,0 +1,11 @@
+{
+  "project": "MedGuard",
+  "version": "2.1.0",
+  "network": "studionet",
+  "chainId": 61999,
+  "rpcUrl": "https://studio.genlayer.com/api",
+  "contractAddress": "0x99Bec3Db10D95c3561b72Ae9577EccBF5adE334b",
+  "deploymentTransaction": "0x5dacc940881c0f8c654f505f0a467d2a82bd454f7e2b7a6d80acf9036aad55cb",
+  "consensusResult": "MAJORITY_AGREE",
+  "deployedAt": "2026-08-28T01:06:20.792882Z"
+}
