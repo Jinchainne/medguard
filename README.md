@@ -8,9 +8,9 @@
 
 <br/>
 
-**AI-powered on-chain clinical decision support with 10 tools, real GEN consensus, and fail-safe evidence handling.**
+**AI-powered on-chain clinical decision support with 10 tools, real GEN consensus, fail-safe evidence handling, and a durable on-chain decision ledger.**
 
-[Live App](https://genlayer-medguard.vercel.app) · [Explorer](https://explorer-studio.genlayer.com/address/0x99Bec3Db10D95c3561b72Ae9577EccBF5adE334b) · [Deploy Tx](https://explorer-studio.genlayer.com/tx/0x5dacc940881c0f8c654f505f0a467d2a82bd454f7e2b7a6d80acf9036aad55cb) · [Contract](contracts/medguard.py) · [Milestones](docs/milestones/phase-1-consensus-security.md) · [Changelog](CHANGELOG.md)
+[Live App](https://genlayer-medguard.vercel.app) · [Explorer](https://explorer-studio.genlayer.com/address/0xE5982D885c14CD1fBEF1791cCEdd93Ac4676E523) · [Deploy Tx](https://explorer-studio.genlayer.com/tx/0x18dee1d4d2c3a55544d43f63f51693ae3aba01d99e75a2e09ab8e4d8557be08e) · [Contract](contracts/medguard.py) · [Milestones](docs/milestones/phase-1-consensus-security.md) · [Changelog](CHANGELOG.md)
 
 </div>
 
@@ -38,6 +38,10 @@
 | 10 | **Insurance Claim** | Coverage verdict | cms.gov · fda.gov |
 
 ---
+
+### v2.2 upgrade: durable clinical decision ledger
+
+History is now loaded from the contract for the connected wallet through `get_checks_for_caller`. Results survive browser refreshes, device changes, and cleared local storage; the existing session history remains a responsive fallback while the chain read is pending.
 
 ## Consensus
 
@@ -90,7 +94,7 @@ Every write function uses **leader/validator** pattern:
 ## Contract
 
 ```
-0x99Bec3Db10D95c3561b72Ae9577EccBF5adE334b  (StudioNet 61999, medguard/2.1.0)
+0xE5982D885c14CD1fBEF1791cCEdd93Ac4676E523  (StudioNet 61999, medguard/2.2.0)
 ```
 
 ### Clinical Consensus Writes (7 — all use leader/validator)

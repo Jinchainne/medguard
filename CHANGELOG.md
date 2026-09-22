@@ -2,6 +2,14 @@
 
 All notable MedGuard milestones are documented here. Each release is intentionally scoped so it can be reviewed as distinct progress in the GenLayer Builder Program.
 
+## [2.2.0] - 2026-09-22
+
+### Durable Clinical Decision Ledger
+
+- Added `get_checks_for_caller`, an on-chain view that returns the connected wallet's persisted clinical decisions.
+- Replaced the history page's session-only assumption with wallet-scoped canonical reads, while retaining a responsive local fallback during loading.
+- Deployed the upgraded contract to StudioNet at `0xE5982D885c14CD1fBEF1791cCEdd93Ac4676E523`.
+
 ## [2.1.0] - 2026-08-28
 
 ### Clinical Consensus Security Hardening

@@ -1241,6 +1241,21 @@ Return JSON:
         return str(raw)
 
     @gl.public.view
+    def get_checks_for_caller(self, caller: str) -> str:
+        """Return the caller's durable on-chain clinical decision ledger."""
+        target = caller.strip().lower()
+        if not target:
+            raise gl.vm.UserError("CALLER_REQUIRED")
+        results = []
+        for key in self.checks:
+            raw = self.checks.get(str(key))
+            if raw is not None:
+                record = json.loads(str(raw))
+                if str(record.get("caller", "")).lower() == target:
+                    results.append(record)
+        return json.dumps(results, sort_keys=True)
+
+    @gl.public.view
     def get_patient(self, patient_id: str) -> str:
         raw = self.patients.get(patient_id)
         if raw is None:

@@ -1032,6 +1032,7 @@ function WorkflowDoctor({ activeStep, setActiveStep, playing, setPlaying }: { ac
 export function App() {
   const wallet = useWallet();
   const ca = getContractAddress();
+  const walletAddress = wallet.state.status === "connected" ? wallet.state.address : "";
   const readClient = useReadClient();
   const writeClient = useWriteClient(
     wallet.state.status === "connected" ? wallet.state.address : null
@@ -1089,6 +1090,27 @@ export function App() {
   }, [ca, readClient]);
 
   useEffect(() => { loadStats(); }, [loadStats]);
+
+  // History is durable on-chain data, not just a browser session log.
+  useEffect(() => {
+    if (page !== "history" || !walletAddress || !ca) return;
+    let cancelled = false;
+    readClient.readContract({ address: ca, functionName: "get_checks_for_caller", args: [walletAddress] })
+      .then(raw => {
+        if (cancelled) return;
+        const records = typeof raw === "string" ? tryParse(raw) : raw;
+        if (!Array.isArray(records)) return;
+        setHistory(records.map((record: any) => ({
+          id: String(record.id),
+          type: String(record.type || "Clinical check"),
+          inputs: JSON.stringify(record.query || {}),
+          result: String(record.id),
+          timestamp: "On-chain"
+        })));
+      })
+      .catch(error => console.warn("Unable to load durable history", error));
+    return () => { cancelled = true; };
+  }, [ca, page, readClient, walletAddress]);
 
   /* Ensure wallet + write client ready */
   function ensureReady(): boolean {
