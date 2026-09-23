@@ -1279,6 +1279,20 @@ export function App() {
           ))}
         </div>
 
+        <div className="ledger-callout">
+          <div>
+            <div className="page-hdr-label"><span className="icon"><IconShield /></span> Canonical ledger</div>
+            <h2>Clinical decisions that travel with the wallet.</h2>
+            <p>Every consensus result is persisted on StudioNet and can be recovered from any connected device. Your wallet is the only key needed to view its decision history.</p>
+          </div>
+          <div className="ledger-status">
+            <span className={`status-dot ${walletAddress ? "online" : ""}`} />
+            <strong>{walletAddress ? "Wallet connected" : "Connect wallet to sync"}</strong>
+            <small>{walletAddress ? `${history.length} local/on-chain records loaded` : "History stays read-only until connected"}</small>
+            <button className="btn btn-sm" onClick={() => setPage("history")}>Open ledger →</button>
+          </div>
+        </div>
+
         <div className="section-title">Data Import / Export</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 28 }}>
           <ImportExportPanel 
