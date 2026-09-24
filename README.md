@@ -119,6 +119,47 @@ get_stats()
 
 ---
 
+## How a clinical check works
+
+1. Connect an EIP-1193 wallet to StudioNet (`chainId 61999`).
+2. Choose a tool and enter clinical inputs. User URLs are HTTPS-only and bounded before becoming prompt evidence.
+3. The browser signs a real contract transaction and waits for GenLayer finality.
+4. The leader fetches authoritative and user evidence, then returns a typed result.
+5. Validators independently reproduce the decision through `run_nondet_unsafe`; malformed output or a failed safety canary is rejected.
+6. The UI reads canonical state and stores the decision in the wallet-scoped on-chain ledger.
+
+The frontend never treats a submitted hash as a completed decision. Results appear only after receipt acceptance and canonical contract readback.
+
+## Useful contract reads
+
+| Method | Purpose |
+| --- | --- |
+| `get_check(id)` | Retrieve a complete consensus decision |
+| `get_checks_for_caller(address)` | Retrieve the caller's durable decision ledger |
+| `get_patient(id)` | Read a registered patient record |
+| `get_alerts_for_patient(id)` | Read patient-scoped safety alerts |
+| `get_stats()` | Read aggregate counters and source configuration |
+
+## Troubleshooting
+
+**Wrong network:** switch to StudioNet, chain `61999`, RPC `https://studio.genlayer.com/api`, symbol `GEN`.
+
+**Pending transaction:** keep the wallet open while validators reach consensus. Do not resubmit until the first transaction is finalized or failed.
+
+**Empty history:** connect the same wallet that submitted the check. The ledger is scoped by caller address, not browser session.
+
+**Unavailable source:** the contract fails safely with an unavailable/needs-review result. Missing evidence must never be treated as clinical clearance.
+
+## Medical safety boundary
+
+MedGuard is a clinical decision-support demonstration, not a diagnostic service or replacement for a licensed clinician. Do not use it for emergency decisions, autonomous prescribing, or unsupervised treatment. Every output requires qualified professional review.
+
+## Contributing
+
+Keep contract schema boundaries typed, preserve untrusted-source markers, and add behavioral tests for authorization, malformed model output, source failure, and persistence changes. Before opening a pull request, run the complete verification commands above and document any StudioNet transaction evidence.
+
+---
+
 ## Project
 
 ```
