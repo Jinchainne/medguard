@@ -1124,6 +1124,23 @@ export function App() {
   }
 
   /* With-transaction helper */
+  function returnedId(value: any): string | null {
+    const seen = new Set<any>();
+    const visit = (node: any): string | null => {
+      if (node == null || seen.has(node)) return null;
+      if (typeof node === "string" && /^\d+$/.test(node)) return node;
+      if (typeof node !== "object") return null;
+      seen.add(node);
+      for (const key of ["return_data", "returnData", "calldata", "payload", "data", "result"]) {
+        const found = visit(node[key]);
+        if (found) return found;
+      }
+      if (Array.isArray(node)) for (const item of node) { const found = visit(item); if (found) return found; }
+      return null;
+    };
+    return visit(value);
+  }
+
   function withTx(fn: () => Promise<any>, onResult?: (r: any) => void) {
     return async () => {
       if (!ensureReady()) return;
@@ -1133,12 +1150,10 @@ export function App() {
         // write() returns {hash, result}, read() returns data directly
         const hashStr = typeof txResult === "object" && txResult?.hash ? txResult.hash : String(txResult);
         setTx({ status: "success", hash: hashStr });
-        // Get the latest check ID from contract after tx finality
+        // Prefer the transaction return value; only fall back to the aggregate counter.
         try {
-          const sRaw = await read("get_stats") as any;
-          const s = typeof sRaw === "string" ? JSON.parse(sRaw) : sRaw;
-          const latestId = String(s?.total_checks ?? "");
-          if (onResult) onResult(latestId || hashStr);
+          const returned = returnedId(txResult?.result);
+          if (onResult) onResult(returned || hashStr);
         } catch {
           if (onResult) onResult(hashStr);
         }
